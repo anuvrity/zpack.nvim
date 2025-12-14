@@ -146,6 +146,20 @@ return {
 }
 ```
 
+### Load Priority
+
+Control load order for startup plugins (higher priority loads first):
+
+```lua
+return {
+  'folke/tokyonight.nvim',
+  priority = 1000,  -- Load colorscheme early
+  config = function()
+    vim.cmd('colorscheme tokyonight')
+  end,
+}
+```
+
 ### Build Hook
 
 ```lua
@@ -190,6 +204,7 @@ Based on the `Spec` type definition:
   enabled = true|false|function,        -- Enable/disable plugin
   cond = true|false|function,           -- Condition to load plugin
   lazy = true|false,                    -- Force eager loading when false (auto-detected)
+  priority = 50,                        -- Load priority for startup plugins (higher = earlier, default: 50)
 
   -- Lifecycle hooks
   init = function() end,                -- Runs before plugin loads

@@ -5,6 +5,24 @@ local lazy = require('zpack.lazy')
 
 local M = {}
 
+local get_priority = function(src)
+  return state.src_spec[src].priority or 50
+end
+
+local sort_by_priority = function()
+  table.sort(state.startup_packs, function(a, b)
+    return get_priority(a.src) > get_priority(b.src)
+  end)
+
+  table.sort(state.src_with_startup_init, function(a, b)
+    return get_priority(a) > get_priority(b)
+  end)
+
+  table.sort(state.src_with_startup_config, function(a, b)
+    return get_priority(a) > get_priority(b)
+  end)
+end
+
 local setup_build_tracking = function()
   vim.api.nvim_create_autocmd('PackChanged', {
     group = state.startup_group,
@@ -53,6 +71,7 @@ local apply_startup_keys = function()
 end
 
 M.process_all = function()
+  sort_by_priority()
   setup_build_tracking()
   run_init_hooks()
   add_startup_packs()

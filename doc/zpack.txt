@@ -21,8 +21,9 @@ CONTENTS                                                      *zpack-contents*
       5.4 Lazy Load on Keymap...........................|zpack-example-keys|
       5.5 VeryLazy Event................................|zpack-example-verylazy|
       5.6 Conditional Loading...........................|zpack-example-conditional|
-      5.7 Build Hook....................................|zpack-example-build|
-      5.8 Multiple Plugins..............................|zpack-example-multiple|
+      5.7 Load Priority.................................|zpack-example-priority|
+      5.8 Build Hook....................................|zpack-example-build|
+      5.9 Multiple Plugins..............................|zpack-example-multiple|
   6. Spec Reference.........................................|zpack-spec-reference|
   7. KeySpec Reference..................................|zpack-keyspec-reference|
 
@@ -250,7 +251,21 @@ Enable plugin based on a condition:
 <
 
 ------------------------------------------------------------------------------
-5.7 BUILD HOOK                                           *zpack-example-build*
+5.7 LOAD PRIORITY                                       *zpack-example-priority*
+
+Control load order for startup plugins (higher priority loads first):
+>lua
+    return {
+      'folke/tokyonight.nvim',
+      priority = 1000,  -- Load colorscheme early
+      config = function()
+        vim.cmd('colorscheme tokyonight')
+      end,
+    }
+<
+
+------------------------------------------------------------------------------
+5.8 BUILD HOOK                                           *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -264,7 +279,7 @@ Run a build command after installing/updating plugin:
 <
 
 ------------------------------------------------------------------------------
-5.8 MULTIPLE PLUGINS                                   *zpack-example-multiple*
+5.9 MULTIPLE PLUGINS                                   *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -298,6 +313,7 @@ Based on the `Spec` type definition:
       enabled = true|false|function,        -- Enable/disable plugin
       cond = true|false|function,           -- Condition to load plugin
       lazy = true|false,                    -- Force eager loading when false (auto-detected)
+      priority = 50,                        -- Load priority for startup plugins (higher = earlier, default: 50)
 
       -- Lifecycle hooks
       init = function() end,                -- Runs before plugin loads
@@ -341,6 +357,12 @@ lazy            (boolean, optional)
                 Set to `false` to force eager loading (load at startup) even
                 when lazy-loading triggers are present. Auto-detected if not
                 set based on the presence of lazy-loading triggers.
+
+                                                        *zpack-Spec.priority*
+priority        (number, optional)
+                Load priority for startup plugins. Higher values load earlier.
+                Default: 50. Useful for colorschemes and plugins that other
+                plugins depend on.
 
                                                             *zpack-Spec.init*
 init            (function, optional)

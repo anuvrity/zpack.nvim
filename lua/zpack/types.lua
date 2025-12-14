@@ -14,6 +14,7 @@
 ---@field enabled? boolean|(fun():boolean)
 ---@field cond? boolean|(fun():boolean)
 ---@field lazy? boolean
+---@field priority? number Load priority for startup plugins. Higher priority loads first. Default: 50
 ---@field version? string
 ---@field keys? KeySpec|KeySpec[]
 ---@field config? fun()
