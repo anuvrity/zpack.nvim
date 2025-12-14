@@ -1,0 +1,65 @@
+---@module 'zpack'
+
+local import = require('zpack.import')
+local lazy = require('zpack.lazy')
+local startup = require('zpack.startup')
+local commands = require('zpack.commands')
+
+local M = {}
+
+---@param plugins_dir string
+local import_specs_from_dir = function(plugins_dir)
+  local plugin_paths = vim.fn.glob(vim.fn.stdpath('config') .. '/lua/' .. plugins_dir .. '/*.lua', false, true)
+
+  for _, plugin_path in ipairs(plugin_paths) do
+    local plugin_name = vim.fn.fnamemodify(plugin_path, ":t:r")
+    local success, spec_item_or_list = pcall(require, plugins_dir .. "." .. plugin_name)
+
+    if not success then
+      vim.schedule(function()
+        vim.notify(
+          ("Failed to load plugin spec for %s: %s"):format(plugin_name, spec_item_or_list),
+          vim.log.levels.ERROR
+        )
+      end)
+    elseif type(spec_item_or_list) ~= "table" then
+      vim.schedule(function()
+        vim.notify(
+          ("Invalid spec for %s, not a table: %s"):format(plugin_name, spec_item_or_list),
+          vim.log.levels.ERROR
+        )
+      end)
+    else
+      import.import_specs(spec_item_or_list)
+    end
+  end
+end
+
+---@class ZpackConfig
+---@field plugins_dir? string
+---@field auto_import? boolean
+
+---@param opts? ZpackConfig
+M.setup = function(opts)
+  opts = opts or {}
+  local plugins_dir = opts.plugins_dir or 'plugins'
+  local auto_import = opts.auto_import == nil and true or opts.auto_import
+
+  if auto_import then
+    import_specs_from_dir(plugins_dir)
+  end
+  lazy.process_all()
+  startup.process_all()
+  commands.setup()
+end
+
+---@param specs Spec[]
+M.add = function(specs)
+  for _, spec in ipairs(specs) do
+    import.import_specs(spec)
+  end
+  lazy.process_all()
+  startup.process_all()
+end
+
+return M
