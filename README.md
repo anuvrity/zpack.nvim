@@ -2,6 +2,21 @@
 
 A super lightweight layer on top of Neovim's native `vim.pack` plugin manager to support a lazy.nvim-like declarative spec and minimalist lazy-loading.
 
+```lua
+-- ./lua/plugins/treesitter.lua
+return {
+  'nvim-treesitter/nvim-treesitter',
+  version = 'main',
+  build = ':TSUpdate',
+  config = function()
+    require('nvim-treesitter.configs').setup({
+      ensure_installed = { 'lua', 'vim' },
+      highlight = { enable = true },
+    })
+  end,
+}
+```
+
 The built-in plugin manager itself is currently a work in progress, so please expect breaking changes.
 
 **[Why zpack?](#why-zpack)** | **[Examples](#examples)** | **[Spec Reference](#spec-reference)** | **[Migrating from lazy.nvim](#migrating-from-lazynvim)**
@@ -36,7 +51,7 @@ require('zpack').add({
 
 zpack provides the following commands:
 
-- `:ZUpdate` - Update all plugins
+- `:ZUpdate` - Update all plugins. See `:h vim.pack.update()`
 - `:ZClean` - Remove plugins that are no longer in your spec
 - `:ZCleanAll` - Remove all installed plugins
 
@@ -80,30 +95,17 @@ zpack might be for you if:
     - Declarative plugin specs to keep your config neat and tidy
     - A simple, readable codebase you can understand
 
-Out of the box, zpack does not currently provide:
+Out of the box, zpack does not provide:
 - UI dashboard for your plugins
 - Profiling, dev mode, etc.
 - Automatic dependency resolution for lazy-loading
-- Advanced lazy-loading optimizations
+- Implicit ft/event handling for lazy-loading, favoring explicit user intent and configuration (see [key differences](#key-differences))
 
 Many of these features are available through Neovim's native tooling. We're actively exploring ways to improve lazy-loading functionality without introducing significant complexity.
 
 For anything else missing, contributions are welcome!
 
 ## Examples
-
-```lua
-return {
-  'nvim-treesitter/nvim-treesitter',
-  config = function()
-    require('nvim-treesitter.configs').setup({
-      ensure_installed = { 'lua', 'vim' },
-      highlight = { enable = true },
-    })
-  end,
-}
-```
-
 #### Lazy Load on Event
 
 ```lua
@@ -236,22 +238,25 @@ Based on the `Spec` type definition:
   [2] = function() end,           -- RHS function
   desc = "description",           -- Keymap description
   mode = "n"|{"n","v"},           -- Mode(s), default: "n"
-  noremap = true|false,           -- Default: true
+  remap = true|false,             -- Allow remapping, default: false
   nowait = true|false,            -- Default: false
 }
 ```
 
 ## Migrating from lazy.nvim
 
-Most of your lazy.nvim plugin specs will work as-is with zpack. Simply copy your specs from `lazy.setup()` to `zpack.setup()` or your `lua/plugins/` directory.
+Most of your lazy.nvim plugin specs will work as-is with zpack.
 
+<a name="key-differences"></a>
 **Key differences:**
 
-- **Dependencies**: zpack does not have a `dependencies` field. Use `priority` to control load order for startup plugins (higher values load first), or structure your lazy-loading triggers (like `event`, `cmd`, `keys`) to ensure dependencies load before dependent plugins.
 - **url**/**dir**: use `src` instead. See `:h vim.pack.Spec`
+- **ft**: With lazy.nvim, `ft` lazy-loading re-triggers `BufReadPre`, `BufReadPost`, and `FileType` events in order to properly attach LSP clients and apply Treesitter syntax, whereas zpack favors simplicity and explicitness. Thus zpack does not provide a `ft` trigger. Please select `FileType`, `BufReadPre`, and `BufReadPost` appropriately based on the plugin's needs.
+- **Dependencies**: zpack does not have a `dependencies` field to implicitly infer plugin ordering. Use `priority` to explicitly control load order for startup plugins (higher values load first), or structure your lazy-loading triggers (like `event`, `cmd`, `keys`) to ensure dependencies load before dependent plugins. See the `plenary.nvim` [example migration](#example-migration)
 - **opt**: For simplicity, use `config` instead.
 - **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `name`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields.
 
+<a name="example-migration"></a>
 **Example migration:**
 
 ```lua

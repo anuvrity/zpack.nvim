@@ -1,7 +1,7 @@
 ---@class KeySpec
 ---@field [1] string
 ---@field [2]? fun()
----@field noremap? boolean
+---@field remap? boolean
 ---@field desc? string
 ---@field mode? string|string[]
 ---@field nowait? boolean

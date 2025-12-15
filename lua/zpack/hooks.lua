@@ -19,7 +19,7 @@ M.try_call_hook = function(src, hook_name)
     return false
   end
 
-  if not type(hook) == "function" then
+  if type(hook) ~= "function" then
     util.schedule_notify("Hook " .. hook_name .. " is not a function for " .. src, vim.log.levels.ERROR)
     return false
   end

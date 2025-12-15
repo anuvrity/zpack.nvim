@@ -4,6 +4,7 @@ local import = require('zpack.import')
 local lazy = require('zpack.lazy')
 local startup = require('zpack.startup')
 local commands = require('zpack.commands')
+local util = require('zpack.util')
 
 local M = {}
 
@@ -16,19 +17,15 @@ local import_specs_from_dir = function(plugins_dir)
     local success, spec_item_or_list = pcall(require, plugins_dir .. "." .. plugin_name)
 
     if not success then
-      vim.schedule(function()
-        vim.notify(
-          ("Failed to load plugin spec for %s: %s"):format(plugin_name, spec_item_or_list),
-          vim.log.levels.ERROR
-        )
-      end)
+      util.schedule_notify(
+        ("Failed to load plugin spec for %s: %s"):format(plugin_name, spec_item_or_list),
+        vim.log.levels.ERROR
+      )
     elseif type(spec_item_or_list) ~= "table" then
-      vim.schedule(function()
-        vim.notify(
-          ("Invalid spec for %s, not a table: %s"):format(plugin_name, spec_item_or_list),
-          vim.log.levels.ERROR
-        )
-      end)
+      util.schedule_notify(
+        ("Invalid spec for %s, not a table: %s"):format(plugin_name, spec_item_or_list),
+        vim.log.levels.ERROR
+      )
     else
       import.import_specs(spec_item_or_list)
     end
@@ -43,7 +40,8 @@ end
 M.setup = function(opts)
   opts = opts or {}
   local plugins_dir = opts.plugins_dir or 'plugins'
-  local auto_import = opts.auto_import == nil and true or opts.auto_import
+  local auto_import = opts.auto_import
+  if auto_import == nil then auto_import = true end
 
   if auto_import then
     import_specs_from_dir(plugins_dir)
