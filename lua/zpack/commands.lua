@@ -3,6 +3,21 @@ local util = require('zpack.util')
 
 local M = {}
 
+M.clean_all = function()
+  local installed_packs = vim.pack.get()
+
+  util.schedule_notify(("Deleting all %d installed plugin(s)..."):format(#installed_packs), vim.log.levels.INFO)
+
+  local names_to_delete = {}
+  for _, pack in ipairs(installed_packs) do
+    table.insert(names_to_delete, pack.spec.name)
+  end
+
+  vim.pack.del(names_to_delete)
+
+  util.schedule_notify("All plugins deleted.", vim.log.levels.INFO)
+end
+
 M.clean_unused = function()
   local installed_packs = vim.pack.get()
   local specs_by_src = state.src_spec
@@ -46,6 +61,12 @@ M.setup = function()
     M.clean_unused()
   end, {
     desc = 'Remove unused plugins',
+  })
+
+  vim.api.nvim_create_user_command('ZCleanAll', function()
+    M.clean_all()
+  end, {
+    desc = 'Remove all plugins',
   })
 end
 

@@ -38,6 +38,7 @@ zpack provides the following commands:
 
 - `:ZUpdate` - Update all plugins
 - `:ZClean` - Remove plugins that are no longer in your spec
+- `:ZCleanAll` - Remove all installed plugins
 
 ### Directory Structure
 

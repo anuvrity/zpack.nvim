@@ -106,6 +106,9 @@ zpack provides the following commands:
                 installed plugins with your current spec and deletes any that
                 are not referenced.
 
+                                                                  *:ZCleanAll*
+:ZCleanAll      Remove all installed plugins.
+
 ------------------------------------------------------------------------------
 3.3 DIRECTORY STRUCTURE                         *zpack-directory-structure*
 
