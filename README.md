@@ -54,6 +54,7 @@ zpack provides the following commands:
 - `:ZUpdate` - Update all plugins. See `:h vim.pack.update()`
 - `:ZClean` - Remove plugins that are no longer in your spec
 - `:ZCleanAll` - Remove all installed plugins
+- `:ZDelete <plugin>` - Remove a specific plugin (supports tab completion)
 
 ### Directory Structure
 
@@ -271,7 +272,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 - **ft**: With lazy.nvim, `ft` lazy-loading implicitly re-triggers `BufReadPre`, `BufReadPost`, and `FileType` events in order to properly attach LSP clients and apply Treesitter syntax. zpack favors explicit event control and thus does not provide a `ft` trigger. Please select `FileType`, `BufReadPre`, and `BufReadPost` events appropriately based on the plugin's needs. If you're not sure, `BufReadPre` is a safe bet to ensure your plugin is loaded before entering the buffer.
 - **Dependencies**: zpack does not have a `dependencies` field to implicitly infer plugin ordering. Use `priority` to directly control load order (higher values load first) for both startup and lazy-loaded plugins, or structure your lazy-loading triggers (like `event`, `cmd`, `keys`) to ensure dependencies load before dependent plugins. See the `plenary.nvim` [example migration](#example-migration)
 - **opt**: use `config = function() ... end` instead.
-- **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `name`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields.
+- **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields.
 
 <a name="example-migration"></a>
 **Example migration:**

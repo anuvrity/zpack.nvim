@@ -12,7 +12,7 @@ local sort_by_priority = function()
   table.sort(state.src_with_startup_config, util.compare_priority)
 end
 
-local setup_build_tracking = function()
+M.setup_build_tracking = function()
   vim.api.nvim_create_autocmd('PackChanged', {
     group = state.startup_group,
     callback = function(event)
@@ -61,7 +61,6 @@ end
 
 M.process_all = function()
   sort_by_priority()
-  setup_build_tracking()
   run_init_hooks()
   add_startup_packs()
   run_config_hooks()

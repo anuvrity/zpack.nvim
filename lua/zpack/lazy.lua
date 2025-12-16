@@ -117,7 +117,7 @@ local setup_shared_cmd_loading = function(cmd_to_specs)
         M.process_spec(vim_spec)
       end
 
-      vim.api.nvim_cmd({
+      pcall(vim.api.nvim_command, {
         cmd = cmd,
         args = cmd_args.fargs,
       }, {})

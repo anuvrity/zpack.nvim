@@ -46,6 +46,7 @@ M.setup = function(opts)
   if auto_import then
     import_specs_from_dir(plugins_dir)
   end
+  startup.setup_build_tracking()
   lazy.process_all()
   startup.process_all()
   commands.setup()
@@ -56,6 +57,7 @@ M.add = function(specs)
   for _, spec in ipairs(specs) do
     import.import_specs(spec)
   end
+  startup.setup_build_tracking()
   lazy.process_all()
   startup.process_all()
 end

@@ -123,6 +123,11 @@ zpack provides the following commands:
                                                                   *:ZCleanAll*
 :ZCleanAll      Remove all installed plugins.
 
+                                                                    *:ZDelete*
+:ZDelete {plugin}
+                Remove a specific plugin by name. Supports tab completion of
+                installed plugin names.
+
 ------------------------------------------------------------------------------
 3.3 DIRECTORY STRUCTURE                         *zpack-directory-structure*
 
@@ -216,7 +221,7 @@ Dependencies              zpack does not have a `dependencies` field to
 
 opt                       use `config = function() ... end` instead.
 
-Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `name`,
+Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
                           `module`, etc. See |zpack-spec-reference| for
                           supported fields.
 
