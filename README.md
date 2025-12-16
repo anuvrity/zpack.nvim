@@ -1,4 +1,5 @@
 # zpack.nvim
+<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/zuqini/zpack.nvim"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/zuqini/zpack.nvim"> <img alt="GitHub License" src="https://img.shields.io/github/license/zuqini/zpack.nvim">
 
 A super lightweight layer on top of Neovim's native `vim.pack` plugin manager to support a lazy.nvim-like declarative spec and minimalist lazy-loading.
 
