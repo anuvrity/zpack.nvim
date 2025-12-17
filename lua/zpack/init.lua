@@ -4,6 +4,7 @@ local import = require('zpack.import')
 local lazy = require('zpack.lazy')
 local startup = require('zpack.startup')
 local commands = require('zpack.commands')
+local hooks = require('zpack.hooks')
 local util = require('zpack.util')
 
 local M = {}
@@ -32,6 +33,13 @@ local import_specs_from_dir = function(plugins_dir)
   end
 end
 
+local process_all = function()
+  hooks.setup_build_tracking()
+  startup.process_all()
+  lazy.process_all()
+  hooks.run_build_hooks()
+end
+
 ---@class ZpackConfig
 ---@field plugins_dir? string
 ---@field auto_import? boolean
@@ -45,21 +53,15 @@ M.setup = function(opts)
 
   if auto_import then
     import_specs_from_dir(plugins_dir)
+    process_all()
   end
-  startup.setup_build_tracking()
-  lazy.process_all()
-  startup.process_all()
   commands.setup()
 end
 
----@param specs Spec[]
-M.add = function(specs)
-  for _, spec in ipairs(specs) do
-    import.import_specs(spec)
-  end
-  startup.setup_build_tracking()
-  lazy.process_all()
-  startup.process_all()
+---@param spec_item_or_list Spec|Spec[]
+M.add = function(spec_item_or_list)
+  import.import_specs(spec_item_or_list)
+  process_all()
 end
 
 return M

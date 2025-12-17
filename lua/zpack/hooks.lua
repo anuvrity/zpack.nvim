@@ -35,8 +35,9 @@ end
 
 ---@param src string
 ---@param build string|fun()
-M.execute_build = function(src, build)
+local execute_build = function(src, build)
   if not state.src_to_request_build[src] then
+    util.schedule_notify("Trying to execute build hook for invalid src " .. src)
     return
   end
 
@@ -48,6 +49,26 @@ M.execute_build = function(src, build)
     vim.schedule(function()
       build()
     end)
+  end
+end
+
+M.setup_build_tracking = function()
+  vim.api.nvim_create_autocmd('PackChanged', {
+    group = state.startup_group,
+    callback = function(event)
+      if event.data.kind == "update" or event.data.kind == "install" then
+        state.src_to_request_build[event.data.spec.src] = true
+      end
+    end,
+  })
+end
+
+M.run_build_hooks = function()
+  for src, _ in pairs(state.src_to_request_build) do
+    local spec = state.src_spec[src]
+    if spec.build then
+      execute_build(src, spec.build)
+    end
   end
 end
 

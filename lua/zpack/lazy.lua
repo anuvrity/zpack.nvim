@@ -15,22 +15,18 @@ M.is_lazy = function(spec)
   return (spec.event ~= nil) or (spec.cmd ~= nil) or (spec.keys ~= nil and #spec.keys > 0)
 end
 
----@param vim_spec vim.pack.Spec
-M.process_spec = function(vim_spec)
-  local spec = state.src_spec[vim_spec.src]
+---@param pack_spec vim.pack.Spec
+M.process_spec = function(pack_spec)
+  local spec = state.src_spec[pack_spec.src]
 
   if spec.init then
-    hooks.try_call_hook(vim_spec.src, 'init')
+    hooks.try_call_hook(pack_spec.src, 'init')
   end
 
-  vim.cmd.packadd(vim_spec.name)
+  vim.cmd.packadd(pack_spec.name)
 
   if spec.config then
-    hooks.try_call_hook(vim_spec.src, 'config')
-  end
-
-  if spec.build then
-    hooks.execute_build(vim_spec.src, spec.build)
+    hooks.try_call_hook(pack_spec.src, 'config')
   end
 
   if spec.keys then
@@ -55,9 +51,9 @@ local split_very_lazy = function(events)
   return has_very_lazy, other_events
 end
 
----@param vim_spec vim.pack.Spec
+---@param pack_spec vim.pack.Spec
 ---@param spec Spec
-local setup_event_loading = function(vim_spec, spec)
+local setup_event_loading = function(pack_spec, spec)
   local events = type(spec.event) == "string" and { spec.event } or spec.event --[[@as string[] ]]
 
   local has_very_lazy, other_events = split_very_lazy(events)
@@ -68,7 +64,7 @@ local setup_event_loading = function(vim_spec, spec)
       once = true,
       callback = function()
         vim.schedule(function()
-          M.process_spec(vim_spec)
+          M.process_spec(pack_spec)
         end)
       end,
     })
@@ -80,41 +76,41 @@ local setup_event_loading = function(vim_spec, spec)
       once = true,
       pattern = spec.pattern or '*',
       callback = function()
-        M.process_spec(vim_spec)
+        M.process_spec(pack_spec)
       end,
     })
   end
 end
 
 ---Build a mapping of command names to all plugins that lazy-load on that command
----@param registered_plugins table[] Array of registered plugin objects from vim.pack.add
+---@param registered_pack_specs vim.pack.Spec[] Array of registered plugin objects from vim.pack.add
 ---@return table<string, vim.pack.Spec[]>
-local build_cmd_mapping = function(registered_plugins)
-  local cmd_to_specs = {}
-  for _, plugin in ipairs(registered_plugins) do
-    local spec = state.src_spec[plugin.spec.src]
+local build_cmd_mapping = function(registered_pack_specs)
+  local cmd_to_pack_specs = {}
+  for _, pack_spec in ipairs(registered_pack_specs) do
+    local spec = state.src_spec[pack_spec.src]
     if spec.cmd then
       local commands = type(spec.cmd) == "string" and { spec.cmd } or spec.cmd --[[@as string[] ]]
       for _, cmd in ipairs(commands) do
-        if not cmd_to_specs[cmd] then
-          cmd_to_specs[cmd] = {}
+        if not cmd_to_pack_specs[cmd] then
+          cmd_to_pack_specs[cmd] = {}
         end
-        table.insert(cmd_to_specs[cmd], plugin.spec)
+        table.insert(cmd_to_pack_specs[cmd], pack_spec)
       end
     end
   end
-  return cmd_to_specs
+  return cmd_to_pack_specs
 end
 
 ---Create user commands that load all plugins associated with each command
----@param cmd_to_specs table<string, vim.pack.Spec[]>
-local setup_shared_cmd_loading = function(cmd_to_specs)
-  for cmd, vim_specs in pairs(cmd_to_specs) do
+---@param cmd_to_pack_specs table<string, vim.pack.Spec[]>
+local setup_shared_cmd_loading = function(cmd_to_pack_specs)
+  for cmd, pack_specs in pairs(cmd_to_pack_specs) do
     vim.api.nvim_create_user_command(cmd, function(cmd_args)
       pcall(vim.api.nvim_del_user_command, cmd)
 
-      for _, vim_spec in ipairs(vim_specs) do
-        M.process_spec(vim_spec)
+      for _, pack_spec in ipairs(pack_specs) do
+        M.process_spec(pack_spec)
       end
 
       pcall(vim.api.nvim_command, {
@@ -125,9 +121,9 @@ local setup_shared_cmd_loading = function(cmd_to_specs)
   end
 end
 
----@param vim_spec vim.pack.Spec
+---@param pack_spec vim.pack.Spec
 ---@param spec Spec
-local setup_key_loading = function(vim_spec, spec)
+local setup_key_loading = function(pack_spec, spec)
   local keys = (spec.keys[1] and type(spec.keys[1]) == "string") and { spec.keys } or spec.keys --[[@as KeySpec[] ]]
 
   for _, key in ipairs(keys) do
@@ -138,22 +134,26 @@ local setup_key_loading = function(vim_spec, spec)
     for _, m in ipairs(modes) do
       vim.keymap.set(m, lhs, function()
         vim.keymap.del(m, lhs)
-        M.process_spec(vim_spec)
+        M.process_spec(pack_spec)
         vim.api.nvim_feedkeys(vim.keycode(lhs), 'm', false)
       end, { desc = key.desc })
     end
   end
 end
 
-M.process_all = function()
-  table.sort(state.lazy_packs, util.compare_priority)
-
+---@return vim.pack.Spec[]
+local register_lazy_packs = function()
   local registered_plugins = {}
   vim.pack.add(state.lazy_packs, {
     load = function(plugin)
-      table.insert(registered_plugins, plugin)
-
-      local spec = state.src_spec[plugin.spec.src]
+      local pack_spec = plugin.spec
+      table.insert(registered_plugins, pack_spec)
+      local spec = state.src_spec[pack_spec.src]
+      if state.src_to_request_build[pack_spec.src] then
+        -- requested build, do not lazy load this
+        M.process_spec(pack_spec)
+        return
+      end
 
       if spec.event then
         setup_event_loading(plugin.spec, spec)
@@ -164,10 +164,19 @@ M.process_all = function()
       end
     end
   })
+  return registered_plugins
+end
 
-  -- Create commands after registration to access plugin.spec.name
-  local cmd_to_specs = build_cmd_mapping(registered_plugins)
-  setup_shared_cmd_loading(cmd_to_specs)
+---@param registered_pack_specs vim.pack.Spec[]
+local setup_cmd_loading = function(registered_pack_specs)
+  local cmd_to_pack_specs = build_cmd_mapping(registered_pack_specs)
+  setup_shared_cmd_loading(cmd_to_pack_specs)
+end
+
+M.process_all = function()
+  table.sort(state.lazy_packs, util.compare_priority)
+  local registered_pack_specs = register_lazy_packs()
+  setup_cmd_loading(registered_pack_specs)
 end
 
 return M
