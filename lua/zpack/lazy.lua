@@ -128,6 +128,7 @@ local setup_key_loading = function(pack_spec, spec)
 
   for _, key in ipairs(keys) do
     local lhs = key[1]
+    local rhs = key[2]
     local mode = key.mode or 'n'
     local modes = type(mode) == "string" and { mode } or mode --[[@as string[] ]]
 
@@ -135,6 +136,15 @@ local setup_key_loading = function(pack_spec, spec)
       vim.keymap.set(m, lhs, function()
         vim.keymap.del(m, lhs)
         M.process_spec(pack_spec)
+
+        if rhs then
+          -- Set up the actual mapping with the provided rhs
+          if type(rhs) == "string" then
+            vim.keymap.set(m, lhs, rhs, { desc = key.desc })
+          elseif type(rhs) == "function" then
+            vim.keymap.set(m, lhs, rhs, { desc = key.desc })
+          end
+        end
         vim.api.nvim_feedkeys(vim.keycode(lhs), 'm', false)
       end, { desc = key.desc })
     end
