@@ -96,9 +96,8 @@ zpack might be for you if:
 - you're already comfortable with `vim.pack`, and want:
     - A minimalist lazy-loading implementation for faster startup
     - Declarative plugin specs to keep your config neat and tidy
-    - A simple, readable codebase you can understand
 
-Additionally, because everything is just `vim.pack` under the hood, you can mix and match zpack.nvim and traditional `vim.pack.add({ ... })` as you wish!
+Additionally, because everything is just `vim.pack` under the hood, you can mix and match zpack.nvim specs and traditional `vim.pack.add({ ... })` as you wish!
 
 Out of the box, zpack does not provide:
 - UI dashboard for your plugins
