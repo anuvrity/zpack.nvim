@@ -54,7 +54,7 @@ end
 ---@param pack_spec vim.pack.Spec
 ---@param spec Spec
 local setup_event_loading = function(pack_spec, spec)
-  local events = type(spec.event) == "string" and { spec.event } or spec.event --[[@as string[] ]]
+  local events = util.normalize_string_list(spec.event) --[[@as string[] ]]
 
   local has_very_lazy, other_events = split_very_lazy(events)
 
@@ -90,7 +90,7 @@ local build_cmd_mapping = function(registered_pack_specs)
   for _, pack_spec in ipairs(registered_pack_specs) do
     local spec = state.src_spec[pack_spec.src]
     if spec.cmd then
-      local commands = type(spec.cmd) == "string" and { spec.cmd } or spec.cmd --[[@as string[] ]]
+      local commands = util.normalize_string_list(spec.cmd) --[[@as string[] ]]
       for _, cmd in ipairs(commands) do
         if not cmd_to_pack_specs[cmd] then
           cmd_to_pack_specs[cmd] = {}
@@ -132,7 +132,7 @@ local build_key_mapping = function(registered_pack_specs)
       for _, key in ipairs(keys) do
         local lhs = key[1]
         local mode = key.mode or 'n'
-        local modes = type(mode) == "string" and { mode } or mode --[[@as string[] ]]
+        local modes = util.normalize_string_list(mode) --[[@as string[] ]]
 
         for _, m in ipairs(modes) do
           local key_id = lhs .. ":" .. m
@@ -166,11 +166,7 @@ local setup_shared_key_loading = function(key_to_info)
       end
 
       if rhs then
-        if type(rhs) == "string" then
-          vim.keymap.set(mode, lhs, rhs, { desc = desc })
-        elseif type(rhs) == "function" then
-          vim.keymap.set(mode, lhs, rhs, { desc = desc })
-        end
+        vim.keymap.set(mode, lhs, rhs, { desc = desc })
       end
       vim.api.nvim_feedkeys(vim.keycode(lhs), 'm', false)
     end, { desc = desc })
