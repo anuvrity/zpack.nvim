@@ -9,7 +9,7 @@ M.startup_packs = {}
 M.lazy_packs = {}
 ---@type KeySpec[]
 M.startup_keys = {}
----@type { [string]: Spec }
+---@type { [string]: { spec: Spec, loaded: boolean } }
 M.src_spec = {}
 ---@type { [string]: boolean }
 M.src_to_request_build = {}
@@ -17,7 +17,5 @@ M.src_to_request_build = {}
 M.src_with_startup_init = {}
 ---@type string[]
 M.src_with_startup_config = {}
----@type { [string]: boolean }
-M.src_loaded = {}
 
 return M

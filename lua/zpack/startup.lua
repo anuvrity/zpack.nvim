@@ -21,6 +21,11 @@ M.process_all = function()
   end
 
   keymap.apply_keys(state.startup_keys)
+
+  -- Mark all startup plugins as loaded
+  for _, pack_spec in ipairs(state.startup_packs) do
+    state.src_spec[pack_spec.src].loaded = true
+  end
 end
 
 return M

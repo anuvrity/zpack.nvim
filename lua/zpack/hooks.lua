@@ -7,7 +7,7 @@ local M = {}
 ---@param hook_name string
 ---@return boolean
 M.try_call_hook = function(src, hook_name)
-  local spec = state.src_spec[src]
+  local spec = state.src_spec[src].spec
   if not spec then
     util.schedule_notify("expected spec missing for " .. src, vim.log.levels.ERROR)
     return false
@@ -65,7 +65,7 @@ end
 
 M.run_build_hooks = function()
   for src, _ in pairs(state.src_to_request_build) do
-    local spec = state.src_spec[src]
+    local spec = state.src_spec[src].spec
     if spec.build then
       execute_build(src, spec.build)
     end

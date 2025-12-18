@@ -25,11 +25,11 @@ end
 ---@param src string
 ---@return number
 M.get_priority = function(src)
-  local spec = state.src_spec[src]
-  if not spec then
+  local entry = state.src_spec[src]
+  if not entry then
     return 50
   end
-  return spec.priority or 50
+  return entry.spec.priority or 50
 end
 
 ---Comparison function for sorting items by priority (descending)

@@ -18,12 +18,10 @@ end
 ---@param pack_spec vim.pack.Spec
 M.process_spec = function(pack_spec)
   -- Guard against multiple triggers loading the same plugin
-  if state.src_loaded[pack_spec.src] then
+  if state.src_spec[pack_spec.src].loaded then
     return
   end
-  state.src_loaded[pack_spec.src] = true
-
-  local spec = state.src_spec[pack_spec.src]
+  local spec = state.src_spec[pack_spec.src].spec
 
   if spec.init then
     hooks.try_call_hook(pack_spec.src, 'init')
@@ -38,6 +36,8 @@ M.process_spec = function(pack_spec)
   if spec.keys then
     keymap.apply_keys(spec.keys)
   end
+
+  state.src_spec[pack_spec.src].loaded = true
 end
 
 ---@param value any
@@ -133,7 +133,7 @@ end
 local build_cmd_mapping = function(registered_pack_specs)
   local cmd_to_pack_specs = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.src_spec[pack_spec.src]
+    local spec = state.src_spec[pack_spec.src].spec
     if spec.cmd then
       local commands = util.normalize_string_list(spec.cmd) --[[@as string[] ]]
       for _, cmd in ipairs(commands) do
@@ -171,7 +171,7 @@ end
 local build_key_mapping = function(registered_pack_specs)
   local key_to_info = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.src_spec[pack_spec.src]
+    local spec = state.src_spec[pack_spec.src].spec
     if spec.keys then
       local keys = util.normalize_keys(spec.keys) --[[@as KeySpec[] ]]
       for _, key in ipairs(keys) do
@@ -224,7 +224,7 @@ local register_lazy_packs = function()
   vim.pack.add(state.lazy_packs, {
     load = function(plugin)
       local pack_spec = plugin.spec
-      local spec = state.src_spec[pack_spec.src]
+      local spec = state.src_spec[pack_spec.src].spec
       if state.src_to_request_build[pack_spec.src] then
         -- requested build, do not lazy load this
         M.process_spec(pack_spec)
