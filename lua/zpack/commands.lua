@@ -25,7 +25,7 @@ M.clean_unused = function()
 
   for _, pack in ipairs(installed_packs) do
     local src = pack.spec.src
-    -- do not delete zpacks
+    -- do not delete zpack
     if not specs_by_src[src] and not string.find(src, 'zpack') then
       table.insert(to_delete, pack.spec)
     end

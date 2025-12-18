@@ -58,7 +58,7 @@ end
 ---@param val string|string[]
 ---@return string[]
 M.normalize_string_list = function(val)
-  return type(val) == "string" and { val } or val
+  return type(val) == "string" and { val } or val --[[@as string[] ]]
 end
 
 return M
