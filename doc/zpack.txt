@@ -14,20 +14,19 @@ CONTENTS                                                      *zpack-contents*
       3.2 Commands...........................................|zpack-commands|
       3.3 Directory Structure...................|zpack-directory-structure|
   4. Why zpack?................................................|zpack-why-zpack|
-  5. Migrating from lazy.nvim...........................|zpack-migrating-lazy|
-  6. Examples..................................................|zpack-examples|
-      6.1 Lazy Load on Event............................|zpack-example-event|
-      6.2 Lazy Load on Command..........................|zpack-example-cmd|
-      6.3 Lazy Load on Keymap...........................|zpack-example-keys|
-      6.4 Lazy Load on Event with Pattern...............|zpack-example-event-pattern|
-      6.5 VeryLazy Event................................|zpack-example-verylazy|
-      6.6 Conditional Loading...........................|zpack-example-conditional|
-      6.7 Load Priority.................................|zpack-example-priority|
-      6.8 Build Hook....................................|zpack-example-build|
-      6.9 Multiple Plugins..............................|zpack-example-multiple|
-  7. Spec Reference.........................................|zpack-spec-reference|
-  8. EventSpec Reference................................|zpack-eventspec-reference|
-  9. KeySpec Reference..................................|zpack-keyspec-reference|
+  5. Examples..................................................|zpack-examples|
+      5.1 Lazy Load on Command..........................|zpack-example-cmd|
+      5.2 Lazy Load on Keymap...........................|zpack-example-keys|
+      5.3 Lazy Load on Event............................|zpack-example-event|
+      5.4 Lazy Load on Event with Pattern...............|zpack-example-event-pattern|
+      5.5 Conditional Loading...........................|zpack-example-conditional|
+      5.6 Load Priority.................................|zpack-example-priority|
+      5.7 Build Hook....................................|zpack-example-build|
+      5.8 Multiple Plugins..............................|zpack-example-multiple|
+  6. Spec Reference.........................................|zpack-spec-reference|
+  7. EventSpec Reference................................|zpack-eventspec-reference|
+  8. KeySpec Reference..................................|zpack-keyspec-reference|
+  9. Migrating from lazy.nvim...........................|zpack-migrating-lazy|
 
 ==============================================================================
 1. INTRODUCTION                                           *zpack-introduction*
@@ -193,123 +192,16 @@ introducing significant complexity.
 For anything else missing, contributions are welcome!
 
 ==============================================================================
-5. MIGRATING FROM LAZY.NVIM                            *zpack-migrating-lazy*
+5. EXAMPLES                                                   *zpack-examples*
 
-Most of your lazy.nvim plugin specs will work as-is with zpack.
-
-KEY DIFFERENCES ~
-
-url/dir                   Use `src` instead. See |vim.pack.Spec|.
-
-ft                        With lazy.nvim, `ft` lazy-loading implicitly
-                          re-triggers `BufReadPre`, `BufReadPost`, and
-                          `FileType` events in order to properly attach LSP
-                          clients and apply Treesitter syntax. zpack favors
-                          explicit event control and thus does not provide a
-                          `ft` trigger. Please select `FileType`, `BufReadPre`,
-                          and `BufReadPost` events appropriately based on the
-                          plugin's needs. If you're not sure, `BufReadPre` is a
-                          safe bet to ensure your plugin is loaded before
-                          entering the buffer.
-
-Dependencies              zpack does not have a `dependencies` field to
-                          implicitly infer plugin ordering. Use `priority` to
-                          directly control load order (higher values load
-                          first) for both startup and lazy-loaded plugins, or
-                          structure your lazy-loading triggers (like `event`,
-                          `cmd`, `keys`) to ensure dependencies load before
-                          dependent plugins. See the `plenary.nvim` example
-                          migration below.
-
-opt                       use `config = function() ... end` instead.
-
-Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
-                          `module`, etc. See |zpack-spec-reference| for
-                          supported fields.
-
-EXAMPLE MIGRATION ~
-                                                  *zpack-example-migration*
->lua
-    -- lazy.nvim
-    {
-      'nvim-telescope/telescope.nvim',
-      dependencies = { 'nvim-lua/plenary.nvim' },
-      cmd = 'Telescope',
-    }
-
-    -- zpack
-    -- Add plenary as a separate spec to load on startup
-    { 'nvim-lua/plenary.nvim' },
-    -- Alternatively, add plenary on the same cmd as Telescope with higher priority
-    {
-      'nvim-lua/plenary.nvim'
-      cmd = 'Telescope',
-      priority = 1000,
-    },
-
-    -- Telescope will load when needed via cmd trigger
-    {
-      'nvim-telescope/telescope.nvim',
-      cmd = 'Telescope',
-    }
-<
-
-For startup plugins with dependencies, use `priority` to ensure load order:
->lua
-    -- Load colorscheme dependency first
-    { 'rktjmp/lush.nvim', priority = 1000 }
-
-    -- Then load your colorscheme
-    {
-      'my-colorscheme',
-      priority = 999,
-      config = function()
-        vim.cmd('colorscheme my-theme')
-      end,
-    }
-<
-
-BLINK.CMP + LAZYDEV ~
-                                              *zpack-migration-blink-lazydev*
-
-Due to the lack of implicit dependency inference, when using `blink.cmp`
-with `lazydev`, add lazydev to `per_filetype` instead of `default` sources.
-This approach also ensures lazydev loads only in Lua files, rather than every
-time blink.cmp loads (which happens even with lazy.nvim if lazydev is part of
-the default sources).
->lua
-    require('blink.cmp').setup({
-      sources = {
-        per_filetype = {
-          lua = { inherit_defaults = true, 'lazydev' }
-        },
-        providers = {
-          lazydev = { name = "LazyDev", module = "lazydev.integrations.blink",
-                      fallbacks = { "lsp" } },
-        },
-      },
-    })
-<
-
-==============================================================================
-6. EXAMPLES                                                   *zpack-examples*
+For more examples, refer to my personal config:
+- zpack installation and setup:
+  https://github.com/zuqini/nvim/blob/main/init.lua
+- plugins directory structure:
+  https://github.com/zuqini/nvim/tree/main/lua/plugins
 
 ------------------------------------------------------------------------------
-6.1 LAZY LOAD ON EVENT                                    *zpack-example-event*
-
-Load plugin when a specific event is triggered:
->lua
-    return {
-      'windwp/nvim-autopairs',
-      event = 'InsertEnter',
-      config = function()
-        require('nvim-autopairs').setup({})
-      end,
-    }
-<
-
-------------------------------------------------------------------------------
-6.2 LAZY LOAD ON COMMAND                                    *zpack-example-cmd*
+5.1 LAZY LOAD ON COMMAND                                    *zpack-example-cmd*
 
 Load plugin when a specific command is executed:
 >lua
@@ -323,7 +215,7 @@ Load plugin when a specific command is executed:
 <
 
 ------------------------------------------------------------------------------
-6.3 LAZY LOAD ON KEYMAP                                    *zpack-example-keys*
+5.2 LAZY LOAD ON KEYMAP                                    *zpack-example-keys*
 
 Load plugin when a specific keymap is triggered:
 >lua
@@ -342,7 +234,21 @@ Load plugin when a specific keymap is triggered:
 <
 
 ------------------------------------------------------------------------------
-6.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
+5.3 LAZY LOAD ON EVENT                                    *zpack-example-event*
+
+Load plugin when a specific event is triggered:
+>lua
+    return {
+      'windwp/nvim-autopairs',
+      event = 'InsertEnter', -- Also supports 'VeryLazy'
+      config = function()
+        require('nvim-autopairs').setup({})
+      end,
+    }
+<
+
+------------------------------------------------------------------------------
+5.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
 
 Load plugin on specific events with file patterns:
 
@@ -374,22 +280,22 @@ Multiple patterns for same event:
     }
 <
 
-------------------------------------------------------------------------------
-6.5 VERYLAZY EVENT                                     *zpack-example-verylazy*
-
-Defer loading until after startup is complete:
+Multiple events with different patterns:
 >lua
     return {
-      'folke/which-key.nvim',
-      event = 'VeryLazy',
+      'file-type-plugin',
+      event = {
+        { event = 'BufReadPre', pattern = '*.lua' },
+        { event = 'BufNewFile', pattern = '*.rs' },
+      },
       config = function()
-        require('which-key').setup({})
+        -- plugin config
       end,
     }
 <
 
 ------------------------------------------------------------------------------
-6.6 CONDITIONAL LOADING                             *zpack-example-conditional*
+5.5 CONDITIONAL LOADING                             *zpack-example-conditional*
 
 Enable plugin based on a condition:
 >lua
@@ -403,9 +309,9 @@ Enable plugin based on a condition:
 <
 
 ------------------------------------------------------------------------------
-6.7 LOAD PRIORITY                                       *zpack-example-priority*
+5.6 LOAD PRIORITY                                       *zpack-example-priority*
 
-Control load order with priority (higher priority loads first):
+Control plugin load order with priority (higher values load first; default: 50):
 >lua
     -- Startup plugin: load colorscheme early
     return {
@@ -428,7 +334,7 @@ Control load order with priority (higher priority loads first):
 <
 
 ------------------------------------------------------------------------------
-6.8 BUILD HOOK                                           *zpack-example-build*
+5.7 BUILD HOOK                                           *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -442,7 +348,7 @@ Run a build command after installing/updating plugin:
 <
 
 ------------------------------------------------------------------------------
-6.9 MULTIPLE PLUGINS                                   *zpack-example-multiple*
+5.8 MULTIPLE PLUGINS                                   *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -459,7 +365,7 @@ Define multiple plugins in a single file:
 <
 
 ==============================================================================
-7. SPEC REFERENCE                                       *zpack-spec-reference*
+6. SPEC REFERENCE                                       *zpack-spec-reference*
                                                                   *zpack-Spec*
 
 >lua
@@ -572,7 +478,7 @@ keys            (KeySpec|KeySpec[], optional)
                 Auto-sets `lazy=true`. See |zpack-KeySpec|.
 
 ==============================================================================
-8. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
+7. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
                                                              *zpack-EventSpec*
 
 >lua
@@ -592,7 +498,7 @@ pattern         (string|string[], optional)
                 patterns. If not specified, defaults to '*' (match all).
 
 ==============================================================================
-9. KEYSPEC REFERENCE                                *zpack-keyspec-reference*
+8. KEYSPEC REFERENCE                                *zpack-keyspec-reference*
                                                                *zpack-KeySpec*
 
 >lua
@@ -630,6 +536,105 @@ remap           (boolean, optional)
                                                         *zpack-KeySpec.nowait*
 nowait          (boolean, optional)
                 Whether to use nowait. Default: false.
+
+==============================================================================
+9. MIGRATING FROM LAZY.NVIM                            *zpack-migrating-lazy*
+
+Most of your lazy.nvim plugin specs will work as-is with zpack.
+
+KEY DIFFERENCES ~
+
+url/dir                   Use `src` instead. See |vim.pack.Spec|.
+
+ft                        With lazy.nvim, `ft` lazy-loading implicitly
+                          re-triggers `BufReadPre`, `BufReadPost`, and
+                          `FileType` events in order to properly attach LSP
+                          clients and apply Treesitter syntax. zpack favors
+                          explicit event control and thus does not provide a
+                          `ft` trigger. Please select `FileType`, `BufReadPre`,
+                          and `BufReadPost` events appropriately based on the
+                          plugin's needs. If you're not sure, `BufReadPre` is a
+                          safe bet to ensure your plugin is loaded before
+                          entering the buffer.
+
+Dependencies              zpack does not have a `dependencies` field to
+                          implicitly infer plugin ordering. Use `priority` to
+                          directly control load order (higher values load
+                          first) for both startup and lazy-loaded plugins, or
+                          structure your lazy-loading triggers (like `event`,
+                          `cmd`, `keys`) to ensure dependencies load before
+                          dependent plugins. See the `plenary.nvim` example
+                          migration below.
+
+opt                       use `config = function() ... end` instead.
+
+Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
+                          `module`, etc. See |zpack-spec-reference| for
+                          supported fields.
+
+EXAMPLE MIGRATION ~
+                                                  *zpack-example-migration*
+>lua
+    -- lazy.nvim
+    {
+      'nvim-telescope/telescope.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim' },
+      cmd = 'Telescope',
+    }
+
+    -- zpack
+    -- Add plenary as a separate spec to load on startup
+    { 'nvim-lua/plenary.nvim' },
+    -- Alternatively, add plenary on the same cmd as Telescope with higher priority
+    {
+      'nvim-lua/plenary.nvim'
+      cmd = 'Telescope',
+      priority = 1000,
+    },
+
+    -- Telescope will load when needed via cmd trigger
+    {
+      'nvim-telescope/telescope.nvim',
+      cmd = 'Telescope',
+    }
+<
+
+For startup plugins with dependencies, use `priority` to ensure load order:
+>lua
+    -- Load colorscheme dependency first
+    { 'rktjmp/lush.nvim', priority = 1000 }
+
+    -- Then load your colorscheme
+    {
+      'my-colorscheme',
+      priority = 999,
+      config = function()
+        vim.cmd('colorscheme my-theme')
+      end,
+    }
+<
+
+BLINK.CMP + LAZYDEV ~
+                                              *zpack-migration-blink-lazydev*
+
+Due to the lack of implicit dependency inference, when using `blink.cmp`
+with `lazydev`, add lazydev to `per_filetype` instead of `default` sources.
+This approach also ensures lazydev loads only in Lua files, rather than every
+time blink.cmp loads (which happens even with lazy.nvim if lazydev is part of
+the default sources).
+>lua
+    require('blink.cmp').setup({
+      sources = {
+        per_filetype = {
+          lua = { inherit_defaults = true, 'lazydev' }
+        },
+        providers = {
+          lazydev = { name = "LazyDev", module = "lazydev.integrations.blink",
+                      fallbacks = { "lsp" } },
+        },
+      },
+    })
+<
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

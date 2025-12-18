@@ -113,18 +113,6 @@ For anything else missing, contributions are welcome!
 For more examples, refer to my personal config:
 - [zpack installation and setup](https://github.com/zuqini/nvim/blob/main/init.lua)
 - [plugins directory structure](https://github.com/zuqini/nvim/tree/main/lua/plugins)
-#### Lazy Load on Event
-
-```lua
-return {
-  'windwp/nvim-autopairs',
-  event = 'InsertEnter', -- Also supports 'VeryLazy'
-  config = function()
-    require('nvim-autopairs').setup({})
-  end,
-}
-```
-
 #### Lazy Load on Command
 
 ```lua
@@ -148,6 +136,18 @@ return {
   },
   config = function()
     require('flash').setup({})
+  end,
+}
+```
+
+#### Lazy Load on Event
+
+```lua
+return {
+  'windwp/nvim-autopairs',
+  event = 'InsertEnter', -- Also supports 'VeryLazy'
+  config = function()
+    require('nvim-autopairs').setup({})
   end,
 }
 ```
@@ -179,16 +179,15 @@ return {
   end,
 }
 
-#### VeryLazy Event
-
-Defer loading until after startup is complete:
-
-```lua
+-- Multiple events with different patterns
 return {
-  'folke/which-key.nvim',
-  event = 'VeryLazy',
+  'file-type-plugin',
+  event = {
+    { event = 'BufReadPre', pattern = '*.lua' },
+    { event = 'BufNewFile', pattern = '*.rs' },
+  },
   config = function()
-    require('which-key').setup({})
+    -- plugin config
   end,
 }
 ```
@@ -207,7 +206,7 @@ return {
 
 #### Load Priority
 
-Control load order with priority (higher priority loads first):
+Control plugin load order with priority (higher values load first; default: 50):
 
 ```lua
 -- Startup plugin: load colorscheme early
