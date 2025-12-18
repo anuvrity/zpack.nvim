@@ -17,5 +17,7 @@ M.src_to_request_build = {}
 M.src_with_startup_init = {}
 ---@type string[]
 M.src_with_startup_config = {}
+---@type { [string]: boolean }
+M.src_loaded = {}
 
 return M

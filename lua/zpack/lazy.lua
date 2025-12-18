@@ -17,6 +17,12 @@ end
 
 ---@param pack_spec vim.pack.Spec
 M.process_spec = function(pack_spec)
+  -- Guard against multiple triggers loading the same plugin
+  if state.src_loaded[pack_spec.src] then
+    return
+  end
+  state.src_loaded[pack_spec.src] = true
+
   local spec = state.src_spec[pack_spec.src]
 
   if spec.init then
