@@ -19,13 +19,15 @@ CONTENTS                                                      *zpack-contents*
       6.1 Lazy Load on Event............................|zpack-example-event|
       6.2 Lazy Load on Command..........................|zpack-example-cmd|
       6.3 Lazy Load on Keymap...........................|zpack-example-keys|
-      6.4 VeryLazy Event................................|zpack-example-verylazy|
-      6.5 Conditional Loading...........................|zpack-example-conditional|
-      6.6 Load Priority.................................|zpack-example-priority|
-      6.7 Build Hook....................................|zpack-example-build|
-      6.8 Multiple Plugins..............................|zpack-example-multiple|
+      6.4 Lazy Load on Event with Pattern...............|zpack-example-event-pattern|
+      6.5 VeryLazy Event................................|zpack-example-verylazy|
+      6.6 Conditional Loading...........................|zpack-example-conditional|
+      6.7 Load Priority.................................|zpack-example-priority|
+      6.8 Build Hook....................................|zpack-example-build|
+      6.9 Multiple Plugins..............................|zpack-example-multiple|
   7. Spec Reference.........................................|zpack-spec-reference|
-  8. KeySpec Reference..................................|zpack-keyspec-reference|
+  8. EventSpec Reference................................|zpack-eventspec-reference|
+  9. KeySpec Reference..................................|zpack-keyspec-reference|
 
 ==============================================================================
 1. INTRODUCTION                                           *zpack-introduction*
@@ -340,7 +342,40 @@ Load plugin when a specific keymap is triggered:
 <
 
 ------------------------------------------------------------------------------
-6.4 VERYLAZY EVENT                                     *zpack-example-verylazy*
+6.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
+
+Load plugin on specific events with file patterns:
+
+Single pattern:
+>lua
+    return {
+      'rust-lang/rust.vim',
+      event = {
+        event = 'BufReadPre',
+        pattern = '*.rs',
+      },
+      config = function()
+        vim.g.rustfmt_autosave = 1
+      end,
+    }
+<
+
+Multiple patterns for same event:
+>lua
+    return {
+      'polyglot-plugin',
+      event = {
+        event = 'BufReadPre',
+        pattern = { '*.lua', '*.rs' },
+      },
+      config = function()
+        -- plugin config
+      end,
+    }
+<
+
+------------------------------------------------------------------------------
+6.5 VERYLAZY EVENT                                     *zpack-example-verylazy*
 
 Defer loading until after startup is complete:
 >lua
@@ -354,7 +389,7 @@ Defer loading until after startup is complete:
 <
 
 ------------------------------------------------------------------------------
-6.5 CONDITIONAL LOADING                             *zpack-example-conditional*
+6.6 CONDITIONAL LOADING                             *zpack-example-conditional*
 
 Enable plugin based on a condition:
 >lua
@@ -368,7 +403,7 @@ Enable plugin based on a condition:
 <
 
 ------------------------------------------------------------------------------
-6.6 LOAD PRIORITY                                       *zpack-example-priority*
+6.7 LOAD PRIORITY                                       *zpack-example-priority*
 
 Control load order with priority (higher priority loads first):
 >lua
@@ -393,7 +428,7 @@ Control load order with priority (higher priority loads first):
 <
 
 ------------------------------------------------------------------------------
-6.7 BUILD HOOK                                           *zpack-example-build*
+6.8 BUILD HOOK                                           *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -407,7 +442,7 @@ Run a build command after installing/updating plugin:
 <
 
 ------------------------------------------------------------------------------
-6.8 MULTIPLE PLUGINS                                   *zpack-example-multiple*
+6.9 MULTIPLE PLUGINS                                   *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -427,7 +462,6 @@ Define multiple plugins in a single file:
 7. SPEC REFERENCE                                       *zpack-spec-reference*
                                                                   *zpack-Spec*
 
-Based on the `Spec` type definition:
 >lua
     {
       -- Plugin identification (provide at least one)
@@ -450,8 +484,8 @@ Based on the `Spec` type definition:
       build = string|function,              -- Build command or function
 
       -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-      event = string|string[],              -- Autocommand event(s). Supports 'VeryLazy'
-      pattern = string|string[],            -- Event pattern(s)
+      event = string|string[]|EventSpec|(string|EventSpec)[],  -- Autocommand event(s). Supports 'VeryLazy'
+      pattern = string|string[],            -- Global fallback pattern(s) for all events
       cmd = string|string[],                -- Command(s) to create
       keys = KeySpec|KeySpec[],             -- Keymap(s) to create
     }
@@ -514,13 +548,18 @@ build           (string|function, optional)
                 installing/updating the plugin.
 
                                                            *zpack-Spec.event*
-event           (string|string[], optional)
+event           (string|string[]|EventSpec|(string|EventSpec)[], optional)
                 Autocommand event(s) that trigger lazy loading. Supports
-                'VeryLazy'. Auto-sets `lazy=true`.
+                'VeryLazy'. Can be a simple string, array of strings,
+                EventSpec (for specifying patterns), or mixed array.
+                See |zpack-EventSpec|. Auto-sets `lazy=true`.
 
                                                          *zpack-Spec.pattern*
 pattern         (string|string[], optional)
-                Pattern(s) for the autocommand event.
+                Global fallback pattern(s) applied to all events. If an
+                EventSpec specifies its own pattern, that takes precedence.
+                When using simple string or string array for `event`, this
+                pattern applies to all events. Defaults to '*' if not specified.
 
                                                              *zpack-Spec.cmd*
 cmd             (string|string[], optional)
@@ -533,7 +572,27 @@ keys            (KeySpec|KeySpec[], optional)
                 Auto-sets `lazy=true`. See |zpack-KeySpec|.
 
 ==============================================================================
-8. KEYSPEC REFERENCE                                *zpack-keyspec-reference*
+8. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
+                                                             *zpack-EventSpec*
+
+>lua
+    {
+      event = string|string[],        -- Event name(s) to trigger on
+      pattern = string|string[],      -- Pattern(s) for the event (optional)
+    }
+<
+
+                                                        *zpack-EventSpec.event*
+event           (string|string[], required)
+                Event name(s) to trigger on.
+
+                                                      *zpack-EventSpec.pattern*
+pattern         (string|string[], optional)
+                Pattern(s) for the event. Can be a single pattern or array of
+                patterns. If not specified, defaults to '*' (match all).
+
+==============================================================================
+9. KEYSPEC REFERENCE                                *zpack-keyspec-reference*
                                                                *zpack-KeySpec*
 
 >lua

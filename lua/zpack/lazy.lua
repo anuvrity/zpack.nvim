@@ -34,6 +34,43 @@ M.process_spec = function(pack_spec)
   end
 end
 
+---@param value any
+---@return boolean
+local is_event_spec = function(value)
+  return type(value) == "table" and value.event ~= nil
+end
+
+---@param spec Spec
+---@return NormalizedEvent[]
+local normalize_and_apply_fallback_pattern = function(spec)
+  local result = {}
+  local fallback_pattern = spec.pattern or '*'
+
+  if not spec.event then
+    return result
+  end
+
+  local event_list = (type(spec.event) == "string" or is_event_spec(spec.event))
+      and { spec.event }
+      or spec.event --[[@as string[]|EventSpec[] ]]
+
+  for _, event in ipairs(event_list) do
+    if type(event) == "string" then
+      table.insert(result, {
+        events = { event },
+        pattern = fallback_pattern
+      })
+    elseif is_event_spec(event) then
+      table.insert(result, {
+        events = util.normalize_string_list(event.event),
+        pattern = event.pattern or fallback_pattern
+      })
+    end
+  end
+
+  return result
+end
+
 ---@param events string[]
 ---@return boolean, string[]
 local split_very_lazy = function(events)
@@ -54,31 +91,33 @@ end
 ---@param pack_spec vim.pack.Spec
 ---@param spec Spec
 local setup_event_loading = function(pack_spec, spec)
-  local events = util.normalize_string_list(spec.event) --[[@as string[] ]]
+  local normalized_events = normalize_and_apply_fallback_pattern(spec)
 
-  local has_very_lazy, other_events = split_very_lazy(events)
+  for _, normalized_event in ipairs(normalized_events) do
+    local has_very_lazy, other_events = split_very_lazy(normalized_event.events)
 
-  if has_very_lazy then
-    vim.api.nvim_create_autocmd("UIEnter", {
-      group = state.lazy_group,
-      once = true,
-      callback = function()
-        vim.schedule(function()
+    if has_very_lazy then
+      vim.api.nvim_create_autocmd("UIEnter", {
+        group = state.lazy_group,
+        once = true,
+        callback = function()
+          vim.schedule(function()
+            M.process_spec(pack_spec)
+          end)
+        end,
+      })
+    end
+
+    if #other_events > 0 then
+      vim.api.nvim_create_autocmd(other_events, {
+        group = state.lazy_group,
+        once = true,
+        pattern = normalized_event.pattern,
+        callback = function()
           M.process_spec(pack_spec)
-        end)
-      end,
-    })
-  end
-
-  if #other_events > 0 then
-    vim.api.nvim_create_autocmd(other_events, {
-      group = state.lazy_group,
-      once = true,
-      pattern = spec.pattern or '*',
-      callback = function()
-        M.process_spec(pack_spec)
-      end,
-    })
+        end,
+      })
+    end
   end
 end
 

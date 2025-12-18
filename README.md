@@ -152,6 +152,47 @@ return {
 }
 ```
 
+#### Lazy Load on Event with Pattern
+
+```lua
+-- Single pattern
+return {
+  'rust-lang/rust.vim',
+  event = {
+    event = 'BufReadPre',
+    pattern = '*.rs',
+  },
+  config = function()
+    vim.g.rustfmt_autosave = 1
+  end,
+}
+
+-- Multiple patterns for same event
+return {
+  'polyglot-plugin',
+  event = {
+    event = 'BufReadPre',
+    pattern = { '*.lua', '*.rs' },
+  },
+  config = function()
+    -- plugin config
+  end,
+}
+
+#### VeryLazy Event
+
+Defer loading until after startup is complete:
+
+```lua
+return {
+  'folke/which-key.nvim',
+  event = 'VeryLazy',
+  config = function()
+    require('which-key').setup({})
+  end,
+}
+```
+
 #### Conditional Loading
 
 ```lua
@@ -218,8 +259,6 @@ return {
 
 ## Spec Reference
 
-Based on the `Spec` type definition:
-
 ```lua
 {
   -- Plugin identification (provide at least one)
@@ -242,10 +281,19 @@ Based on the `Spec` type definition:
   build = string|function,              -- Build command or function
 
   -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-  event = string|string[],              -- Autocommand event(s). Supports 'VeryLazy'
-  pattern = string|string[],            -- Event pattern(s)
+  event = string|string[]|EventSpec|(string|EventSpec)[],  -- Autocommand event(s). Supports 'VeryLazy'
+  pattern = string|string[],            -- Global fallback pattern(s) for all events
   cmd = string|string[],                -- Command(s) to create
   keys = KeySpec|KeySpec[],             -- Keymap(s) to create
+}
+```
+
+### EventSpec Reference
+
+```lua
+{
+  event = string|string[],        -- Event name(s) to trigger on
+  pattern = string|string[],      -- Pattern(s) for the event (optional)
 }
 ```
 

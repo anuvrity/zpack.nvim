@@ -6,6 +6,15 @@
 ---@field mode? string|string[]
 ---@field nowait? boolean
 
+---@class EventSpec
+---@field event string|string[] Event name(s) to trigger on
+---@field pattern? string|string[] Pattern(s) for the event
+
+---Normalized event with pattern
+---@class NormalizedEvent
+---@field events string[] List of event names
+---@field pattern string|string[] Pattern(s) for these events
+
 ---@class Spec
 ---@field [1]? string Plugin short name (e.g., "user/repo"). Required if src is not provided
 ---@field src? string Custom git URL. Required if [1] is not provided
@@ -19,8 +28,8 @@
 ---@field version? string
 ---@field keys? KeySpec|KeySpec[]
 ---@field config? fun()
----@field event? string|string[]
----@field pattern? string|string[]
+---@field event? string|string[]|EventSpec|(string|EventSpec)[]
+---@field pattern? string|string[] Global fallback pattern applied to all events (unless EventSpec specifies its own)
 ---@field cmd? string|string[]
 
 return {}
