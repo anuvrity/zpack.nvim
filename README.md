@@ -349,15 +349,15 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 **Key differences:**
 
 - **url**/**dir**: use `src` instead. See `:h vim.pack.Spec`
-- **Dependencies**: zpack does not have a `dependencies` field to implicitly infer plugin ordering. Use `priority` to directly control load order (higher values load first) for both startup and lazy-loaded plugins, or structure your lazy-loading triggers (like `event`, `cmd`, `keys`) to ensure dependencies load before dependent plugins. See the `plenary.nvim` [example migration](#example-migration)
-- **opt**: use `config = function() ... end` instead.
-- **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields.
+- **Dependencies**: zpack does not have a `dependencies` field. Instead, use `priority` to control load order (higher = earlier, default: 50), or remove lazy-loading from the dependency to load it at startup. See [example migration](#example-migration)
+- **opt**: use `config = function() ... end` instead
+- **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 
 <a name="example-migration"></a>
 **Example migration:**
 
+**lazy.nvim:**
 ```lua
--- lazy.nvim
 return {
   'nvim-telescope/telescope.nvim',
   dependencies = { 'nvim-lua/plenary.nvim' },
@@ -365,21 +365,30 @@ return {
 }
 ```
 
+**zpack (Option 1):** Load dependency at startup
 ```lua
--- zpack
--- Add plenary as a separate spec to load on startup
-{ 'nvim-lua/plenary.nvim' },
--- Alternatively, add plenary on the same cmd as Telescope with higher priority
-{
-  'nvim-lua/plenary.nvim'
-  cmd = 'Telescope',
-  priority = 1000,
-},
+return {
+  { 'nvim-lua/plenary.nvim' },
+  {
+    'nvim-telescope/telescope.nvim',
+    cmd = 'Telescope',
+  }
+}
+```
 
--- Telescope will load when needed via cmd trigger
-{
-  'nvim-telescope/telescope.nvim',
-  cmd = 'Telescope',
+**zpack (Option 2):** Use `priority` with same lazy-loading trigger
+```lua
+local common_cmd_trigger = 'Telescope'
+return {
+  {
+    'nvim-lua/plenary.nvim',
+    cmd = common_cmd_trigger,
+    priority = 1000,
+  },
+  {
+    'nvim-telescope/telescope.nvim',
+    cmd = common_cmd_trigger,
+  }
 }
 ```
 
