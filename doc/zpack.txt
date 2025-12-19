@@ -232,7 +232,18 @@ Load plugin when a specific event is triggered:
 
 Load plugin on specific events with file patterns:
 
-Single pattern:
+Inline pattern (same as lazy.nvim):
+>lua
+    return {
+      'rust-lang/rust.vim',
+      event = 'BufReadPre *.rs',
+      config = function()
+        vim.g.rustfmt_autosave = 1
+      end,
+    }
+<
+
+Or using EventSpec:
 >lua
     return {
       'rust-lang/rust.vim',
@@ -467,6 +478,7 @@ event           (string|string[]|EventSpec|(string|EventSpec)[], optional)
                 Autocommand event(s) that trigger lazy loading. Supports
                 'VeryLazy'. Can be a simple string, array of strings,
                 EventSpec (for specifying patterns), or mixed array.
+                Patterns can be specified inline: "BufReadPre *.lua".
                 See |zpack-EventSpec|. Auto-sets `lazy=true`.
 
                                                          *zpack-Spec.pattern*

@@ -62,10 +62,19 @@ local normalize_and_apply_fallback_pattern = function(spec)
 
   for _, event in ipairs(event_list) do
     if type(event) == "string" then
-      table.insert(result, {
-        events = { event },
-        pattern = fallback_pattern
-      })
+      -- Parse "EventName pattern" format (e.g., "BufEnter *.lua")
+      local event_name, pattern = event:match("^(%w+)%s+(.*)$")
+      if event_name then
+        table.insert(result, {
+          events = { event_name },
+          pattern = pattern
+        })
+      else
+        table.insert(result, {
+          events = { event },
+          pattern = fallback_pattern
+        })
+      end
     elseif is_event_spec(event) then
       table.insert(result, {
         events = util.normalize_string_list(event.event),

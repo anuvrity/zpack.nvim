@@ -154,7 +154,16 @@ return {
 #### Lazy Load on Event with Pattern
 
 ```lua
--- Single pattern
+-- Inline pattern (same as lazy.nvim)
+return {
+  'rust-lang/rust.vim',
+  event = 'BufReadPre *.rs',
+  config = function()
+    vim.g.rustfmt_autosave = 1
+  end,
+}
+
+-- Or using EventSpec
 return {
   'rust-lang/rust.vim',
   event = {
@@ -302,7 +311,7 @@ return {
   build = string|function,              -- Build command or function
 
   -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-  event = string|string[]|EventSpec|(string|EventSpec)[],  -- Autocommand event(s). Supports 'VeryLazy'
+  event = string|string[]|EventSpec|(string|EventSpec)[],  -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
   pattern = string|string[],            -- Global fallback pattern(s) for all events
   cmd = string|string[],                -- Command(s) to create
   keys = KeySpec|KeySpec[],             -- Keymap(s) to create
