@@ -327,12 +327,14 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 
 ```lua
 -- lazy.nvim
-{
+return {
   'nvim-telescope/telescope.nvim',
   dependencies = { 'nvim-lua/plenary.nvim' },
   cmd = 'Telescope',
 }
+```
 
+```lua
 -- zpack
 -- Add plenary as a separate spec to load on startup
 { 'nvim-lua/plenary.nvim' },

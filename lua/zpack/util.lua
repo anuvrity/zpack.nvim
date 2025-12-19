@@ -47,15 +47,13 @@ end
 ---@param keys KeySpec|KeySpec[]|string|string[]
 ---@return KeySpec[]
 M.normalize_keys = function(keys)
-  if type(keys) == "string" then
-    return { { keys } }
-  elseif keys[1] and type(keys[1]) == "string" then
-    return { keys }
-  end
+  -- Normalize to always be an array
+  local key_list = (type(keys) == "string" or (keys[1] and type(keys[1]) == "string"))
+      and { keys }
+      or keys
 
-  -- Handle mixed arrays with KeySpec tables and plain strings
   local result = {}
-  for _, key in ipairs(keys) do
+  for _, key in ipairs(key_list) do
     if type(key) == "string" then
       table.insert(result, { key })
     else
