@@ -58,6 +58,16 @@ zpack provides the following commands:
 - `:ZBuild[!] [plugin]` - Run build hook for a specific plugin, or all plugins with `!` (supports tab completion)
 - `:ZDelete[!] [plugin]` - Remove a specific plugin, or all plugins with `!` (supports tab completion)
 
+### Performance
+
+By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
+
+```lua
+require('zpack').setup({
+  disable_vim_loader = true,
+})
+```
+
 ### Directory Structure
 
 Under the default setting, create plugin specs in `lua/plugins/`:

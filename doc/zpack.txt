@@ -84,6 +84,19 @@ auto_import     (boolean, optional)
                 Whether to automatically import specs from the plugins
                 directory. Set to `false` to manually add all specs via
                 `zpack.add()`. Default: `true`
+
+                                              *zpack-setup-disable_vim_loader*
+disable_vim_loader (boolean, optional)
+                Disable vim.loader bytecode caching. By default, zpack
+                enables `vim.loader` to cache Lua module bytecode and
+                speed up startup. Set to `true` to disable it.
+                Default: `false`
+
+                Example: Disable vim.loader
+>lua
+                require('zpack').setup({
+                  disable_vim_loader = true,
+                })
 <
 
 ------------------------------------------------------------------------------
