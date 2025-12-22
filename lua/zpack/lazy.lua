@@ -1,7 +1,6 @@
 -- inspired by https://www.reddit.com/r/neovim/comments/1mx71rc/how_i_vastly_improved_my_lazy_loading_experience/
 local util = require('zpack.utils')
 local state = require('zpack.state')
-local loader = require('zpack.loader')
 local event_handler = require('zpack.lazy_trigger.event')
 local ft_handler = require('zpack.lazy_trigger.ft')
 local cmd_handler = require('zpack.lazy_trigger.cmd')
@@ -25,9 +24,7 @@ local register_lazy_packs = function()
     load = function(plugin)
       local pack_spec = plugin.spec
       local spec = state.src_spec[pack_spec.src].spec
-      if state.src_to_request_build[pack_spec.src] then
-        -- requested build, do not lazy load this
-        loader.process_spec(pack_spec)
+      if next(state.src_to_request_build) ~= nil then
         return
       end
 
