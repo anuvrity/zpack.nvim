@@ -54,26 +54,54 @@ M.setup_build_tracking = function()
   end, { group = state.startup_group })
 end
 
-M.run_build_hooks = function()
-  for src, _ in pairs(state.src_to_request_build) do
-    local spec = state.src_spec[src].spec
-    if spec.build then
-      M.execute_build(spec.build)
+M.setup_lazy_build_tracking = function()
+  util.autocmd('PackChanged', function(event)
+    if event.data.kind == "update" or event.data.kind == "install" then
+      local src = event.data.spec.src
+      local src_spec_entry = state.src_spec[src]
+      if src_spec_entry and src_spec_entry.spec.build then
+        M.load_all_unloaded_plugins()
+        M.execute_build(src_spec_entry.spec.build)
+      end
+    end
+  end, { group = state.lazy_build_group })
+end
+
+M.load_all_unloaded_plugins = function()
+  local loader = require('zpack.loader')
+
+  for _, plugin in ipairs(state.get_sorted_plugins()) do
+    local entry = state.src_spec[plugin.spec.src]
+    if entry and not entry.loaded then
+      loader.process_spec(plugin.spec)
     end
   end
 end
 
-M.run_all_build_hooks = function()
-  local loader = require('zpack.loader')
-  local count = 0
+M.run_pending_builds = function()
+  if next(state.src_to_request_build) == nil then
+    return
+  end
 
-  local installed = vim.pack.get()
-  for _, pack in ipairs(installed) do
-    local src_spec_entry = state.src_spec[pack.spec.src]
-    if src_spec_entry and src_spec_entry.spec.build then
-      loader.process_spec(pack.spec)
-      state.src_to_request_build[pack.spec.src] = true
-      M.execute_build(src_spec_entry.spec.build)
+  M.load_all_unloaded_plugins()
+
+  for src in pairs(state.src_to_request_build) do
+    local entry = state.src_spec[src]
+    if entry and entry.spec.build then
+      M.execute_build(entry.spec.build)
+    end
+  end
+
+  state.src_to_request_build = {}
+end
+
+M.run_all_builds = function()
+  M.load_all_unloaded_plugins()
+
+  local count = 0
+  for _, entry in pairs(state.src_spec) do
+    if entry.spec.build then
+      M.execute_build(entry.spec.build)
       count = count + 1
     end
   end

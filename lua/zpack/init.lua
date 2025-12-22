@@ -37,11 +37,16 @@ local import_specs_from_dir = function(plugins_dir)
 end
 
 local process_all = function()
-  require('zpack.hooks').setup_build_tracking()
+  local hooks = require('zpack.hooks')
+  local state = require('zpack.state')
+
+  hooks.setup_build_tracking()
   require('zpack.startup').process_all()
   require('zpack.lazy').process_all()
-  require('zpack.hooks').run_build_hooks()
-  require('zpack.state').update_cache()
+  hooks.run_pending_builds()
+  vim.api.nvim_clear_autocmds({ group = state.startup_group })
+  hooks.setup_lazy_build_tracking()
+  state.update_cache()
 end
 
 ---@class ZpackConfig

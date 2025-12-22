@@ -396,6 +396,10 @@ Run a build command after installing/updating plugin:
       end,
     }
 <
+Build hooks run after plugin installation or update. When a build hook runs,
+zpack loads all plugins first (in priority order) to ensure any cross-plugin
+dependencies are available. For example, a plugin's build hook can safely
+call `:TSInstall` even if nvim-treesitter is lazy-loaded.
 
 ------------------------------------------------------------------------------
 5.9 MULTIPLE PLUGINS                                   *zpack-example-multiple*
@@ -582,7 +586,9 @@ config          (function, optional)
                                                            *zpack-Spec.build*
 build           (string|function, optional)
                 Build command (string) or function to run after
-                installing/updating the plugin.
+                installing/updating the plugin. When a build hook runs,
+                all plugins are loaded first (in priority order) to ensure
+                cross-plugin dependencies are available.
 
                                                            *zpack-Spec.event*
 event           (string|string[]|EventSpec|(string|EventSpec)[], optional)

@@ -1,7 +1,6 @@
 local state = require('zpack.state')
 local util = require('zpack.utils')
 local hooks = require('zpack.hooks')
-local loader = require('zpack.loader')
 
 local M = {}
 
@@ -14,39 +13,22 @@ local get_plugin_or_notify = function(plugin_name)
   return pack
 end
 
-local get_installed_plugin_names = function()
-  return state.cached_plugin_names or {}
-end
-
-local get_plugin_names_with_build_hooks = function()
-  return state.cached_plugin_names_with_build or {}
-end
-
 M.clean_all = function()
-  local installed_packs = vim.pack.get()
+  local names = state.get_installed_plugin_names()
 
-  util.schedule_notify(("Deleting all %d installed plugin(s)..."):format(#installed_packs), vim.log.levels.INFO)
+  util.schedule_notify(("Deleting all %d installed plugin(s)..."):format(#names), vim.log.levels.INFO)
 
-  local names_to_delete = {}
-  for _, pack in ipairs(installed_packs) do
-    table.insert(names_to_delete, pack.spec.name)
-  end
-
-  vim.pack.del(names_to_delete)
+  vim.pack.del(names)
 
   util.schedule_notify("All plugins deleted.", vim.log.levels.INFO)
 end
 
 M.clean_unused = function()
-  local installed_packs = vim.pack.get()
-  local specs_by_src = state.src_spec
   local to_delete = {}
 
-  for _, pack in ipairs(installed_packs) do
-    local src = pack.spec.src
-    -- do not delete zpack
-    if not specs_by_src[src] and not string.find(src, 'zpack') then
-      table.insert(to_delete, pack.spec)
+  for _, spec in ipairs(state.get_installed_plugins()) do
+    if not state.src_spec[spec.src] and not string.find(spec.src, 'zpack') then
+      table.insert(to_delete, spec.name)
     end
   end
 
@@ -57,15 +39,10 @@ M.clean_unused = function()
 
   util.schedule_notify(("Deleting %d unused plugin(s)..."):format(#to_delete), vim.log.levels.INFO)
 
-  local names_to_delete = {}
-  for _, spec in ipairs(to_delete) do
-    table.insert(names_to_delete, spec.name)
-  end
+  vim.pack.del(to_delete)
 
-  vim.pack.del(names_to_delete)
-
-  for _, spec in ipairs(to_delete) do
-    util.schedule_notify(("Deleted: %s"):format(spec.name or spec.src), vim.log.levels.INFO)
+  for _, name in ipairs(to_delete) do
+    util.schedule_notify(("Deleted: %s"):format(name), vim.log.levels.INFO)
   end
 end
 
@@ -83,7 +60,7 @@ M.setup = function()
   end, {
     nargs = '?',
     desc = 'Update all plugins or a specific plugin',
-    complete = get_installed_plugin_names,
+    complete = state.get_installed_plugin_names,
   })
 
   vim.api.nvim_create_user_command('ZClean', function()
@@ -99,7 +76,7 @@ M.setup = function()
         util.schedule_notify('Use :ZBuild! to run build hooks for all plugins', vim.log.levels.WARN)
         return
       end
-      hooks.run_all_build_hooks()
+      hooks.run_all_builds()
       return
     end
 
@@ -114,15 +91,14 @@ M.setup = function()
       return
     end
 
-    loader.process_spec(pack.spec)
-    state.src_to_request_build[pack.spec.src] = true
+    hooks.load_all_unloaded_plugins()
     hooks.execute_build(src_spec_entry.spec.build)
     util.schedule_notify(('Running build hook for %s'):format(plugin_name), vim.log.levels.INFO)
   end, {
     nargs = '?',
     bang = true,
     desc = 'Run build hook for a specific plugin or all plugins',
-    complete = get_plugin_names_with_build_hooks,
+    complete = state.get_plugin_names_with_build_hooks,
   })
 
   vim.api.nvim_create_user_command('ZDelete', function(opts)
@@ -149,7 +125,7 @@ M.setup = function()
     nargs = '?',
     bang = true,
     desc = 'Delete all plugins or a specific plugin',
-    complete = get_installed_plugin_names,
+    complete = state.get_installed_plugin_names,
   })
 end
 

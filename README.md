@@ -294,6 +294,8 @@ return {
 }
 ```
 
+Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available. For example, a plugin's build hook can safely call `:TSInstall` even if nvim-treesitter is lazy-loaded.
+
 #### Multiple Plugins in One File
 
 ```lua
