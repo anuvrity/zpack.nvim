@@ -70,7 +70,7 @@ Add your spec manually without auto-import:
 <
 
 ------------------------------------------------------------------------------
-5.1 SETUP OPTIONS                                      *zpack-setup-options*
+3.1 SETUP OPTIONS                                      *zpack-setup-options*
 
 The `setup()` function accepts the following options:
 
@@ -87,17 +87,8 @@ auto_import     (boolean, optional)
 
                                               *zpack-setup-disable_vim_loader*
 disable_vim_loader (boolean, optional)
-                Disable vim.loader bytecode caching. By default, zpack
-                enables `vim.loader` to cache Lua module bytecode and
-                speed up startup. Set to `true` to disable it.
-                Default: `false`
-
-                Example: Disable vim.loader
->lua
-                require('zpack').setup({
-                  disable_vim_loader = true,
-                })
-<
+                Disable vim.loader bytecode caching. See
+                |zpack-performance| for details. Default: `false`
 
 ------------------------------------------------------------------------------
 3.2 COMMANDS                                                  *zpack-commands*
@@ -158,6 +149,17 @@ Each file returns a spec (or list of specs):
         require('telescope').setup({})
       end,
     }
+<
+
+------------------------------------------------------------------------------
+3.4 PERFORMANCE                                           *zpack-performance*
+
+By default, zpack enables `vim.loader` to cache Lua module bytecode and
+speed up startup. You can disable it:
+>lua
+    require('zpack').setup({
+      disable_vim_loader = true,
+    })
 <
 
 ==============================================================================

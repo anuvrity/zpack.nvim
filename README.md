@@ -39,8 +39,10 @@ vim.g.maplocalleader = "\\"
 
 -- automatically import specs from `/lua/plugins/*.lua`
 require('zpack').setup({})
+
 -- automatically import specs from a custom directory
 require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
+
 -- add your spec manually
 require('zpack').setup({ auto_import = false })
 require('zpack').add({
@@ -57,16 +59,6 @@ zpack provides the following commands:
 - `:ZClean` - Remove plugins that are no longer in your spec
 - `:ZBuild[!] [plugin]` - Run build hook for a specific plugin, or all plugins with `!` (supports tab completion)
 - `:ZDelete[!] [plugin]` - Remove a specific plugin, or all plugins with `!` (supports tab completion)
-
-### Performance
-
-By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
-
-```lua
-require('zpack').setup({
-  disable_vim_loader = true,
-})
-```
 
 ### Directory Structure
 
@@ -94,6 +86,16 @@ return {
     require('telescope').setup({})
   end,
 }
+```
+
+### Performance
+
+By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
+
+```lua
+require('zpack').setup({
+  disable_vim_loader = true,
+})
 ```
 
 ## Why zpack?
