@@ -7,7 +7,7 @@ local M = {}
 ---@param hook_name string
 ---@return boolean
 M.try_call_hook = function(src, hook_name)
-  local spec = state.src_spec[src].spec
+  local spec = state.spec_registry[src].spec
   if not spec then
     util.schedule_notify("expected spec missing for " .. src, vim.log.levels.ERROR)
     return false
@@ -58,10 +58,10 @@ M.setup_lazy_build_tracking = function()
   util.autocmd('PackChanged', function(event)
     if event.data.kind == "update" or event.data.kind == "install" then
       local src = event.data.spec.src
-      local src_spec_entry = state.src_spec[src]
-      if src_spec_entry and src_spec_entry.spec.build then
+      local registry_entry = state.spec_registry[src]
+      if registry_entry and registry_entry.spec.build then
         M.load_all_unloaded_plugins()
-        M.execute_build(src_spec_entry.spec.build)
+        M.execute_build(registry_entry.spec.build)
       end
     end
   end, { group = state.lazy_build_group })
@@ -71,7 +71,7 @@ M.load_all_unloaded_plugins = function()
   local loader = require('zpack.loader')
 
   for _, plugin in ipairs(state.get_sorted_plugins()) do
-    local entry = state.src_spec[plugin.spec.src]
+    local entry = state.spec_registry[plugin.spec.src]
     if entry and not entry.loaded then
       loader.process_spec(plugin.spec)
     end
@@ -86,7 +86,7 @@ M.run_pending_builds = function()
   M.load_all_unloaded_plugins()
 
   for src in pairs(state.src_to_request_build) do
-    local entry = state.src_spec[src]
+    local entry = state.spec_registry[src]
     if entry and entry.spec.build then
       M.execute_build(entry.spec.build)
     end
@@ -99,7 +99,7 @@ M.run_all_builds = function()
   M.load_all_unloaded_plugins()
 
   local count = 0
-  for _, entry in pairs(state.src_spec) do
+  for _, entry in pairs(state.spec_registry) do
     if entry.spec.build then
       M.execute_build(entry.spec.build)
       count = count + 1

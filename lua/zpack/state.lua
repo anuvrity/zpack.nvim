@@ -13,7 +13,7 @@ M.lazy_packs = {}
 ---@type KeySpec[]
 M.startup_keys = {}
 ---@type { [string]: { spec: Spec, loaded: boolean } }
-M.src_spec = {}
+M.spec_registry = {}
 ---@type { [string]: boolean }
 M.src_to_request_build = {}
 ---@type string[]
@@ -31,7 +31,7 @@ M.build_sorted_plugins = function()
   local plugins = {}
 
   for _, pack in ipairs(installed) do
-    local entry = M.src_spec[pack.spec.src]
+    local entry = M.spec_registry[pack.spec.src]
     local priority = entry and (entry.spec.priority or 50) or PRIORITY_MAX
     table.insert(plugins, {
       spec = pack.spec,
@@ -86,8 +86,8 @@ M.update_cache = function(refresh)
     local names_with_build = {}
 
     for _, plugin in ipairs(M.get_sorted_plugins()) do
-      local src_spec_entry = M.src_spec[plugin.spec.src]
-      if src_spec_entry and src_spec_entry.spec.build then
+      local registry_entry = M.spec_registry[plugin.spec.src]
+      if registry_entry and registry_entry.spec.build then
         table.insert(names_with_build, plugin.spec.name)
       end
     end

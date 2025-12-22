@@ -25,7 +25,7 @@ end
 ---@param src string
 ---@return number
 M.get_priority = function(src)
-  local entry = state.src_spec[src]
+  local entry = state.spec_registry[src]
   if not entry then
     return 50
   end

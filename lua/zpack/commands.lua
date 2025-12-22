@@ -27,7 +27,7 @@ M.clean_unused = function()
   local to_delete = {}
 
   for _, spec in ipairs(state.get_installed_plugins()) do
-    if not state.src_spec[spec.src] and not string.find(spec.src, 'zpack') then
+    if not state.spec_registry[spec.src] and not string.find(spec.src, 'zpack') then
       table.insert(to_delete, spec.name)
     end
   end
@@ -85,14 +85,14 @@ M.setup = function()
       return
     end
 
-    local src_spec_entry = state.src_spec[pack.spec.src]
-    if not src_spec_entry or not src_spec_entry.spec.build then
+    local registry_entry = state.spec_registry[pack.spec.src]
+    if not registry_entry or not registry_entry.spec.build then
       util.schedule_notify(('Plugin "%s" has no build hook'):format(plugin_name), vim.log.levels.WARN)
       return
     end
 
     hooks.load_all_unloaded_plugins()
-    hooks.execute_build(src_spec_entry.spec.build)
+    hooks.execute_build(registry_entry.spec.build)
     util.schedule_notify(('Running build hook for %s'):format(plugin_name), vim.log.levels.INFO)
   end, {
     nargs = '?',

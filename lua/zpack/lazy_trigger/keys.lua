@@ -18,7 +18,7 @@ M.setup = function(registered_pack_specs)
   -- Build mapping of keys to plugins
   local key_to_info = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.src_spec[pack_spec.src].spec
+    local spec = state.spec_registry[pack_spec.src].spec
     if spec.keys then
       local keys = util.normalize_keys(spec.keys) --[[@as KeySpec[] ]]
       for _, key in ipairs(keys) do

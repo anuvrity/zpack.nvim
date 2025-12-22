@@ -23,18 +23,10 @@ local register_lazy_packs = function()
   vim.pack.add(state.lazy_packs, {
     load = function(plugin)
       local pack_spec = plugin.spec
-      local spec = state.src_spec[pack_spec.src].spec
       if next(state.src_to_request_build) ~= nil then
         return
       end
-
       table.insert(registered_plugins, pack_spec)
-      if spec.event then
-        event_handler.setup(plugin.spec, spec)
-      end
-      if spec.ft then
-        ft_handler.setup(plugin.spec, spec)
-      end
     end
   })
   return registered_plugins
@@ -43,6 +35,15 @@ end
 M.process_all = function()
   table.sort(state.lazy_packs, util.compare_priority)
   local registered_pack_specs = register_lazy_packs()
+  for _, pack_spec in ipairs(registered_pack_specs) do
+    local spec = state.spec_registry[pack_spec.src].spec
+    if spec.event then
+      event_handler.setup(pack_spec, spec)
+    end
+    if spec.ft then
+      ft_handler.setup(pack_spec, spec)
+    end
+  end
   cmd_handler.setup(registered_pack_specs)
   keys_handler.setup(registered_pack_specs)
 end

@@ -102,7 +102,7 @@ M.import_specs = function(spec_item_or_list)
     end
 
     local src = get_source_url(spec)
-    state.src_spec[src] = { spec = spec, loaded = false }
+    state.spec_registry[src] = { spec = spec, loaded = false }
     categorize_spec(spec, src)
 
     ::continue::

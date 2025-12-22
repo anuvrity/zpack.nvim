@@ -24,7 +24,7 @@ M.process_all = function()
 
   -- Mark all startup plugins as loaded
   for _, pack_spec in ipairs(state.startup_packs) do
-    state.src_spec[pack_spec.src].loaded = true
+    state.spec_registry[pack_spec.src].loaded = true
   end
 end
 

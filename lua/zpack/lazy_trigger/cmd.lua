@@ -9,7 +9,7 @@ M.setup = function(registered_pack_specs)
   -- Build mapping of command names to plugins
   local cmd_to_pack_specs = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.src_spec[pack_spec.src].spec
+    local spec = state.spec_registry[pack_spec.src].spec
     if spec.cmd then
       local commands = util.normalize_string_list(spec.cmd) --[[@as string[] ]]
       for _, cmd in ipairs(commands) do
