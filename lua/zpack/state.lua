@@ -7,9 +7,7 @@ M.startup_group = vim.api.nvim_create_augroup('StartupPack', { clear = true })
 M.lazy_build_group = vim.api.nvim_create_augroup('LazyBuildPack', { clear = true })
 
 ---@type vim.pack.Spec[]
-M.startup_packs = {}
----@type vim.pack.Spec[]
-M.lazy_packs = {}
+M.vim_packs = {}
 ---@type KeySpec[]
 M.startup_keys = {}
 ---@type { [string]: { spec: Spec, loaded: boolean } }
@@ -20,6 +18,10 @@ M.src_to_request_build = {}
 M.src_with_startup_init = {}
 ---@type string[]
 M.src_with_startup_config = {}
+---@type vim.pack.Spec[]
+M.registered_startup_packs = {}
+---@type vim.pack.Spec[]
+M.registered_lazy_packs = {}
 
 ---@type string[]|nil
 M.cached_plugin_names_with_build = nil

@@ -53,12 +53,10 @@ end
 
 ---@param spec Spec
 ---@param src string
-local categorize_spec = function(spec, src)
-  if lazy.is_lazy(spec) then
-    table.insert(state.lazy_packs, { src = src, version = spec.version, name = spec.name })
-  else
-    table.insert(state.startup_packs, { src = src, version = spec.version, name = spec.name })
+local index_spec = function(spec, src)
+  table.insert(state.vim_packs, { src = src, version = spec.version, name = spec.name })
 
+  if not lazy.is_lazy(spec) then
     if spec.config then
       table.insert(state.src_with_startup_config, src)
     end
@@ -103,7 +101,7 @@ M.import_specs = function(spec_item_or_list)
 
     local src = get_source_url(spec)
     state.spec_registry[src] = { spec = spec, loaded = false }
-    categorize_spec(spec, src)
+    index_spec(spec, src)
 
     ::continue::
   end

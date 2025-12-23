@@ -360,7 +360,7 @@ return {
 }
 ```
 
-**Note:** Priority only affects `vim.pack.add` order for lazy-loaded plugins with the same trigger. For non lazy-loaded plugins, all packages are added simultaneously via `vim.pack.add()` before calling plugin's config hooks, and priority only affects the order in which the config hooks are called. There should almost never be a need to define dependency priority for non lazy-loaded plugins.
+**Note:** For non-lazy plugins, packages are all loaded via `packadd` in priority order before their config hooks are executed in priority order, thus all dependencies are available without having to explicitly set priority. There should almost never be a need to define dependency priority for non-lazy plugins unless configs need to be called in specific orders.
 
 ## Spec Reference
 

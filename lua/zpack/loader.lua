@@ -5,7 +5,8 @@ local keymap = require('zpack.keymap')
 local M = {}
 
 ---@param pack_spec vim.pack.Spec
-M.process_spec = function(pack_spec)
+M.process_spec = function(pack_spec, opts)
+  opts = opts or {}
   -- Guard against multiple triggers loading the same plugin
   if state.spec_registry[pack_spec.src].loaded then
     return
@@ -16,7 +17,7 @@ M.process_spec = function(pack_spec)
     hooks.try_call_hook(pack_spec.src, 'init')
   end
 
-  vim.cmd.packadd(pack_spec.name)
+  vim.cmd.packadd({ pack_spec.name, bang = opts.bang })
 
   if spec.config then
     hooks.try_call_hook(pack_spec.src, 'config')

@@ -67,13 +67,14 @@ M.setup_lazy_build_tracking = function()
   end, { group = state.lazy_build_group })
 end
 
-M.load_all_unloaded_plugins = function()
+M.load_all_unloaded_plugins = function(opts)
+  opts = opts or {}
   local loader = require('zpack.loader')
 
   for _, plugin in ipairs(state.get_sorted_plugins()) do
     local entry = state.spec_registry[plugin.spec.src]
     if entry and not entry.loaded then
-      loader.process_spec(plugin.spec)
+      loader.process_spec(plugin.spec, opts)
     end
   end
 end
@@ -83,7 +84,7 @@ M.run_pending_builds = function()
     return
   end
 
-  M.load_all_unloaded_plugins()
+  M.load_all_unloaded_plugins({ bang = true })
 
   for src in pairs(state.src_to_request_build) do
     local entry = state.spec_registry[src]

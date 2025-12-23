@@ -1,5 +1,4 @@
 -- inspired by https://www.reddit.com/r/neovim/comments/1mx71rc/how_i_vastly_improved_my_lazy_loading_experience/
-local util = require('zpack.utils')
 local state = require('zpack.state')
 local event_handler = require('zpack.lazy_trigger.event')
 local ft_handler = require('zpack.lazy_trigger.ft')
@@ -17,25 +16,12 @@ M.is_lazy = function(spec)
   return (spec.event ~= nil) or (spec.cmd ~= nil) or (spec.keys ~= nil and #spec.keys > 0) or (spec.ft ~= nil)
 end
 
----@return vim.pack.Spec[]
-local register_lazy_packs = function()
-  local registered_plugins = {}
-  vim.pack.add(state.lazy_packs, {
-    load = function(plugin)
-      local pack_spec = plugin.spec
-      if next(state.src_to_request_build) ~= nil then
-        return
-      end
-      table.insert(registered_plugins, pack_spec)
-    end
-  })
-  return registered_plugins
-end
-
 M.process_all = function()
-  table.sort(state.lazy_packs, util.compare_priority)
-  local registered_pack_specs = register_lazy_packs()
-  for _, pack_spec in ipairs(registered_pack_specs) do
+  if next(state.src_to_request_build) ~= nil then
+    return
+  end
+
+  for _, pack_spec in ipairs(state.registered_lazy_packs) do
     local spec = state.spec_registry[pack_spec.src].spec
     if spec.event then
       event_handler.setup(pack_spec, spec)
@@ -44,8 +30,8 @@ M.process_all = function()
       ft_handler.setup(pack_spec, spec)
     end
   end
-  cmd_handler.setup(registered_pack_specs)
-  keys_handler.setup(registered_pack_specs)
+  cmd_handler.setup(state.registered_lazy_packs)
+  keys_handler.setup(state.registered_lazy_packs)
 end
 
 return M

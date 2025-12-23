@@ -6,7 +6,6 @@ local util = require('zpack.utils')
 local M = {}
 
 M.process_all = function()
-  table.sort(state.startup_packs, util.compare_priority)
   table.sort(state.src_with_startup_init, util.compare_priority)
   table.sort(state.src_with_startup_config, util.compare_priority)
 
@@ -14,7 +13,9 @@ M.process_all = function()
     hooks.try_call_hook(src, 'init')
   end
 
-  vim.pack.add(state.startup_packs)
+  for _, pack_spec in ipairs(state.registered_startup_packs) do
+    vim.cmd.packadd({ pack_spec.name, bang = true })
+  end
 
   for _, src in ipairs(state.src_with_startup_config) do
     hooks.try_call_hook(src, 'config')
@@ -22,8 +23,7 @@ M.process_all = function()
 
   keymap.apply_keys(state.startup_keys)
 
-  -- Mark all startup plugins as loaded
-  for _, pack_spec in ipairs(state.startup_packs) do
+  for _, pack_spec in ipairs(state.registered_startup_packs) do
     state.spec_registry[pack_spec.src].loaded = true
   end
 end

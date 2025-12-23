@@ -43,6 +43,7 @@ local process_all = function(opts)
   local state = require('zpack.state')
 
   hooks.setup_build_tracking()
+  require('zpack.registration').register_all()
   require('zpack.startup').process_all()
   require('zpack.lazy').process_all()
   hooks.run_pending_builds()
