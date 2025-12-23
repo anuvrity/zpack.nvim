@@ -37,32 +37,30 @@ expect breaking changes.
 - Neovim 0.12.0+
 
 ==============================================================================
-3. USAGE                                                         *zpack-usage*
-                                                                 *zpack.setup()*
-                                                                 *zpack.add()*
+3. INSTALLATION                                           *zpack-installation*
 
 Install zpack.nvim via vim.pack.add():
 >lua
     vim.pack.add({ 'https://github.com/zuqini/zpack.nvim' })
+<
 
+==============================================================================
+4. USAGE                                                         *zpack-usage*
+                                                                 *zpack.setup()*
+                                                                 *zpack.add()*
+>lua
     -- Make sure to setup `mapleader` and `maplocalleader` before
     -- loading zpack.nvim so that mappings are correct.
     vim.g.mapleader = " "
     vim.g.maplocalleader = "\\"
-<
 
-Automatically import specs from `/lua/plugins/*.lua`:
->lua
+    -- automatically import specs from `/lua/plugins/*.lua`
     require('zpack').setup({})
-<
 
-Automatically import specs from a custom directory:
->lua
+    -- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
     require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
-<
 
-Add your spec manually without auto-import:
->lua
+    -- or add your specs manually
     require('zpack').setup({ auto_import = false })
     require('zpack').add({
         { 'neovim/nvim-lspconfig', config = function() ... end },
@@ -71,33 +69,7 @@ Add your spec manually without auto-import:
 <
 
 ------------------------------------------------------------------------------
-3.1 SETUP OPTIONS                                      *zpack-setup-options*
-
-The `setup()` function accepts the following options:
-
-                                                    *zpack-setup-plugins_dir*
-plugins_dir     (string, optional)
-                Directory to auto-import plugin specs from, relative to
-                `lua/` directory. Default: `'plugins'`
-
-                                                    *zpack-setup-auto_import*
-auto_import     (boolean, optional)
-                Whether to automatically import specs from the plugins
-                directory. Set to `false` to manually add all specs via
-                `zpack.add()`. Default: `true`
-
-                                              *zpack-setup-disable_vim_loader*
-disable_vim_loader (boolean, optional)
-                Disable vim.loader bytecode caching. See
-                |zpack-performance| for details. Default: `false`
-
-                                                        *zpack-setup-confirm*
-confirm         (boolean, optional)
-                Whether `vim.pack` prompts for confirmation before
-                installing new plugins. Default: `true`
-
-------------------------------------------------------------------------------
-3.2 COMMANDS                                                  *zpack-commands*
+4.1 COMMANDS                                                  *zpack-commands*
 
 zpack provides the following commands:
 
@@ -129,7 +101,7 @@ zpack provides the following commands:
                 tab completion of installed plugin names.
 
 ------------------------------------------------------------------------------
-3.3 DIRECTORY STRUCTURE                         *zpack-directory-structure*
+4.2 DIRECTORY STRUCTURE                         *zpack-directory-structure*
 
 Under the default setting, create plugin specs in `lua/plugins/`:
 >
@@ -140,7 +112,8 @@ Under the default setting, create plugin specs in `lua/plugins/`:
         lsp.lua
 <
 
-Each file returns a spec (or list of specs):
+Each file returns a spec or list of specs (see |zpack-examples| or
+|zpack-spec-reference|):
 >lua
     -- lua/plugins/telescope.lua
     return {
@@ -158,7 +131,21 @@ Each file returns a spec (or list of specs):
 <
 
 ------------------------------------------------------------------------------
-3.4 PERFORMANCE                                           *zpack-performance*
+4.3 CONFIGURATIONS                                     *zpack-configurations*
+
+                                                        *zpack-setup-confirm*
+Plugin Installation ~
+
+By default, `vim.pack` prompts for confirmation before installing new
+plugins. To skip confirmation prompts:
+>lua
+    require('zpack').setup({
+      confirm = false,
+    })
+<
+
+                                                         *zpack-performance*
+Performance ~
 
 By default, zpack enables `vim.loader` to cache Lua module bytecode and
 speed up startup. You can disable it:
@@ -168,8 +155,33 @@ speed up startup. You can disable it:
     })
 <
 
+------------------------------------------------------------------------------
+4.4 SETUP OPTIONS                                      *zpack-setup-options*
+
+The `setup()` function accepts the following options:
+
+                                                    *zpack-setup-plugins_dir*
+plugins_dir     (string, optional)
+                Directory to auto-import plugin specs from, relative to
+                `lua/` directory. Default: `'plugins'`
+
+                                                    *zpack-setup-auto_import*
+auto_import     (boolean, optional)
+                Whether to automatically import specs from the plugins
+                directory. Set to `false` to manually add all specs via
+                `zpack.add()`. Default: `true`
+
+                                              *zpack-setup-disable_vim_loader*
+disable_vim_loader (boolean, optional)
+                Disable vim.loader bytecode caching. See
+                |zpack-performance| for details. Default: `false`
+
+confirm         (boolean, optional)
+                Whether `vim.pack` prompts for confirmation before
+                installing new plugins. Default: `true`
+
 ==============================================================================
-4. WHY ZPACK?                                                *zpack-why-zpack*
+5. WHY ZPACK?                                                *zpack-why-zpack*
 
 Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles
 plugin installation, updates, and version management. zpack is a thin layer
@@ -179,8 +191,8 @@ while leveraging the native infrastructure.
 zpack might be for you if:
 - you're a lazy.nvim user, love its declarative spec, and its wide adoption
   by plugin authors, but you don't need most of its advanced features
-- you want to try `vim.pack`, but don't want to rewrite your entire plugins
-  spec from scratch
+- you're a lazy.nvim user, want to try `vim.pack`, but don't want to rewrite
+  your entire plugins spec from scratch
 - you're already comfortable with `vim.pack`, and want:
     - A minimalist lazy-loading implementation for faster startup
     - Declarative plugin specs to keep your config neat and tidy
@@ -199,7 +211,7 @@ introducing significant complexity.
 For anything else missing, contributions are welcome!
 
 ==============================================================================
-5. EXAMPLES                                                   *zpack-examples*
+6. EXAMPLES                                                   *zpack-examples*
 
 For more examples, refer to my personal config:
 - zpack installation and setup:
@@ -208,7 +220,7 @@ For more examples, refer to my personal config:
   https://github.com/zuqini/nvim/tree/main/lua/plugins
 
 ------------------------------------------------------------------------------
-5.1 LAZY LOAD ON COMMAND                                    *zpack-example-cmd*
+6.1 LAZY LOAD ON COMMAND                                    *zpack-example-cmd*
 
 Load plugin when a specific command is executed:
 >lua
@@ -222,7 +234,7 @@ Load plugin when a specific command is executed:
 <
 
 ------------------------------------------------------------------------------
-5.2 LAZY LOAD ON KEYMAP                                    *zpack-example-keys*
+6.2 LAZY LOAD ON KEYMAP                                    *zpack-example-keys*
 
 Load plugin when a specific keymap is triggered:
 >lua
@@ -241,7 +253,7 @@ Load plugin when a specific keymap is triggered:
 <
 
 ------------------------------------------------------------------------------
-5.3 LAZY LOAD ON EVENT                                    *zpack-example-event*
+6.3 LAZY LOAD ON EVENT                                    *zpack-example-event*
 
 Load plugin when a specific event is triggered:
 >lua
@@ -255,7 +267,7 @@ Load plugin when a specific event is triggered:
 <
 
 ------------------------------------------------------------------------------
-5.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
+6.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
 
 Load plugin on specific events with file patterns:
 
@@ -313,7 +325,7 @@ Multiple events with different patterns:
 <
 
 ------------------------------------------------------------------------------
-5.5 LAZY LOAD ON FILETYPE                                 *zpack-example-ft*
+6.5 LAZY LOAD ON FILETYPE                                 *zpack-example-ft*
 
 Load plugin when opening files of specific types. Automatically re-triggers
 BufReadPre, BufReadPost, and FileType events to ensure LSP clients and
@@ -340,7 +352,7 @@ Multiple filetypes:
 <
 
 ------------------------------------------------------------------------------
-5.6 CONDITIONAL LOADING                             *zpack-example-conditional*
+6.6 CONDITIONAL LOADING                             *zpack-example-conditional*
 
 Use `enabled` to skip `vim.pack.add` entirely, or `cond` to conditionally
 load after calling `vim.pack.add`:
@@ -367,7 +379,7 @@ load after calling `vim.pack.add`:
 <
 
 ------------------------------------------------------------------------------
-5.7 LOAD PRIORITY                                       *zpack-example-priority*
+6.7 LOAD PRIORITY                                       *zpack-example-priority*
 
 Control load order with priority (higher loads first; default: 50):
 >lua
@@ -392,7 +404,18 @@ Control load order with priority (higher loads first; default: 50):
 <
 
 ------------------------------------------------------------------------------
-5.8 BUILD HOOK                                           *zpack-example-build*
+6.8 VERSION PINNING                                    *zpack-example-version*
+
+Pin a plugin to a semver range:
+>lua
+    return {
+      'mrcjkb/rustaceanvim',
+      version = vim.version.range('^6'),
+    }
+<
+
+------------------------------------------------------------------------------
+6.9 BUILD HOOK                                           *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -410,7 +433,7 @@ dependencies are available. For example, a plugin's build hook can safely
 call `:TSInstall` even if nvim-treesitter is lazy-loaded.
 
 ------------------------------------------------------------------------------
-5.9 MULTIPLE PLUGINS                                   *zpack-example-multiple*
+6.10 MULTIPLE PLUGINS                                  *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -427,14 +450,14 @@ Define multiple plugins in a single file:
 <
 
 ==============================================================================
-6. DEPENDENCY HANDLING                              *zpack-dependency-handling*
+7. DEPENDENCY HANDLING                              *zpack-dependency-handling*
 
 Unlike lazy.nvim, zpack does not have a `dependencies` field to automatically
 infer plugin load order. Instead, you explicitly control dependencies using
 one of two approaches:
 
 ------------------------------------------------------------------------------
-6.1 OPTION 1: LOAD DEPENDENCIES AT STARTUP    *zpack-dependency-option-startup*
+7.1 OPTION 1: LOAD DEPENDENCIES AT STARTUP    *zpack-dependency-option-startup*
 
 The simplest approach is to load dependency plugins at startup (without
 lazy-loading triggers) while keeping the dependent plugin lazy-loaded. For
@@ -462,7 +485,7 @@ zpack:
 <
 
 ------------------------------------------------------------------------------
-6.2 OPTION 2: USE PRIORITY WITH SAME TRIGGER  *zpack-dependency-option-priority*
+7.2 OPTION 2: USE PRIORITY WITH SAME TRIGGER  *zpack-dependency-option-priority*
 
 If you want both plugins lazy-loaded, use the same trigger with `priority` to
 control load order (higher = earlier):
@@ -482,13 +505,13 @@ control load order (higher = earlier):
 <
 
 Note: For non-lazy plugins, packages are all loaded via `packadd` in priority
-order before their config hooks are executed in priority order, thus all
-dependencies are available without having to explicitly set priority. There
-should almost never be a need to define dependency priority for non-lazy
-plugins unless configs need to be called in specific orders.
+order before executing their config hooks, thus all dependencies are available
+without having to explicitly set priority. There should almost never be a need
+to define dependency priority for non-lazy plugins unless configs need to be
+called in specific orders.
 
 ==============================================================================
-7. SPEC REFERENCE                                       *zpack-spec-reference*
+8. SPEC REFERENCE                                       *zpack-spec-reference*
                                                                   *zpack-Spec*
 
 >lua
@@ -503,7 +526,8 @@ plugins unless configs need to be called in specific orders.
       name = "my-plugin",                   -- Custom name (optional)
 
       -- Source control
-      version = vim.version.range("1.*"),   -- Version range
+      version = "main",                     -- Branch/tag/commit
+      -- version = vim.version.range("1.*"), -- Or semver range
 
       -- Loading control
       enabled = true|false|function,        -- Enable/disable plugin
@@ -517,6 +541,9 @@ plugins unless configs need to be called in specific orders.
       build = string|function,              -- Build command/function
 
       -- Lazy loading triggers (auto-sets lazy=true unless overridden)
+
+      -- Autocommand event(s). Supports 'VeryLazy' and inline patterns:
+      -- "BufReadPre *.lua"
       event = string|string[]|EventSpec|(string|EventSpec)[],
       pattern = string|string[],            -- Global event pattern(s)
       cmd = string|string[],                -- Command(s) to create
@@ -555,8 +582,9 @@ name            (string, optional)
                 name or want to avoid naming conflicts.
 
                                                          *zpack-Spec.version*
-version         (string, optional)
-                Version range via |vim.version.range()|.
+version         (string|vim.VersionRange, optional)
+                Git branch, tag, or commit (string), or semver range via
+                |vim.version.range()|.
 
                                                          *zpack-Spec.enabled*
 enabled         (boolean|function, optional)
@@ -631,7 +659,7 @@ ft              (string|string[], optional)
                 Auto-sets `lazy=true`.
 
 ==============================================================================
-8. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
+9. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
                                                              *zpack-EventSpec*
 
 >lua
@@ -651,7 +679,7 @@ pattern         (string|string[], optional)
                 patterns. If not specified, defaults to '*' (match all).
 
 ==============================================================================
-9. KEYSPEC REFERENCE                                *zpack-keyspec-reference*
+10. KEYSPEC REFERENCE                               *zpack-keyspec-reference*
                                                                *zpack-KeySpec*
 
 >lua
@@ -691,7 +719,7 @@ nowait          (boolean, optional)
                 Whether to use nowait. Default: false.
 
 ==============================================================================
-10. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
+11. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
 
 Most of your lazy.nvim plugin specs will work as-is with zpack.
 
@@ -700,6 +728,10 @@ KEY DIFFERENCES ~
 Dependencies              zpack does not have a `dependencies` field. See
                           |zpack-dependency-handling| for how to manage plugin
                           dependencies using `priority` or startup loading.
+
+version                   `vim.pack` expects string for git branch, tag, or
+                          commit hash; and `vim.VersionRange` for semver
+                          versions. See |vim.version.range()|.
 
 opt                       use `config = function() ... end` instead.
 

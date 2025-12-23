@@ -27,7 +27,7 @@
 ---@field cond? boolean|(fun():boolean)
 ---@field lazy? boolean
 ---@field priority? number Load priority for startup plugins. Higher priority loads first. Default: 50
----@field version? string
+---@field version? string|vim.VersionRange Git branch/tag/commit (string) or semver range (vim.VersionRange)
 ---@field keys? string|string[]|KeySpec|KeySpec[]
 ---@field config? fun()
 ---@field event? string|string[]|EventSpec|(string|EventSpec)[]

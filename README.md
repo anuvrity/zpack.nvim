@@ -1,5 +1,5 @@
 # zpack.nvim
-<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/zuqini/zpack.nvim"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/zuqini/zpack.nvim"> <img alt="GitHub License" src="https://img.shields.io/github/license/zuqini/zpack.nvim">
+<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/zuqini/zpack.nvim?style=for-the-badge"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/zuqini/zpack.nvim?style=for-the-badge"> <img alt="GitHub License" src="https://img.shields.io/github/license/zuqini/zpack.nvim?style=for-the-badge">
 
 A super lightweight layer on top of Neovim's native `vim.pack`, with support for the widely adopted lazy.nvim-like declarative spec and minimalist lazy-loading using only Neovim's builtin features.
 
@@ -27,11 +27,16 @@ The built-in plugin manager itself is currently a work in progress, so please ex
 
 - Neovim 0.12.0+
 
+## Installation
+
+```lua
+-- install with vim.pack directly
+vim.pack.add({ 'https://github.com/zuqini/zpack.nvim' })
+```
+
 ## Usage
 
 ```lua
-vim.pack.add({ 'https://github.com/zuqini/zpack.nvim' })
-
 -- Make sure to setup `mapleader` and `maplocalleader` before
 -- loading zpack.nvim so that mappings are correct.
 vim.g.mapleader = " "
@@ -40,10 +45,10 @@ vim.g.maplocalleader = "\\"
 -- automatically import specs from `/lua/plugins/*.lua`
 require('zpack').setup({})
 
--- automatically import specs from a custom directory
+-- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
 require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
 
--- add your spec manually
+-- or add your specs manually
 require('zpack').setup({ auto_import = false })
 require('zpack').add({
     { 'neovim/nvim-lspconfig', config = function() ... end },
@@ -72,7 +77,7 @@ lua/
     lsp.lua
 ```
 
-Each file returns a spec (or list of specs):
+Each file returns a spec or list of specs (see [examples](#examples) or [spec reference](#spec-reference)):
 
 ```lua
 -- lua/plugins/telescope.lua
@@ -88,17 +93,8 @@ return {
 }
 ```
 
-### Performance
-
-By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
-
-```lua
-require('zpack').setup({
-  disable_vim_loader = true,
-})
-```
-
-### Plugin Installation
+### Configurations
+#### Plugin Installation
 
 By default, `vim.pack` prompts for confirmation before installing new plugins. To skip confirmation prompts:
 
@@ -108,13 +104,23 @@ require('zpack').setup({
 })
 ```
 
+#### Performance
+
+By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
+
+```lua
+require('zpack').setup({
+  disable_vim_loader = true,
+})
+```
+
 ## Why zpack?
 
 Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles plugin installation, updates, and version management. zpack is a thin layer that adds lazy-loading capabilities and a lazy.nvim-like declarative structure while leveraging the native infrastructure.
 
 zpack might be for you if:
 - you're a lazy.nvim user, love its declarative spec, and its wide adoption by plugin authors, but you don't need most of its advanced features
-- you want to try `vim.pack`, but don't want to rewrite your entire plugins spec from scratch
+- you're a lazy.nvim user, want to try `vim.pack`, but don't want to rewrite your entire plugins spec from scratch
 - you're already comfortable with `vim.pack`, and want:
     - A minimalist lazy-loading implementation for faster startup
     - Declarative plugin specs to keep your config neat and tidy
@@ -294,6 +300,15 @@ return {
 }
 ```
 
+#### Version Pinning
+
+```lua
+return {
+  'mrcjkb/rustaceanvim',
+  version = vim.version.range('^6'),
+}
+```
+
 #### Build Hook
 
 ```lua
@@ -370,7 +385,7 @@ return {
 }
 ```
 
-**Note:** For non-lazy plugins, packages are all loaded via `packadd` in priority order before their config hooks are executed in priority order, thus all dependencies are available without having to explicitly set priority. There should almost never be a need to define dependency priority for non-lazy plugins unless configs need to be called in specific orders.
+**Note:** For non-lazy plugins, packages are all loaded via `packadd` in priority order before executing their config hooks, thus all dependencies are available without having to explicitly set priority. There should almost never be a need to define dependency priority for non-lazy plugins unless configs need to be called in specific orders.
 
 ## Spec Reference
 
@@ -386,7 +401,8 @@ return {
   name = "my-plugin",                   -- Custom plugin name (optional, overrides auto-derived name)
 
   -- Source control
-  version = vim.version.range("1.*"),   -- Version range via vim.version.range()
+  version = "main",                     -- Git branch, tag, or commit
+  -- version = vim.version.range("1.*"), -- Or semver range via vim.version.range()
 
   -- Loading control
   enabled = true|false|function,        -- Enable/disable plugin
@@ -400,7 +416,7 @@ return {
   build = string|function,              -- Build command or function
 
   -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-  event = string|string[]|EventSpec|(string|EventSpec)[],  -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
+  event = string|string[]|EventSpec|(string|EventSpec)[], -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
   pattern = string|string[],            -- Global fallback pattern(s) for all events
   cmd = string|string[],                -- Command(s) to create
   keys = KeySpec|KeySpec[],             -- Keymap(s) to create
@@ -437,6 +453,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 **Key differences:**
 
 - **Dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling) for how to manage plugin dependencies using `priority` or startup loading
+- **version**: `vim.pack` expects string for git branch, tag, or commit hash; and `vim.VersionRange` for semvar versions. See `:h vim.version.range()`, `:h vim.VersionRange`.
 - **opt**: use `config = function() ... end` instead
 - **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 
