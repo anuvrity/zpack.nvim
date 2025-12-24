@@ -90,6 +90,14 @@ local config = {
 ---@param opts? ZpackConfig
 M.setup = function(opts)
   if not check_version() then return end
+
+  local state = require('zpack.state')
+  if state.is_setup then
+    require('zpack.utils').schedule_notify('zpack.setup() has already been called', vim.log.levels.WARN)
+    return
+  end
+  state.is_setup = true
+
   opts = opts or {}
 
   if opts.confirm ~= nil then
@@ -108,6 +116,7 @@ M.setup = function(opts)
     local ctx = create_context({ confirm = config.confirm })
     import_specs_from_dir(plugins_dir, ctx)
     process_all(ctx)
+    state.initial_spec_imported = true
   end
   require('zpack.commands').setup()
 end
@@ -115,6 +124,21 @@ end
 ---@param spec_item_or_list Spec|Spec[]
 M.add = function(spec_item_or_list)
   if not check_version() then return end
+
+  local state = require('zpack.state')
+  if not state.is_setup then
+    require('zpack.utils').schedule_notify('zpack.setup() must be called before zpack.add()', vim.log.levels.ERROR)
+    return
+  end
+
+  if not state.initial_spec_imported then
+    local ctx = create_context({ confirm = config.confirm })
+    require('zpack.import').import_specs(spec_item_or_list, ctx)
+    process_all(ctx)
+    state.initial_spec_imported = true
+    return
+  end
+
   vim.schedule(function()
     local ctx = create_context({ load = true, confirm = config.confirm })
     require('zpack.import').import_specs(spec_item_or_list, ctx)

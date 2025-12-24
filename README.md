@@ -1,7 +1,11 @@
 # zpack.nvim
-<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/zuqini/zpack.nvim?style=for-the-badge"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/zuqini/zpack.nvim?style=for-the-badge"> <img alt="GitHub License" src="https://img.shields.io/github/license/zuqini/zpack.nvim?style=for-the-badge">
+<div align="center">
+<img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/zuqini/zpack.nvim?style=for-the-badge&logo=lua"> <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/zuqini/zpack.nvim?style=for-the-badge&logo=neovim"> <img alt="GitHub License" src="https://img.shields.io/github/license/zuqini/zpack.nvim?style=for-the-badge&logo=opensourceinitiative">
 
-A super lightweight layer on top of Neovim's native `vim.pack`, with support for the widely adopted lazy.nvim-like declarative spec and minimalist lazy-loading using only Neovim's builtin features.
+<img alt="Issues" src="https://img.shields.io/github/issues/zuqini/zpack.nvim?style=for-the-badge&logo=github"> <img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/zuqini/zpack.nvim?style=for-the-badge&logo=github">
+</div>
+
+A super lightweight layer on top of Neovim's native `vim.pack`, adding support for lazy-loading and the widely adopted lazy.nvim-like declarative spec.
 
 ```lua
 -- ./lua/plugins/fundo.lua
@@ -308,8 +312,11 @@ return {
 return {
   'mrcjkb/rustaceanvim',
   version = vim.version.range('^6'),
+  -- version = 'main',
 }
 ```
+
+See `:h vim.version.range()` and `:h vim.VersionRange`.
 
 #### Build Hook
 
@@ -455,7 +462,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 **Key differences:**
 
 - **Dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling) for how to manage plugin dependencies using `priority` or startup loading
-- **version**: `vim.pack` expects string for git branch, tag, or commit hash; and `vim.VersionRange` for semvar versions. See `:h vim.version.range()`, `:h vim.VersionRange`.
+- **version**: `vim.pack` expects string for git branch, tag, or commit hash; and `vim.VersionRange` for semver versions. See [Version Pinning](#version-pinning)
 - **opt**: use `config = function() ... end` instead
 - **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 
