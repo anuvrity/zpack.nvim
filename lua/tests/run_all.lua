@@ -37,8 +37,8 @@ local all_passed = helpers.summary()
 
 if all_passed then
   print("\n✓ All tests passed!")
-  return 0
+  vim.cmd('qall!')
 else
   print("\n✗ Some tests failed")
-  return 1
+  vim.cmd('cquit!')  -- Exit with error code 1
 end
