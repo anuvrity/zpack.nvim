@@ -37,7 +37,7 @@ M.setup = function(registered_pack_specs)
         cmd = cmd,
         args = cmd_args.fargs,
       }, {})
-    end, {})
+    end, { nargs = '*' })
   end
 end
 

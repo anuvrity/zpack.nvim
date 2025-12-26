@@ -83,5 +83,29 @@ return function()
 
       helpers.cleanup_test_env()
     end)
+    helpers.test("plugin loads when command is invoked with args", function()
+      helpers.setup_test_env()
+      local state = require('zpack.state')
+      local loaded = false
+
+      require('zpack').setup({ auto_import = false })
+      require('zpack').add({
+        'test/plugin',
+        cmd = 'TestCommand',
+        config = function()
+          loaded = true
+        end,
+      })
+
+      vim.schedule(function()
+        pcall(vim.cmd, 'TestCommand somearg')
+
+        vim.schedule(function()
+          helpers.assert_true(loaded, "Plugin should load when command is invoked with args")
+        end)
+      end)
+
+      helpers.cleanup_test_env()
+    end)
   end)
 end
