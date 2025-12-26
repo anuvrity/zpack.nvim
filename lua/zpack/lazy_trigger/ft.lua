@@ -5,9 +5,9 @@ local loader = require('zpack.loader')
 local M = {}
 
 ---@param pack_spec vim.pack.Spec
----@param spec zpack.Spec
-M.setup = function(pack_spec, spec)
-  local filetypes = util.normalize_string_list(spec.ft)
+---@param ft zpack.FtValue
+M.setup = function(pack_spec, ft)
+  local filetypes = util.normalize_string_list(ft)
 
   util.autocmd("FileType", function(ev)
     loader.process_spec(pack_spec)

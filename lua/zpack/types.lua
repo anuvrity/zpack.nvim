@@ -15,24 +15,34 @@
 ---@field events string[] List of event names
 ---@field pattern string|string[] Pattern(s) for these events
 
+---Plugin data passed to load callback from vim.pack.add
+---@class zpack.Plugin
+---@field spec vim.pack.Spec
+---@field path string
+
+---@alias zpack.EventValue string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]
+---@alias zpack.CmdValue string|string[]
+---@alias zpack.KeysValue string|string[]|zpack.KeySpec|zpack.KeySpec[]
+---@alias zpack.FtValue string|string[]
+
 ---@class zpack.Spec
 ---@field [1]? string Plugin short name (e.g., "user/repo"). Required if src/dir/url not provided
 ---@field src? string Custom git URL or local path. Required if [1]/dir/url not provided
 ---@field dir? string Local plugin directory path (lazy.nvim compat). Mapped to src
 ---@field url? string Custom git URL (lazy.nvim compat). Mapped to src
 ---@field name? string Custom plugin name. Overrides auto-derived name from URL
----@field init? fun()
----@field build? string|fun()
+---@field init? fun(plugin: zpack.Plugin)
+---@field build? string|fun(plugin: zpack.Plugin)
 ---@field enabled? boolean|(fun():boolean)
----@field cond? boolean|(fun():boolean)
+---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
 ---@field lazy? boolean
 ---@field priority? number Load priority for startup plugins. Higher priority loads first. Default: 50
 ---@field version? string|vim.VersionRange Git branch/tag/commit (string) or semver range (vim.VersionRange)
----@field keys? string|string[]|zpack.KeySpec|zpack.KeySpec[]
----@field config? fun()
----@field event? string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]
+---@field keys? zpack.KeysValue|fun(plugin: zpack.Plugin):zpack.KeysValue
+---@field config? fun(plugin: zpack.Plugin)
+---@field event? zpack.EventValue|fun(plugin: zpack.Plugin):zpack.EventValue
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
----@field cmd? string|string[]
----@field ft? string|string[]
+---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue
+---@field ft? zpack.FtValue|fun(plugin: zpack.Plugin):zpack.FtValue
 
 return {}

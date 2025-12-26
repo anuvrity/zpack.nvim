@@ -7,13 +7,14 @@ local M = {}
 ---@param hook_name string
 ---@return boolean
 M.try_call_hook = function(src, hook_name)
-  local spec = state.spec_registry[src].spec
+  local registry_entry = state.spec_registry[src]
+  local spec = registry_entry.spec
   if not spec then
     util.schedule_notify("expected spec missing for " .. src, vim.log.levels.ERROR)
     return false
   end
 
-  local hook = spec[hook_name] --[[@as fun()]]
+  local hook = spec[hook_name] --[[@as fun(plugin: zpack.Plugin)]]
   if not hook then
     util.schedule_notify("expected " .. hook_name .. " missing for " .. src, vim.log.levels.ERROR)
     return false
@@ -24,7 +25,7 @@ M.try_call_hook = function(src, hook_name)
     return false
   end
 
-  local success, error_msg = pcall(hook)
+  local success, error_msg = pcall(hook, registry_entry.plugin)
   if not success then
     util.schedule_notify(("Failed to run hook for %s: %s"):format(src, error_msg), vim.log.levels.ERROR)
     return false
@@ -33,15 +34,16 @@ M.try_call_hook = function(src, hook_name)
   return true
 end
 
----@param build string|fun()
-M.execute_build = function(build)
+---@param build string|fun(plugin: zpack.Plugin)
+---@param plugin zpack.Plugin?
+M.execute_build = function(build, plugin)
   if type(build) == "string" then
     vim.schedule(function()
       vim.cmd(build)
     end)
   elseif type(build) == "function" then
     vim.schedule(function()
-      build()
+      build(plugin)
     end)
   end
 end
@@ -61,7 +63,7 @@ M.setup_lazy_build_tracking = function()
       local registry_entry = state.spec_registry[src]
       if registry_entry and registry_entry.spec.build then
         M.load_all_unloaded_plugins()
-        M.execute_build(registry_entry.spec.build)
+        M.execute_build(registry_entry.spec.build, registry_entry.plugin)
       end
     end
   end, { group = state.lazy_build_group })
@@ -89,7 +91,7 @@ M.run_pending_builds_on_startup = function(ctx)
   for src in pairs(state.src_with_pending_build) do
     local entry = state.spec_registry[src]
     if entry and entry.spec.build then
-      M.execute_build(entry.spec.build)
+      M.execute_build(entry.spec.build, entry.plugin)
     end
   end
 
@@ -102,7 +104,7 @@ M.run_all_builds = function()
   local count = 0
   for _, entry in pairs(state.spec_registry) do
     if entry.spec.build then
-      M.execute_build(entry.spec.build)
+      M.execute_build(entry.spec.build, entry.plugin)
       count = count + 1
     end
   end

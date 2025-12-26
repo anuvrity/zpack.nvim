@@ -6,17 +6,20 @@ local M = {}
 
 ---@param registered_pack_specs vim.pack.Spec[]
 M.setup = function(registered_pack_specs)
-  -- Build mapping of command names to plugins
   local cmd_to_pack_specs = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.spec_registry[pack_spec.src].spec
-    if spec.cmd then
-      local commands = util.normalize_string_list(spec.cmd) --[[@as string[] ]]
-      for _, cmd in ipairs(commands) do
-        if not cmd_to_pack_specs[cmd] then
-          cmd_to_pack_specs[cmd] = {}
+    local registry_entry = state.spec_registry[pack_spec.src]
+    local spec = registry_entry.spec
+    local plugin = registry_entry.plugin
+
+    local cmd = util.resolve_field(spec.cmd, plugin)
+    if cmd then
+      local commands = util.normalize_string_list(cmd) --[[@as string[] ]]
+      for _, c in ipairs(commands) do
+        if not cmd_to_pack_specs[c] then
+          cmd_to_pack_specs[c] = {}
         end
-        table.insert(cmd_to_pack_specs[cmd], pack_spec)
+        table.insert(cmd_to_pack_specs[c], pack_spec)
       end
     end
   end

@@ -281,6 +281,21 @@ return {
 }
 ```
 
+#### Using Plugin Data in Hooks
+
+All lifecycle hooks (`init`, `config`, `build`, `cond`) and lazy-loading triggers (`event`, `cmd`, `keys`, `ft`) can be functions that receive a `zpack.Plugin` object containing the resolved plugin path and spec:
+
+```lua
+return {
+  'some/plugin',
+  build = function(plugin)
+    -- plugin.path: absolute path to the plugin directory
+    -- plugin.spec: the vim.pack.Spec with resolved name, src, version
+    vim.fn.system({ 'make', '-C', plugin.path })
+  end,
+}
+```
+
 #### Load Priority
 
 Control plugin load order with priority (higher values load first; default: 50):
@@ -415,21 +430,33 @@ return {
 
   -- Loading control
   enabled = true|false|function,        -- Enable/disable plugin
-  cond = true|false|function,           -- Condition to load plugin
+  cond = true|false|function(plugin),   -- Condition to load plugin
   lazy = true|false,                    -- Force eager loading when false (auto-detected)
   priority = 50,                        -- Load priority (higher = earlier, default: 50)
 
-  -- Lifecycle hooks
-  init = function() end,                -- Runs before plugin loads, useful for certain vim plugins
-  config = function() end,              -- Runs after plugin loads
-  build = string|function,              -- Build command or function
+  -- Lifecycle hooks (all receive zpack.Plugin as argument)
+  init = function(plugin) end,          -- Runs before plugin loads, useful for certain vim plugins
+  config = function(plugin) end,        -- Runs after plugin loads
+  build = string|function(plugin),      -- Build command or function
 
   -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-  event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[], -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
+  -- All triggers can also be functions that receive zpack.Plugin and return the respective type
+  event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]|function(plugin), -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
   pattern = string|string[],            -- Global fallback pattern(s) for all events
-  cmd = string|string[],                -- Command(s) to create
-  keys = zpack.KeySpec|zpack.KeySpec[], -- Keymap(s) to create
-  ft = string|string[],                 -- FileType(s) to lazy load on
+  cmd = string|string[]|function(plugin), -- Command(s) to create
+  keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
+  ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
+}
+```
+
+### zpack.Plugin Reference
+
+The plugin data object passed to hooks and trigger functions:
+
+```lua
+{
+  spec = vim.pack.Spec,           -- The resolved vim.pack spec (name, src, version)
+  path = string,                  -- Absolute path to the plugin directory
 }
 ```
 
@@ -463,7 +490,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack.
 
 - **Dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling) for how to manage plugin dependencies using `priority` or startup loading
 - **version**: `vim.pack` expects string for git branch, tag, or commit hash; and `vim.VersionRange` for semver versions. See [Version Pinning](#version-pinning)
-- **opt**: use `config = function() ... end` instead
+- **opts**: use `config = function() require('plugin').setup({ ... }) end` instead. lazy.nvim uses heuristics to determine a plugin's main module and automatically calls setup with opts, but this isn't guaranteed to succeed for all plugins and is out of scope for zpack
 - **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 
 ### blink.cmp + lazydev

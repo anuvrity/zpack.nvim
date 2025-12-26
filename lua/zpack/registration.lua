@@ -10,8 +10,12 @@ M.register_all = function(ctx)
     confirm = ctx.confirm,
     load = function(plugin)
       local pack_spec = plugin.spec
-      local spec = state.spec_registry[pack_spec.src].spec
-      if not utils.check_cond(spec) then
+      local registry_entry = state.spec_registry[pack_spec.src]
+      local spec = registry_entry.spec
+
+      registry_entry.plugin = plugin
+
+      if not utils.check_cond(spec, plugin) then
         return
       end
 
@@ -20,10 +24,25 @@ M.register_all = function(ctx)
         table.insert(state.plugin_names_with_build, pack_spec.name)
       end
 
-      if lazy.is_lazy(spec) then
+      if lazy.is_lazy(spec, plugin) then
         table.insert(ctx.registered_lazy_packs, pack_spec)
       else
         table.insert(ctx.registered_startup_packs, pack_spec)
+
+        if spec.config then
+          table.insert(ctx.src_with_startup_config, pack_spec.src)
+        end
+
+        if spec.init then
+          table.insert(ctx.src_with_startup_init, pack_spec.src)
+        end
+
+        local keys = utils.resolve_field(spec.keys, plugin)
+        if keys then
+          for _, key in ipairs(utils.normalize_keys(keys)) do
+            table.insert(ctx.startup_keys, key)
+          end
+        end
       end
     end
   })

@@ -11,18 +11,15 @@ local is_event_spec = function(value)
 end
 
 ---@param spec zpack.Spec
+---@param event zpack.EventValue
 ---@return zpack.NormalizedEvent[]
-local normalize_and_apply_fallback_pattern = function(spec)
+local normalize_and_apply_fallback_pattern = function(spec, event)
   local result = {}
   local fallback_pattern = spec.pattern or '*'
 
-  if not spec.event then
-    return result
-  end
-
-  local event_list = (type(spec.event) == "string" or is_event_spec(spec.event))
-      and { spec.event }
-      or spec.event --[[@as string[]|zpack.EventSpec[] ]]
+  local event_list = (type(event) == "string" or is_event_spec(event))
+      and { event }
+      or event --[[@as string[]|zpack.EventSpec[] ]]
 
   for _, event in ipairs(event_list) do
     if type(event) == "string" then
@@ -69,8 +66,9 @@ end
 
 ---@param pack_spec vim.pack.Spec
 ---@param spec zpack.Spec
-M.setup = function(pack_spec, spec)
-  local normalized_events = normalize_and_apply_fallback_pattern(spec)
+---@param event zpack.EventValue
+M.setup = function(pack_spec, spec, event)
+  local normalized_events = normalize_and_apply_fallback_pattern(spec, event)
 
   for _, normalized_event in ipairs(normalized_events) do
     local has_very_lazy, other_events = split_very_lazy(normalized_event.events)

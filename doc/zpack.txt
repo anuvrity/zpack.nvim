@@ -387,7 +387,24 @@ load after calling `vim.pack.add`:
 <
 
 ------------------------------------------------------------------------------
-6.7 LOAD PRIORITY                                       *zpack-example-priority*
+6.7 USING PLUGIN DATA IN HOOKS                     *zpack-example-plugin-data*
+
+All lifecycle hooks (`init`, `config`, `build`, `cond`) and lazy-loading
+triggers (`event`, `cmd`, `keys`, `ft`) can be functions that receive a
+|zpack.Plugin| object containing the resolved plugin path and spec:
+>lua
+    return {
+      'some/plugin',
+      build = function(plugin)
+        -- plugin.path: absolute path to the plugin directory
+        -- plugin.spec: the vim.pack.Spec with resolved name, src, version
+        vim.fn.system({ 'make', '-C', plugin.path })
+      end,
+    }
+<
+
+------------------------------------------------------------------------------
+6.8 LOAD PRIORITY                                       *zpack-example-priority*
 
 Control load order with priority (higher loads first; default: 50):
 >lua
@@ -412,7 +429,7 @@ Control load order with priority (higher loads first; default: 50):
 <
 
 ------------------------------------------------------------------------------
-6.8 VERSION PINNING                                    *zpack-example-version*
+6.9 VERSION PINNING                                    *zpack-example-version*
 
 Pin a plugin to a semver range, branch, tag, or commit:
 >lua
@@ -425,7 +442,7 @@ Pin a plugin to a semver range, branch, tag, or commit:
 See |vim.version.range()| and |vim.VersionRange|.
 
 ------------------------------------------------------------------------------
-6.9 BUILD HOOK                                           *zpack-example-build*
+6.10 BUILD HOOK                                          *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -443,7 +460,7 @@ dependencies are available. For example, a plugin's build hook can safely
 call `:TSInstall` even if nvim-treesitter is lazy-loaded.
 
 ------------------------------------------------------------------------------
-6.10 MULTIPLE PLUGINS                                  *zpack-example-multiple*
+6.11 MULTIPLE PLUGINS                                  *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -540,25 +557,26 @@ called in specific orders.
       -- version = vim.version.range("1.*"), -- Or semver range
 
       -- Loading control
-      enabled = true|false|function,        -- Enable/disable plugin
-      cond = true|false|function,           -- Condition to load
+      enabled = true|false|function,        -- Enable/disable
+      cond = true|false|function(plugin),   -- Condition to load
       lazy = true|false,                    -- Force eager (auto-detect)
       priority = 50,                        -- Load order (default: 50)
 
-      -- Lifecycle hooks
-      init = function() end,                -- Runs before load
-      config = function() end,              -- Runs after load
-      build = string|function,              -- Build command/function
+      -- Lifecycle hooks (all receive zpack.Plugin as argument)
+      init = function(plugin) end,          -- Runs before load
+      config = function(plugin) end,        -- Runs after load
+      build = string|function(plugin),      -- Build command/function
 
       -- Lazy loading triggers (auto-sets lazy=true unless overridden)
+      -- All triggers can also be functions receiving zpack.Plugin
 
       -- Autocommand event(s). Supports 'VeryLazy' and inline patterns:
       -- "BufReadPre *.lua"
-      event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[],
+      event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]|function(plugin),
       pattern = string|string[],            -- Global event pattern(s)
-      cmd = string|string[],                -- Command(s) to create
-      keys = zpack.KeySpec|zpack.KeySpec[], -- Keymap(s) to create
-      ft = string|string[],                 -- FileType(s) to lazy load on
+      cmd = string|string[]|function(plugin), -- Command(s) to create
+      keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
+      ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
     }
 <
 
@@ -602,9 +620,9 @@ enabled         (boolean|function, optional)
                 a boolean.
 
                                                             *zpack-Spec.cond*
-cond            (boolean|function, optional)
-                Condition to load the plugin. Can be a function that returns
-                a boolean.
+cond            (boolean|function(plugin), optional)
+                Condition to load the plugin. Can be a function that receives
+                |zpack.Plugin| and returns a boolean.
 
                                                             *zpack-Spec.lazy*
 lazy            (boolean, optional)
@@ -621,27 +639,30 @@ priority        (number, optional)
                 that other plugins depend on.
 
                                                             *zpack-Spec.init*
-init            (function, optional)
-                Runs before the plugin loads.
+init            (function(plugin), optional)
+                Runs before the plugin loads. Receives |zpack.Plugin|.
 
                                                           *zpack-Spec.config*
-config          (function, optional)
-                Runs after the plugin loads.
+config          (function(plugin), optional)
+                Runs after the plugin loads. Receives |zpack.Plugin|.
 
                                                            *zpack-Spec.build*
-build           (string|function, optional)
+build           (string|function(plugin), optional)
                 Build command (string) or function to run after
-                installing/updating the plugin. When a build hook runs,
-                all plugins are loaded first (in priority order) to ensure
-                cross-plugin dependencies are available.
+                installing/updating the plugin. Function receives
+                |zpack.Plugin|. When a build hook runs, all plugins are
+                loaded first (in priority order) to ensure cross-plugin
+                dependencies are available.
 
                                                            *zpack-Spec.event*
-event           (string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[], optional)
+event           (string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]|function(plugin), optional)
                 Autocommand event(s) that trigger lazy loading. Supports
                 'VeryLazy'. Can be a simple string, array of strings,
-                zpack.EventSpec (for specifying patterns), or mixed array.
-                Patterns can be specified inline: "BufReadPre *.lua".
-                See |zpack.EventSpec|. Auto-sets `lazy=true`.
+                zpack.EventSpec (for specifying patterns), mixed array, or
+                a function receiving |zpack.Plugin| that returns any of
+                these types. Patterns can be specified inline:
+                "BufReadPre *.lua". See |zpack.EventSpec|. Auto-sets
+                `lazy=true`.
 
                                                          *zpack-Spec.pattern*
 pattern         (string|string[], optional)
@@ -652,24 +673,47 @@ pattern         (string|string[], optional)
                 not specified.
 
                                                              *zpack-Spec.cmd*
-cmd             (string|string[], optional)
-                Command(s) to create that trigger lazy loading.
+cmd             (string|string[]|function(plugin), optional)
+                Command(s) to create that trigger lazy loading. Can be a
+                function receiving |zpack.Plugin| that returns the value.
                 Auto-sets `lazy=true`.
 
                                                             *zpack-Spec.keys*
-keys            (zpack.KeySpec|zpack.KeySpec[], optional)
-                Keymap(s) to create that trigger lazy loading.
+keys            (zpack.KeySpec|zpack.KeySpec[]|function(plugin), optional)
+                Keymap(s) to create that trigger lazy loading. Can be a
+                function receiving |zpack.Plugin| that returns the value.
                 Auto-sets `lazy=true`. See |zpack.KeySpec|.
 
                                                               *zpack-Spec.ft*
-ft              (string|string[], optional)
-                FileType(s) to lazy load on. Automatically re-triggers
-                BufReadPre, BufReadPost, and FileType events after loading
-                to ensure LSP clients and Treesitter attach properly.
-                Auto-sets `lazy=true`.
+ft              (string|string[]|function(plugin), optional)
+                FileType(s) to lazy load on. Can be a function receiving
+                |zpack.Plugin| that returns the value. Automatically
+                re-triggers BufReadPre, BufReadPost, and FileType events
+                after loading to ensure LSP clients and Treesitter attach
+                properly. Auto-sets `lazy=true`.
 
 ==============================================================================
-9. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
+9. PLUGIN REFERENCE                                *zpack-plugin-reference*
+                                                              *zpack.Plugin*
+
+The plugin data object passed to hooks and trigger functions:
+>lua
+    {
+      spec = vim.pack.Spec,           -- The resolved vim.pack spec
+      path = string,                  -- Absolute path to plugin directory
+    }
+<
+
+                                                        *zpack.Plugin.spec*
+spec            (vim.pack.Spec)
+                The resolved vim.pack spec containing name, src, and version.
+
+                                                        *zpack.Plugin.path*
+path            (string)
+                Absolute path to the plugin directory.
+
+==============================================================================
+10. EVENTSPEC REFERENCE                           *zpack-eventspec-reference*
                                                        *zpack.EventSpec*
 
 >lua
@@ -689,7 +733,7 @@ pattern         (string|string[], optional)
                 patterns. If not specified, defaults to '*' (match all).
 
 ==============================================================================
-10. KEYSPEC REFERENCE                               *zpack-keyspec-reference*
+11. KEYSPEC REFERENCE                               *zpack-keyspec-reference*
                                                              *zpack.KeySpec*
 
 >lua
@@ -729,7 +773,7 @@ nowait          (boolean, optional)
                 Whether to use nowait. Default: false.
 
 ==============================================================================
-11. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
+12. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
 
 Most of your lazy.nvim plugin specs will work as-is with zpack.
 
@@ -743,7 +787,11 @@ version                   `vim.pack` expects string for git branch, tag, or
                           commit hash; and `vim.VersionRange` for semver
                           versions. See |zpack-example-version|.
 
-opt                       use `config = function() ... end` instead.
+opts                      use `config = function() require('plugin').setup({ ... }) end`
+                          instead. lazy.nvim uses heuristics to determine a
+                          plugin's main module and automatically calls setup
+                          with opts, but this isn't guaranteed to succeed for
+                          all plugins and is out of scope for zpack.
 
 Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
                           `module`, etc. See |zpack-spec-reference| for

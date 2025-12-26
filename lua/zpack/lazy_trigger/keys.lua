@@ -15,18 +15,20 @@ end
 
 ---@param registered_pack_specs vim.pack.Spec[]
 M.setup = function(registered_pack_specs)
-  -- Build mapping of keys to plugins
   local key_to_info = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
-    local spec = state.spec_registry[pack_spec.src].spec
-    if spec.keys then
-      local keys = util.normalize_keys(spec.keys) --[[@as KeySpec[] ]]
+    local registry_entry = state.spec_registry[pack_spec.src]
+    local spec = registry_entry.spec
+    local plugin = registry_entry.plugin
+
+    local keys_value = util.resolve_field(spec.keys, plugin)
+    if keys_value then
+      local keys = util.normalize_keys(keys_value) --[[@as KeySpec[] ]]
       for _, key in ipairs(keys) do
         local lhs = key[1]
         local mode = key.mode or 'n'
         local modes = util.normalize_string_list(mode) --[[@as string[] ]]
 
-        -- Split modes because different plugins might use same key in different modes
         for _, m in ipairs(modes) do
           local key_id = create_key_id(lhs, m)
           if not key_to_info[key_id] then

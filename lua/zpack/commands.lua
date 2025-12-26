@@ -111,7 +111,7 @@ M.setup = function()
     end
 
     hooks.load_all_unloaded_plugins()
-    hooks.execute_build(registry_entry.spec.build)
+    hooks.execute_build(registry_entry.spec.build, registry_entry.plugin)
     util.schedule_notify(('Running build hook for %s'):format(plugin_name), vim.log.levels.INFO)
   end, {
     nargs = '?',

@@ -1,6 +1,5 @@
 local utils = require('zpack.utils')
 local state = require('zpack.state')
-local lazy = require('zpack.lazy')
 
 local M = {}
 
@@ -42,33 +41,6 @@ local get_source_url = function(spec)
   return src
 end
 
----@param spec zpack.Spec
----@param src string
----@param ctx ProcessContext
-local index_spec = function(spec, src, ctx)
-  table.insert(ctx.vim_packs, { src = src, version = spec.version, name = spec.name })
-
-  if not utils.check_cond(spec) then
-    return
-  end
-
-  if not lazy.is_lazy(spec) then
-    if spec.config then
-      table.insert(ctx.src_with_startup_config, src)
-    end
-
-    if spec.init then
-      table.insert(ctx.src_with_startup_init, src)
-    end
-
-    if spec.keys then
-      for _, key in ipairs(utils.normalize_keys(spec.keys)) do
-        table.insert(ctx.startup_keys, key)
-      end
-    end
-  end
-end
-
 ---Check if value is a single spec (not a list of specs)
 ---@param value zpack.Spec|zpack.Spec[]
 ---@return boolean
@@ -98,7 +70,7 @@ M.import_specs = function(spec_item_or_list, ctx)
     end
 
     state.spec_registry[src] = { spec = spec, loaded = false }
-    index_spec(spec, src, ctx)
+    table.insert(ctx.vim_packs, { src = src, version = spec.version, name = spec.name })
 
     ::continue::
   end

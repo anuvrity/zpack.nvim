@@ -13,6 +13,7 @@ local test_modules = {
   'tests.lifecycle_test',
   'tests.priority_test',
   'tests.conditional_test',
+  'tests.plugin_data_test',
 }
 
 print("\n" .. string.rep("=", 60))
@@ -40,5 +41,5 @@ if all_passed then
   vim.cmd('qall!')
 else
   print("\n✗ Some tests failed")
-  vim.cmd('cquit!')  -- Exit with error code 1
+  vim.cmd('cquit!') -- Exit with error code 1
 end

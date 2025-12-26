@@ -81,11 +81,23 @@ M.autocmd = function(event, callback, opts)
   }, opts))
 end
 
+---Resolve a field that may be a function
+---@param field any
+---@param plugin zpack.Plugin?
+---@return any
+M.resolve_field = function(field, plugin)
+  if type(field) == "function" then
+    return field(plugin)
+  end
+  return field
+end
+
 ---Check if spec.cond passes
 ---@param spec zpack.Spec
+---@param plugin zpack.Plugin?
 ---@return boolean
-M.check_cond = function(spec)
-  if spec.cond == false or (type(spec.cond) == "function" and not spec.cond()) then
+M.check_cond = function(spec, plugin)
+  if spec.cond == false or (type(spec.cond) == "function" and not spec.cond(plugin)) then
     return false
   end
   return true
