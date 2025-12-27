@@ -82,9 +82,11 @@ end
 ---@field auto_import? boolean
 ---@field disable_vim_loader? boolean
 ---@field confirm? boolean
+---@field cmd_prefix? string
 
 local config = {
   confirm = true,
+  cmd_prefix = 'Z',
 }
 
 ---@param opts? ZpackConfig
@@ -104,6 +106,10 @@ M.setup = function(opts)
     config.confirm = opts.confirm
   end
 
+  if opts.cmd_prefix ~= nil then
+    config.cmd_prefix = opts.cmd_prefix
+  end
+
   if not opts.disable_vim_loader then
     vim.loader.enable()
   end
@@ -118,7 +124,7 @@ M.setup = function(opts)
     process_all(ctx)
     state.initial_spec_imported = true
   end
-  require('zpack.commands').setup()
+  require('zpack.commands').setup(config.cmd_prefix)
 end
 
 ---@param spec_item_or_list zpack.Spec|zpack.Spec[]

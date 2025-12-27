@@ -62,7 +62,7 @@ require('zpack').add({
 
 ### Commands
 
-zpack provides the following commands:
+zpack provides the following commands (default prefix: `Z`, customizable via `cmd_prefix` option):
 
 - `:ZUpdate [plugin]` - Update all plugins, or a specific plugin if provided (supports tab completion). See `:h vim.pack.update()`
 - `:ZClean` - Remove plugins that are no longer in your spec
@@ -117,6 +117,17 @@ By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up
 ```lua
 require('zpack').setup({
   disable_vim_loader = true,
+})
+```
+
+#### Command Prefix
+
+By default, zpack creates commands with the `Z` prefix (`:ZUpdate`, `:ZClean`, etc.). If this conflicts with other plugins, you can customize the prefix:
+
+```lua
+require('zpack').setup({
+  cmd_prefix = 'Pack', -- Creates :PackUpdate, :PackClean, :PackBuild, :PackDelete
+  -- cmd_prefix = '',  -- Creates :Update, :Clean, :Build, :Delete
 })
 ```
 

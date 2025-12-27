@@ -143,7 +143,7 @@ function M.cleanup_test_env()
 
   -- Force reload all zpack modules to reset state
   package.loaded['zpack.state'] = nil
-  package.loaded['zpack.init'] = nil
+  package.loaded['zpack'] = nil
   package.loaded['zpack.import'] = nil
   package.loaded['zpack.registration'] = nil
   package.loaded['zpack.startup'] = nil

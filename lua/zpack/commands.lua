@@ -4,6 +4,25 @@ local hooks = require('zpack.hooks')
 
 local M = {}
 
+local validate_prefix = function(prefix)
+  if prefix == '' then
+    return true
+  end
+  if not prefix:match('^%u[%a%d]*$') then
+    return false
+  end
+  return true
+end
+
+local create_command = function(name, fn, opts)
+  local ok, err = pcall(vim.api.nvim_create_user_command, name, fn, opts)
+  if not ok then
+    util.schedule_notify(('Failed to create command %s: %s'):format(name, err), vim.log.levels.ERROR)
+    return false
+  end
+  return true
+end
+
 local filter_completions = function(list, prefix)
   if prefix == '' then return list end
   local lower_prefix = prefix:lower()
@@ -65,8 +84,17 @@ M.clean_unused = function()
   vim.pack.del(to_delete)
 end
 
-M.setup = function()
-  vim.api.nvim_create_user_command('ZUpdate', function(opts)
+---@param prefix string
+M.setup = function(prefix)
+  if not validate_prefix(prefix) then
+    util.schedule_notify(
+      ('Invalid cmd_prefix "%s": must be empty or start with uppercase letter and contain only letters/digits'):format(prefix),
+      vim.log.levels.ERROR
+    )
+    return
+  end
+
+  create_command(prefix .. 'Update', function(opts)
     local plugin_name = opts.args
     if plugin_name == '' then
       vim.pack.update()
@@ -79,20 +107,20 @@ M.setup = function()
   end, {
     nargs = '?',
     desc = 'Update all plugins or a specific plugin',
-    complete = function(prefix) return filter_completions(state.registered_plugin_names, prefix) end,
+    complete = function(arg_lead) return filter_completions(state.registered_plugin_names, arg_lead) end,
   })
 
-  vim.api.nvim_create_user_command('ZClean', function()
+  create_command(prefix .. 'Clean', function()
     M.clean_unused()
   end, {
     desc = 'Remove unused plugins',
   })
 
-  vim.api.nvim_create_user_command('ZBuild', function(opts)
+  create_command(prefix .. 'Build', function(opts)
     local plugin_name = opts.args
     if plugin_name == '' then
       if not opts.bang then
-        util.schedule_notify('Use :ZBuild! to run build hooks for all plugins', vim.log.levels.WARN)
+        util.schedule_notify(('Use :%sBuild! to run build hooks for all plugins'):format(prefix), vim.log.levels.WARN)
         return
       end
       hooks.run_all_builds()
@@ -117,15 +145,15 @@ M.setup = function()
     nargs = '?',
     bang = true,
     desc = 'Run build hook for a specific plugin or all plugins',
-    complete = function(prefix) return filter_completions(state.plugin_names_with_build, prefix) end,
+    complete = function(arg_lead) return filter_completions(state.plugin_names_with_build, arg_lead) end,
   })
 
-  vim.api.nvim_create_user_command('ZDelete', function(opts)
+  create_command(prefix .. 'Delete', function(opts)
     local plugin_name = opts.args
     if plugin_name == '' then
       if not opts.bang then
         util.schedule_notify(
-          'Use :ZDelete! to confirm deletion of all installed plugin(s)',
+          ('Use :%sDelete! to confirm deletion of all installed plugin(s)'):format(prefix),
           vim.log.levels.WARN
         )
         return
@@ -160,7 +188,7 @@ M.setup = function()
     nargs = '?',
     bang = true,
     desc = 'Delete all plugins or a specific plugin',
-    complete = function(prefix) return filter_completions(state.registered_plugin_names, prefix) end,
+    complete = function(arg_lead) return filter_completions(state.registered_plugin_names, arg_lead) end,
   })
 end
 

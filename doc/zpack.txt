@@ -75,7 +75,8 @@ build hooks. Prefer to add all of your specs in one go.
 ------------------------------------------------------------------------------
 4.1 COMMANDS                                                  *zpack-commands*
 
-zpack provides the following commands:
+zpack provides the following commands (default prefix: `Z`, customizable via
+|zpack-setup-cmd_prefix|):
 
                                                                     *:ZUpdate*
 :ZUpdate [plugin]
@@ -187,6 +188,15 @@ disable_vim_loader (boolean, optional)
 confirm         (boolean, optional)
                 Whether `vim.pack` prompts for confirmation before
                 installing new plugins. Default: `true`
+
+                                                      *zpack-setup-cmd_prefix*
+cmd_prefix      (string, optional)
+                Prefix for user commands. Change this if the default
+                commands conflict with other plugins. Default: `'Z'`
+                Examples:
+                  - `'Z'` creates `:ZUpdate`, `:ZClean`, `:ZBuild`, `:ZDelete`
+                  - `'Pack'` creates `:PackUpdate`, `:PackClean`, etc.
+                  - `''` creates `:Update`, `:Clean`, `:Build`, `:Delete`
 
 ==============================================================================
 5. WHY ZPACK?                                                *zpack-why-zpack*
