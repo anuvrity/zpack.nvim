@@ -503,13 +503,15 @@ The plugin data object passed to hooks and trigger functions:
 
 ## Migrating from lazy.nvim
 
-Most of your lazy.nvim plugin specs will work as-is with zpack, however, to minimize complexity as a thin layer to `vim.pack`, see **key differences:**
+Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a thin layer, zpack specs have some differences to minimize complexity and maintain compatibility with `vim.pack`.
 
-- **Dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
+**key differences:**
+
+- **dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
 - **version**: `vim.pack` expects a `string` for git branch, tag, or commit hash; and `vim.VersionRange` for semver versions. See [Version Pinning](#version-pinning)
-- **opts**: use `config = function() require('plugin').setup({ ... }) end` instead
-- **Other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
-- **Spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
+- **opts**: use `config = function() ... end` instead
+- **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
+- **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
 
 ### blink.cmp + lazydev
 

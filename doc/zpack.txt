@@ -789,31 +789,31 @@ nowait          (boolean, optional)
 ==============================================================================
 12. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
 
-Most of your lazy.nvim plugin specs will work as-is with zpack, however, to
-minimize complexity as a thin layer to `vim.pack`, see key differences:
+Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a
+thin layer, zpack specs have some differences to minimize complexity and
+maintain compatibility with `vim.pack`.
 
 KEY DIFFERENCES ~
 
-Dependencies              zpack does not have a `dependencies` field. See
+dependencies              zpack does not have a `dependencies` field. See
                           |zpack-dependency-handling|.
 
 version                   `vim.pack` expects string for git branch, tag, or
                           commit hash; and `vim.VersionRange` for semver
                           versions. See |zpack-example-version|.
 
-opts                      use `config = function()
-                          require('plugin').setup({ ... }) end` instead.
+opts                      use `config = function() ... end` instead.
                           lazy.nvim heuristically speculates a plugin's main
                           module to automatically calls its setup with
                           `opts`. This requires significant maintenance to
                           account for edge-cases, isn't guaranteed to resolve
                           for all plugins, and is out of scope for zpack.
 
-Other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
+other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
                           `module`, etc. See |zpack-spec-reference| for
                           supported fields.
 
-Spec merging              zpack does not merge duplicate specs. Please only
+spec merging              zpack does not merge duplicate specs. Please only
                           define each plugin spec once.
 
 BLINK.CMP + LAZYDEV ~
