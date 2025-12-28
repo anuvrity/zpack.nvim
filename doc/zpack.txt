@@ -198,6 +198,26 @@ cmd_prefix      (string, optional)
                   - `'Pack'` creates `:PackUpdate`, `:PackClean`, etc.
                   - `''` creates `:Update`, `:Clean`, `:Build`, `:Delete`
 
+                                                        *zpack-setup-defaults*
+defaults        (table, optional)
+                Default values that apply to all plugins. Plugin-level
+                settings always take precedence over defaults.
+
+                defaults.cond   (boolean|function(plugin), optional)
+                                Default `cond` condition for all plugins.
+                                Only applied when a plugin spec doesn't
+                                define its own `cond`. Useful for globally
+                                disabling plugins in certain environments.
+                                Example:
+>lua
+                                require('zpack').setup({
+                                  defaults = {
+                                    -- Disable plugins in VSCode
+                                    cond = not vim.g.vscode,
+                                  },
+                                })
+<
+
 ==============================================================================
 5. WHY ZPACK?                                                *zpack-why-zpack*
 

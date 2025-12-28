@@ -11,6 +11,7 @@ local M = {}
 ---@field registered_lazy_packs vim.pack.Spec[]
 ---@field load boolean?
 ---@field confirm boolean?
+---@field defaults ZpackDefaults
 
 ---@return ProcessContext
 local function create_context(opts)
@@ -24,6 +25,7 @@ local function create_context(opts)
     registered_lazy_packs = {},
     load = opts.load,
     confirm = opts.confirm,
+    defaults = opts.defaults or {},
   }
 end
 
@@ -77,16 +79,21 @@ local process_all = function(ctx)
   hooks.setup_lazy_build_tracking()
 end
 
+---@class ZpackDefaults
+---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
+
 ---@class ZpackConfig
 ---@field plugins_dir? string
 ---@field auto_import? boolean
 ---@field disable_vim_loader? boolean
 ---@field confirm? boolean
 ---@field cmd_prefix? string
+---@field defaults? ZpackDefaults
 
 local config = {
   confirm = true,
   cmd_prefix = 'Z',
+  defaults = {},
 }
 
 ---@param opts? ZpackConfig
@@ -110,6 +117,10 @@ M.setup = function(opts)
     config.cmd_prefix = opts.cmd_prefix
   end
 
+  if opts.defaults ~= nil then
+    config.defaults = opts.defaults
+  end
+
   if not opts.disable_vim_loader then
     vim.loader.enable()
   end
@@ -119,7 +130,7 @@ M.setup = function(opts)
   if auto_import == nil then auto_import = true end
 
   if auto_import then
-    local ctx = create_context({ confirm = config.confirm })
+    local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
     import_specs_from_dir(plugins_dir, ctx)
     process_all(ctx)
     state.initial_spec_imported = true
@@ -138,7 +149,7 @@ M.add = function(spec_item_or_list)
   end
 
   if not state.initial_spec_imported then
-    local ctx = create_context({ confirm = config.confirm })
+    local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
     require('zpack.import').import_specs(spec_item_or_list, ctx)
     process_all(ctx)
     state.initial_spec_imported = true
@@ -146,7 +157,7 @@ M.add = function(spec_item_or_list)
   end
 
   vim.schedule(function()
-    local ctx = create_context({ load = true, confirm = config.confirm })
+    local ctx = create_context({ load = true, confirm = config.confirm, defaults = config.defaults })
     require('zpack.import').import_specs(spec_item_or_list, ctx)
     process_all(ctx)
   end)

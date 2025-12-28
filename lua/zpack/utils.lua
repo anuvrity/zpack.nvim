@@ -79,12 +79,18 @@ M.resolve_field = function(field, plugin)
   return field
 end
 
----Check if spec.cond passes
+---Check if spec.cond passes (with optional default fallback)
 ---@param spec zpack.Spec
 ---@param plugin zpack.Plugin?
+---@param default_cond? boolean|(fun(plugin: zpack.Plugin):boolean)
 ---@return boolean
-M.check_cond = function(spec, plugin)
-  if spec.cond == false or (type(spec.cond) == "function" and not spec.cond(plugin)) then
+M.check_cond = function(spec, plugin, default_cond)
+  local cond = spec.cond
+  if cond == nil then
+    cond = default_cond
+  end
+
+  if cond == false or (type(cond) == "function" and not cond(plugin)) then
     return false
   end
   return true

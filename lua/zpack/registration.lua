@@ -15,7 +15,7 @@ M.register_all = function(ctx)
 
       registry_entry.plugin = plugin
 
-      if not utils.check_cond(spec, plugin) then
+      if not utils.check_cond(spec, plugin, ctx.defaults.cond) then
         return
       end
 

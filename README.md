@@ -131,6 +131,25 @@ require('zpack').setup({
 })
 ```
 
+#### Plugin Defaults
+
+You can set default values that apply to all plugins. Currently supports a default `cond` condition, useful for globally disabling plugins in certain environments (e.g., when running inside VSCode):
+
+```lua
+require('zpack').setup({
+  defaults = {
+    -- Disable all plugins when running in VSCode
+    cond = not vim.g.vscode,
+    -- Or use a function for dynamic conditions
+    -- cond = function(plugin)
+    --   return not vim.g.vscode
+    -- end,
+  },
+})
+```
+
+The default `cond` is only applied when a plugin spec doesn't define its own `cond`. Plugin-level `cond` always takes precedence over the default.
+
 ## Why zpack?
 
 Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles plugin installation, updates, and version management. zpack is a thin layer that adds lazy-loading capabilities and support for a lazy.nvim-like declarative spec while leveraging the native infrastructure.

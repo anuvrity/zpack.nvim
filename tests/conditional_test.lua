@@ -228,5 +228,63 @@ return function()
 
       helpers.cleanup_test_env()
     end)
+
+    helpers.test("default_cond=false prevents loading when spec.cond is nil", function()
+      helpers.setup_test_env()
+      local utils = require('zpack.utils')
+
+      local spec = {
+        'test/plugin',
+      }
+
+      local should_load = utils.check_cond(spec, nil, false)
+      helpers.assert_false(should_load, "Plugin should not load when default_cond=false and spec.cond is nil")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("default_cond function returning false prevents loading", function()
+      helpers.setup_test_env()
+      local utils = require('zpack.utils')
+
+      local spec = {
+        'test/plugin',
+      }
+
+      local should_load = utils.check_cond(spec, nil, function() return false end)
+      helpers.assert_false(should_load, "Plugin should not load when default_cond function returns false")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("spec.cond overrides default_cond", function()
+      helpers.setup_test_env()
+      local utils = require('zpack.utils')
+
+      local spec = {
+        'test/plugin',
+        cond = true,
+      }
+
+      local should_load = utils.check_cond(spec, nil, false)
+      helpers.assert_true(should_load, "Plugin should load when spec.cond=true even if default_cond=false")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("spec.cond=false overrides default_cond=true", function()
+      helpers.setup_test_env()
+      local utils = require('zpack.utils')
+
+      local spec = {
+        'test/plugin',
+        cond = false,
+      }
+
+      local should_load = utils.check_cond(spec, nil, true)
+      helpers.assert_false(should_load, "Plugin should not load when spec.cond=false even if default_cond=true")
+
+      helpers.cleanup_test_env()
+    end)
   end)
 end
