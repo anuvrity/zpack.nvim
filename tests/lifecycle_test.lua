@@ -22,10 +22,9 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_true(init_ran, "init hook should run")
-        helpers.assert_true(init_ran_before_config, "init should run before config")
-      end)
+      helpers.flush_pending()
+      helpers.assert_true(init_ran, "init hook should run")
+      helpers.assert_true(init_ran_before_config, "init should run before config")
 
       helpers.cleanup_test_env()
     end)
@@ -42,9 +41,8 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_true(config_ran, "config hook should run")
-      end)
+      helpers.flush_pending()
+      helpers.assert_true(config_ran, "config hook should run")
 
       helpers.cleanup_test_env()
     end)
@@ -62,9 +60,32 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_true(init_ran, "init should run for lazy plugins at setup time")
-      end)
+      helpers.flush_pending()
+      helpers.assert_true(init_ran, "init should run for lazy plugins at setup time")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("init runs only once for lazy plugins", function()
+      helpers.setup_test_env()
+      local init_count = 0
+
+      require('zpack').setup({ auto_import = false })
+      require('zpack').add({
+        'test/plugin',
+        cmd = 'TestCommand',
+        init = function()
+          init_count = init_count + 1
+        end,
+        config = function() end,
+      })
+
+      helpers.flush_pending()
+      helpers.assert_equal(init_count, 1, "init should run once at startup")
+
+      pcall(vim.cmd, 'TestCommand')
+      helpers.flush_pending()
+      helpers.assert_equal(init_count, 1, "init should not run again when plugin loads")
 
       helpers.cleanup_test_env()
     end)
@@ -82,9 +103,8 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_false(config_ran, "config should not run for lazy plugins at setup time")
-      end)
+      helpers.flush_pending()
+      helpers.assert_false(config_ran, "config should not run for lazy plugins at setup time")
 
       helpers.cleanup_test_env()
     end)
@@ -98,16 +118,15 @@ return function()
         build = 'echo "build completed"',
       })
 
-      vim.schedule(function()
-        local state = require('zpack.state')
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
-        helpers.assert_equal(
-          type(state.spec_registry[src].spec.build),
-          'string',
-          "Build hook should be string"
-        )
-      end)
+      helpers.flush_pending()
+      local state = require('zpack.state')
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
+      helpers.assert_equal(
+        type(state.spec_registry[src].spec.build),
+        'string',
+        "Build hook should be string"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -122,16 +141,15 @@ return function()
         build = build_fn,
       })
 
-      vim.schedule(function()
-        local state = require('zpack.state')
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
-        helpers.assert_equal(
-          type(state.spec_registry[src].spec.build),
-          'function',
-          "Build hook should be function"
-        )
-      end)
+      helpers.flush_pending()
+      local state = require('zpack.state')
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
+      helpers.assert_equal(
+        type(state.spec_registry[src].spec.build),
+        'function',
+        "Build hook should be function"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -151,11 +169,10 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_equal(#execution_order, 2, "Both hooks should run")
-        helpers.assert_equal(execution_order[1], 'init', "init should run first")
-        helpers.assert_equal(execution_order[2], 'config', "config should run second")
-      end)
+      helpers.flush_pending()
+      helpers.assert_equal(#execution_order, 2, "Both hooks should run")
+      helpers.assert_equal(execution_order[1], 'init', "init should run first")
+      helpers.assert_equal(execution_order[2], 'config', "config should run second")
 
       helpers.cleanup_test_env()
     end)
@@ -172,9 +189,8 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_true(can_access_globals, "config should have access to vim globals")
-      end)
+      helpers.flush_pending()
+      helpers.assert_true(can_access_globals, "config should have access to vim globals")
 
       helpers.cleanup_test_env()
     end)

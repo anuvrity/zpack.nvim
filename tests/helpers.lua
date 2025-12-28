@@ -108,14 +108,33 @@ function M.setup_test_env()
     created_keymaps = {},
     triggered_events = {},
     vim_pack_calls = {},
+    notifications = {},
   }
 
-  -- Mock vim.pack.add to prevent actual plugin installation
+  vim.g.mapleader = ' '
+
+  _G.test_state.original_notify = vim.notify
+  vim.notify = function(msg, level)
+    table.insert(_G.test_state.notifications, { msg = msg, level = level })
+  end
+
   _G.test_state.original_vim_pack_add = vim.pack.add
-  vim.pack.add = function(specs)
+  vim.pack.add = function(specs, opts)
     table.insert(_G.test_state.vim_pack_calls, specs)
-    -- Don't actually install anything
-    return
+    opts = opts or {}
+
+    for _, pack_spec in ipairs(specs) do
+      local name = pack_spec.name or pack_spec.src:match('[^/]+$')
+      local mock_plugin = {
+        spec = pack_spec,
+        path = vim.fn.stdpath('data') .. '/site/pack/zpack/opt/' .. name,
+        name = name,
+      }
+
+      if opts.load then
+        opts.load(mock_plugin)
+      end
+    end
   end
 end
 
@@ -134,9 +153,14 @@ function M.cleanup_test_env()
     end
   end
 
-  -- Restore original vim.pack.add
-  if _G.test_state and _G.test_state.original_vim_pack_add then
-    vim.pack.add = _G.test_state.original_vim_pack_add
+  -- Restore original vim.pack.add and vim.notify
+  if _G.test_state then
+    if _G.test_state.original_vim_pack_add then
+      vim.pack.add = _G.test_state.original_vim_pack_add
+    end
+    if _G.test_state.original_notify then
+      vim.notify = _G.test_state.original_notify
+    end
   end
 
   _G.test_state = nil
@@ -179,6 +203,29 @@ function M.wait_for_condition(condition, timeout_ms, interval_ms)
     vim.wait(interval_ms)
   end
   return false
+end
+
+function M.flush_pending()
+  -- Process all pending vim.schedule callbacks by waiting with a condition that
+  -- never returns true. 50ms is sufficient for most deferred operations while
+  -- keeping tests fast. The condition returns false to ensure we always wait
+  -- the full duration, allowing all queued callbacks to execute.
+  vim.wait(50, function() return false end)
+end
+
+function M.find_autocmd(autocmds, event, pattern)
+  for _, cmd in ipairs(autocmds) do
+    if cmd.event == event then
+      if pattern == nil then
+        return cmd
+      end
+      -- Pattern can be a single value or comma-separated list
+      if cmd.pattern == pattern or (cmd.pattern and cmd.pattern:find(pattern, 1, true)) then
+        return cmd
+      end
+    end
+  end
+  return nil
 end
 
 return M

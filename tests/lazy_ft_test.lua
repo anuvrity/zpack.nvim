@@ -12,17 +12,12 @@ return function()
         ft = 'rust',
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'FileType' and vim.tbl_contains(cmd.pattern or {}, 'rust') then
-            found = true
-            break
-          end
-        end
-        helpers.assert_true(found, "Single filetype should create FileType autocmd")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'FileType', 'rust'),
+        "Single filetype should create FileType autocmd"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -37,24 +32,12 @@ return function()
         ft = { 'lua', 'vim', 'python' },
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found_lua = false
-        local found_vim = false
-        local found_python = false
-
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'FileType' then
-            local patterns = cmd.pattern or {}
-            if vim.tbl_contains(patterns, 'lua') then found_lua = true end
-            if vim.tbl_contains(patterns, 'vim') then found_vim = true end
-            if vim.tbl_contains(patterns, 'python') then found_python = true end
-          end
-        end
-
-        helpers.assert_true(found_lua or found_vim or found_python,
-          "Multiple filetypes should create FileType autocmd")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      local found = helpers.find_autocmd(autocmds, 'FileType', 'lua')
+        or helpers.find_autocmd(autocmds, 'FileType', 'vim')
+        or helpers.find_autocmd(autocmds, 'FileType', 'python')
+      helpers.assert_not_nil(found, "Multiple filetypes should create FileType autocmd")
 
       helpers.cleanup_test_env()
     end)
@@ -69,13 +52,12 @@ return function()
         ft = 'lua',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_false(
-          state.spec_registry[src].loaded,
-          "Lazy ft plugin should not be loaded at startup"
-        )
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_false(
+        state.spec_registry[src].loaded,
+        "Lazy ft plugin should not be loaded at startup"
+      )
 
       helpers.cleanup_test_env()
     end)

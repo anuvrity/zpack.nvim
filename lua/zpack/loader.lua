@@ -17,10 +17,6 @@ M.process_spec = function(pack_spec, opts)
   local spec = registry_entry.spec
   local plugin = registry_entry.plugin
 
-  if spec.init then
-    hooks.try_call_hook(pack_spec.src, 'init')
-  end
-
   vim.cmd.packadd({ pack_spec.name, bang = opts.bang })
 
   if spec.config then

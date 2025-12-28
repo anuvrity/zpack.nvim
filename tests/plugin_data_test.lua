@@ -11,11 +11,10 @@ return function()
         'test/plugin',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered")
-        helpers.assert_not_nil(state.spec_registry[src].plugin, "Plugin data should be stored")
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered")
+      helpers.assert_not_nil(state.spec_registry[src].plugin, "Plugin data should be stored")
 
       helpers.cleanup_test_env()
     end)
@@ -29,13 +28,12 @@ return function()
         'test/plugin',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        local plugin = state.spec_registry[src].plugin
-        helpers.assert_not_nil(plugin, "Plugin data should exist")
-        helpers.assert_not_nil(plugin.spec, "Plugin should have spec field")
-        helpers.assert_not_nil(plugin.spec.src, "Plugin spec should have src")
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      local plugin = state.spec_registry[src].plugin
+      helpers.assert_not_nil(plugin, "Plugin data should exist")
+      helpers.assert_not_nil(plugin.spec, "Plugin should have spec field")
+      helpers.assert_not_nil(plugin.spec.src, "Plugin spec should have src")
 
       helpers.cleanup_test_env()
     end)
@@ -49,13 +47,12 @@ return function()
         'test/plugin',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        local plugin = state.spec_registry[src].plugin
-        helpers.assert_not_nil(plugin, "Plugin data should exist")
-        helpers.assert_not_nil(plugin.path, "Plugin should have path field")
-        helpers.assert_equal(type(plugin.path), 'string', "Plugin path should be a string")
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      local plugin = state.spec_registry[src].plugin
+      helpers.assert_not_nil(plugin, "Plugin data should exist")
+      helpers.assert_not_nil(plugin.path, "Plugin should have path field")
+      helpers.assert_equal(type(plugin.path), 'string', "Plugin path should be a string")
 
       helpers.cleanup_test_env()
     end)
@@ -72,11 +69,10 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_not_nil(received_plugin, "config should receive plugin argument")
-        helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
-        helpers.assert_not_nil(received_plugin.path, "plugin should have path")
-      end)
+      helpers.flush_pending()
+      helpers.assert_not_nil(received_plugin, "config should receive plugin argument")
+      helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
+      helpers.assert_not_nil(received_plugin.path, "plugin should have path")
 
       helpers.cleanup_test_env()
     end)
@@ -93,11 +89,10 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_not_nil(received_plugin, "init should receive plugin argument")
-        helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
-        helpers.assert_not_nil(received_plugin.path, "plugin should have path")
-      end)
+      helpers.flush_pending()
+      helpers.assert_not_nil(received_plugin, "init should receive plugin argument")
+      helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
+      helpers.assert_not_nil(received_plugin.path, "plugin should have path")
 
       helpers.cleanup_test_env()
     end)
@@ -115,11 +110,10 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_not_nil(received_plugin, "cond should receive plugin argument")
-        helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
-        helpers.assert_not_nil(received_plugin.path, "plugin should have path")
-      end)
+      helpers.flush_pending()
+      helpers.assert_not_nil(received_plugin, "cond should receive plugin argument")
+      helpers.assert_not_nil(received_plugin.spec, "plugin should have spec")
+      helpers.assert_not_nil(received_plugin.path, "plugin should have path")
 
       helpers.cleanup_test_env()
     end)
@@ -137,10 +131,9 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_not_nil(path_received, "cond should receive plugin.path")
-        helpers.assert_equal(type(path_received), 'string', "plugin.path should be a string")
-      end)
+      helpers.flush_pending()
+      helpers.assert_not_nil(path_received, "cond should receive plugin.path")
+      helpers.assert_equal(type(path_received), 'string', "plugin.path should be a string")
 
       helpers.cleanup_test_env()
     end)
@@ -269,10 +262,9 @@ return function()
         end,
       })
 
-      vim.schedule(function()
-        helpers.assert_true(keys_called, "keys function should be called for startup plugin")
-        helpers.assert_not_nil(received_plugin, "keys function should receive plugin")
-      end)
+      helpers.flush_pending()
+      helpers.assert_true(keys_called, "keys function should be called for startup plugin")
+      helpers.assert_not_nil(received_plugin, "keys function should receive plugin")
 
       helpers.cleanup_test_env()
     end)

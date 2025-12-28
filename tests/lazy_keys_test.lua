@@ -4,28 +4,24 @@ return function()
   helpers.describe("Lazy Loading - Keymaps", function()
     helpers.test("KeySpec supports string shorthand", function()
       helpers.setup_test_env()
-      local loaded = false
 
       require('zpack').setup({ auto_import = false })
       require('zpack').add({
         'test/plugin',
         keys = '<leader>tk',
-        config = function()
-          loaded = true
-        end,
+        config = function() end,
       })
 
-      vim.schedule(function()
-        local keymaps = vim.api.nvim_get_keymap('n')
-        local found = false
-        for _, map in ipairs(keymaps) do
-          if map.lhs == ' tk' then
-            found = true
-            break
-          end
+      helpers.flush_pending()
+      local keymaps = vim.api.nvim_get_keymap('n')
+      local found = false
+      for _, map in ipairs(keymaps) do
+        if map.lhs == ' tk' then
+          found = true
+          break
         end
-        helpers.assert_true(found, "String key should create keymap")
-      end)
+      end
+      helpers.assert_true(found, "String key should create keymap")
 
       helpers.cleanup_test_env()
     end)
@@ -41,17 +37,16 @@ return function()
         },
       })
 
-      vim.schedule(function()
-        local keymaps = vim.api.nvim_get_keymap('n')
-        local found_with_desc = false
-        for _, map in ipairs(keymaps) do
-          if map.lhs == ' td' and map.desc == 'Test description' then
-            found_with_desc = true
-            break
-          end
+      helpers.flush_pending()
+      local keymaps = vim.api.nvim_get_keymap('n')
+      local found_with_desc = false
+      for _, map in ipairs(keymaps) do
+        if map.lhs == ' td' and map.desc == 'Test description' then
+          found_with_desc = true
+          break
         end
-        helpers.assert_true(found_with_desc, "KeySpec should create keymap with description")
-      end)
+      end
+      helpers.assert_true(found_with_desc, "KeySpec should create keymap with description")
 
       helpers.cleanup_test_env()
     end)
@@ -67,30 +62,29 @@ return function()
         },
       })
 
-      vim.schedule(function()
-        local normal_maps = vim.api.nvim_get_keymap('n')
-        local visual_maps = vim.api.nvim_get_keymap('v')
+      helpers.flush_pending()
+      local normal_maps = vim.api.nvim_get_keymap('n')
+      local visual_maps = vim.api.nvim_get_keymap('v')
 
-        local found_in_normal = false
-        local found_in_visual = false
+      local found_in_normal = false
+      local found_in_visual = false
 
-        for _, map in ipairs(normal_maps) do
-          if map.lhs == ' tv' then
-            found_in_normal = true
-            break
-          end
+      for _, map in ipairs(normal_maps) do
+        if map.lhs == ' tv' then
+          found_in_normal = true
+          break
         end
+      end
 
-        for _, map in ipairs(visual_maps) do
-          if map.lhs == ' tv' then
-            found_in_visual = true
-            break
-          end
+      for _, map in ipairs(visual_maps) do
+        if map.lhs == ' tv' then
+          found_in_visual = true
+          break
         end
+      end
 
-        helpers.assert_true(found_in_normal, "KeySpec should create keymap in normal mode")
-        helpers.assert_true(found_in_visual, "KeySpec should create keymap in visual mode")
-      end)
+      helpers.assert_true(found_in_normal, "KeySpec should create keymap in normal mode")
+      helpers.assert_true(found_in_visual, "KeySpec should create keymap in visual mode")
 
       helpers.cleanup_test_env()
     end)
@@ -105,13 +99,12 @@ return function()
         keys = '<leader>tl',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_false(
-          state.spec_registry[src].loaded,
-          "Lazy keys plugin should not be loaded at startup"
-        )
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_false(
+        state.spec_registry[src].loaded,
+        "Lazy keys plugin should not be loaded at startup"
+      )
 
       helpers.cleanup_test_env()
     end)

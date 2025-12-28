@@ -12,17 +12,12 @@ return function()
         event = 'BufReadPre *.lua',
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'BufReadPre' and vim.tbl_contains(cmd.pattern or {}, '*.lua') then
-            found = true
-            break
-          end
-        end
-        helpers.assert_true(found, "Inline event pattern should create autocmd")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'BufReadPre', '*.lua'),
+        "Inline event pattern should create autocmd"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -40,17 +35,12 @@ return function()
         },
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'BufRead' and vim.tbl_contains(cmd.pattern or {}, '*.rs') then
-            found = true
-            break
-          end
-        end
-        helpers.assert_true(found, "EventSpec pattern should create autocmd with pattern")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'BufReadPost', '*.rs'),
+        "EventSpec pattern should create autocmd with pattern"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -68,20 +58,11 @@ return function()
         },
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'BufRead' then
-            local patterns = cmd.pattern or {}
-            if vim.tbl_contains(patterns, '*.lua') or vim.tbl_contains(patterns, '*.vim') then
-              found = true
-              break
-            end
-          end
-        end
-        helpers.assert_true(found, "EventSpec with multiple patterns should create autocmd")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      local found = helpers.find_autocmd(autocmds, 'BufReadPost', '*.lua')
+        or helpers.find_autocmd(autocmds, 'BufReadPost', '*.vim')
+      helpers.assert_not_nil(found, "EventSpec with multiple patterns should create autocmd")
 
       helpers.cleanup_test_env()
     end)
@@ -97,17 +78,12 @@ return function()
         pattern = '*.md',
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'BufRead' and vim.tbl_contains(cmd.pattern or {}, '*.md') then
-            found = true
-            break
-          end
-        end
-        helpers.assert_true(found, "Global pattern should be applied to events")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'BufReadPost', '*.md'),
+        "Global pattern should be applied to events"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -122,17 +98,12 @@ return function()
         event = 'VeryLazy',
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found = false
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'UIEnter' then
-            found = true
-            break
-          end
-        end
-        helpers.assert_true(found, "VeryLazy should create UIEnter autocmd")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'UIEnter'),
+        "VeryLazy should create UIEnter autocmd"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -150,23 +121,16 @@ return function()
         },
       })
 
-      vim.schedule(function()
-        local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
-        local found_lua = false
-        local found_rs = false
-
-        for _, cmd in ipairs(autocmds) do
-          if cmd.event == 'BufReadPre' and vim.tbl_contains(cmd.pattern or {}, '*.lua') then
-            found_lua = true
-          end
-          if cmd.event == 'BufNewFile' and vim.tbl_contains(cmd.pattern or {}, '*.rs') then
-            found_rs = true
-          end
-        end
-
-        helpers.assert_true(found_lua, "Should create BufReadPre autocmd with *.lua pattern")
-        helpers.assert_true(found_rs, "Should create BufNewFile autocmd with *.rs pattern")
-      end)
+      helpers.flush_pending()
+      local autocmds = vim.api.nvim_get_autocmds({ group = state.lazy_group })
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'BufReadPre', '*.lua'),
+        "Should create BufReadPre autocmd with *.lua pattern"
+      )
+      helpers.assert_not_nil(
+        helpers.find_autocmd(autocmds, 'BufNewFile', '*.rs'),
+        "Should create BufNewFile autocmd with *.rs pattern"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -181,13 +145,12 @@ return function()
         event = 'BufRead',
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_false(
-          state.spec_registry[src].loaded,
-          "Lazy event plugin should not be loaded at startup"
-        )
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_false(
+        state.spec_registry[src].loaded,
+        "Lazy event plugin should not be loaded at startup"
+      )
 
       helpers.cleanup_test_env()
     end)
