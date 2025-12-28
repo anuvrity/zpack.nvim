@@ -331,6 +331,8 @@ return {
 
 #### Version Pinning
 
+`vim.pack.add` expects `string|vim.VersionRange`:
+
 ```lua
 return {
   'mrcjkb/rustaceanvim',
@@ -340,7 +342,7 @@ return {
   -- version = 'abc123', -- commit
 }
 ```
-See `:h vim.version.range()` and `:h vim.VersionRange`.
+See `:h vim.pack.Spec`, `:h vim.version.range()`, and `:h vim.VersionRange`.
 
 ##### for lazy.nvim compatibility:
 

@@ -433,6 +433,8 @@ Control load order with priority (higher loads first; default: 50):
 ------------------------------------------------------------------------------
 6.9 VERSION PINNING                                    *zpack-example-version*
 
+`vim.pack.add` expects `string|vim.VersionRange`.
+
 Pin a plugin to a semver range, branch, tag, or commit:
 >lua
     return {
@@ -443,7 +445,7 @@ Pin a plugin to a semver range, branch, tag, or commit:
       -- version = 'abc123', -- commit
     }
 <
-See |vim.version.range()| and |vim.VersionRange|.
+See |vim.pack.Spec|, |vim.version.range()|, and |vim.VersionRange|.
 
 For lazy.nvim compatibility: ~
 >lua
