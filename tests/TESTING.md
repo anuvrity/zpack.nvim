@@ -73,6 +73,5 @@ end
 
 ## Notes
 
-- Tests use `vim.schedule()` for async operations
 - Each test should clean up after itself to prevent state pollution
 - Mock plugins are used (e.g., 'test/plugin') to avoid actual vim.pack operations
