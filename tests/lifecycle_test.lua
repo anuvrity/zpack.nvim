@@ -23,7 +23,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -46,7 +46,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -69,7 +69,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -93,7 +93,7 @@ return function()
             config = function() end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -120,7 +120,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -139,7 +139,7 @@ return function()
             build = 'echo "build completed"',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -166,7 +166,7 @@ return function()
             build = build_fn,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -198,7 +198,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -222,7 +222,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

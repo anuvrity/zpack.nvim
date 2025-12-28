@@ -10,7 +10,7 @@ return function()
         spec = {
           { 'test/plugin' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -32,7 +32,7 @@ return function()
             priority = 100,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -71,7 +71,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -95,7 +95,7 @@ return function()
             priority = 999,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -116,7 +116,7 @@ return function()
           { 'test/plugin2', priority = 50 },
           { 'test/plugin3', priority = 200 },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -163,7 +163,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

@@ -13,7 +13,7 @@ return function()
             config = function() end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -42,7 +42,7 @@ return function()
             },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -71,7 +71,7 @@ return function()
             },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -112,7 +112,7 @@ return function()
             keys = '<leader>tl',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

@@ -13,7 +13,7 @@ return function()
             ft = 'rust',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -37,7 +37,7 @@ return function()
             ft = { 'lua', 'vim', 'python' },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -61,7 +61,7 @@ return function()
             ft = 'lua',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

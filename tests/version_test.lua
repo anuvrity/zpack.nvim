@@ -14,7 +14,7 @@ return function()
             tag = 'v1.0.0',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -34,7 +34,7 @@ return function()
             sem_version = '^6',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -58,7 +58,7 @@ return function()
             branch = 'develop',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -78,7 +78,7 @@ return function()
             tag = 'v1.0.0',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -98,7 +98,7 @@ return function()
             commit = 'abc123def',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -121,7 +121,7 @@ return function()
             commit = 'abc123',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -145,7 +145,7 @@ return function()
             commit = 'abc123',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -166,7 +166,7 @@ return function()
             commit = 'abc123',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -183,7 +183,7 @@ return function()
         spec = {
           { 'test/plugin' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
@@ -204,7 +204,7 @@ return function()
             version = range,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]

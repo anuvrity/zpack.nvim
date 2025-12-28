@@ -12,7 +12,7 @@ return function()
             cmd = 'TestCommand',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -32,7 +32,7 @@ return function()
             cmd = { 'TestCmd1', 'TestCmd2', 'TestCmd3' },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -55,7 +55,7 @@ return function()
             cmd = 'TestCommand',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -82,7 +82,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -107,7 +107,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

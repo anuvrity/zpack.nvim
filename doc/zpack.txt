@@ -141,28 +141,21 @@ Each file returns a spec or list of specs (see |zpack-examples| or
 
 ------------------------------------------------------------------------------
 4.3 CONFIGURATIONS                                     *zpack-configurations*
-
-                                                        *zpack-setup-confirm*
-Plugin Installation ~
-
-By default, `vim.pack` prompts for confirmation before installing new
-plugins. To skip confirmation prompts:
+                                                       *zpack-setup-defaults*
+                                                          *zpack-performance*
 >lua
     require('zpack').setup({
-      confirm = false,
+      defaults = {
+        confirm = false,         -- skip install prompts (default: true)
+        cond = not vim.g.vscode, -- global plugin condition
+      },
+      performance = {
+        vim_loader = true,       -- bytecode caching (default: true)
+      },
+      cmd_prefix = 'Z',          -- :ZUpdate, :ZClean, etc. (default: 'Z')
     })
 <
-
-                                                         *zpack-performance*
-Performance ~
-
-By default, zpack enables `vim.loader` to cache Lua module bytecode and
-speed up startup. You can disable it:
->lua
-    require('zpack').setup({
-      disable_vim_loader = true,
-    })
-<
+Plugin-level settings always take precedence over `defaults`.
 
 ------------------------------------------------------------------------------
 4.4 SETUP OPTIONS                                      *zpack-setup-options*
@@ -175,7 +168,7 @@ spec            (table, optional)
                 inline instead of importing from a directory.
 
                 Specs can also be passed directly as array elements in the
-                setup table (without the `spec` key). Both forms are equivalent:
+                setup table (without the `spec` key). Both forms work:
 >lua
                 -- Form 1: specs as array elements
                 require('zpack').setup({
@@ -198,16 +191,7 @@ plugins_dir     (string, optional)
                 `lua/` directory. Default: `'plugins'`
                 Only used when `spec` is not provided.
 
-                                              *zpack-setup-disable_vim_loader*
-disable_vim_loader (boolean, optional)
-                Disable vim.loader bytecode caching. See
-                |zpack-performance| for details. Default: `false`
-
-confirm         (boolean, optional)
-                Whether `vim.pack` prompts for confirmation before
-                installing new plugins. Default: `true`
-
-                                                      *zpack-setup-cmd_prefix*
+                                                     *zpack-setup-cmd_prefix*
 cmd_prefix      (string, optional)
                 Prefix for user commands. Change this if the default
                 commands conflict with other plugins. Default: `'Z'`
@@ -216,25 +200,15 @@ cmd_prefix      (string, optional)
                   - `'Pack'` creates `:PackUpdate`, `:PackClean`, etc.
                   - `''` creates `:Update`, `:Clean`, `:Build`, `:Delete`
 
-                                                        *zpack-setup-defaults*
 defaults        (table, optional)
                 Default values that apply to all plugins. Plugin-level
                 settings always take precedence over defaults.
+                  - `confirm`: Skip vim.pack install prompts. Default: `true`
+                  - `cond`: Global condition for all plugins.
 
-                defaults.cond   (boolean|function(plugin), optional)
-                                Default `cond` condition for all plugins.
-                                Only applied when a plugin spec doesn't
-                                define its own `cond`. Useful for globally
-                                disabling plugins in certain environments.
-                                Example:
->lua
-                                require('zpack').setup({
-                                  defaults = {
-                                    -- Disable plugins in VSCode
-                                    cond = not vim.g.vscode,
-                                  },
-                                })
-<
+performance     (table, optional)
+                Performance-related settings.
+                  - `vim_loader`: Enable vim.loader caching. Default: `true`
 
 ==============================================================================
 5. WHY ZPACK?                                                *zpack-why-zpack*
@@ -315,7 +289,7 @@ Load plugin when a specific event is triggered:
 <
 
 ------------------------------------------------------------------------------
-6.4 LAZY LOAD ON EVENT WITH PATTERN            *zpack-example-event-pattern*
+6.4 LAZY LOAD ON EVENT WITH PATTERN              *zpack-example-event-pattern*
 
 Load plugin on specific events with file patterns:
 
@@ -623,7 +597,7 @@ called in specific orders.
       -- version = vim.version.range("1.*"), -- Or semver range
 
       -- Source control (lazy.nvim compat, mapped to version)
-      sem_version = "^1.0.0",               -- corresponds to lazy.nvim spec's version
+      sem_version = "^1.0.0",               -- lazy.nvim's version field
       branch = "main",                      -- Git branch
       tag = "v1.0.0",                       -- Git tag
       commit = "abc123",                    -- Git commit

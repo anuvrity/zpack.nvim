@@ -105,55 +105,21 @@ return {
 ```
 
 ### Configurations
-#### Plugin Installation
-
-By default, `vim.pack` prompts for confirmation before installing new plugins. To skip confirmation prompts:
-
-```lua
-require('zpack').setup({
-  confirm = false,
-})
-```
-
-#### Performance
-
-By default, zpack enables `vim.loader` to cache Lua module bytecode and speed up startup. You can disable it:
-
-```lua
-require('zpack').setup({
-  disable_vim_loader = true,
-})
-```
-
-#### Command Prefix
-
-By default, zpack creates commands with the `Z` prefix (`:ZUpdate`, `:ZClean`, etc.). If this conflicts with other plugins, you can customize the prefix:
-
-```lua
-require('zpack').setup({
-  cmd_prefix = 'Pack', -- Creates :PackUpdate, :PackClean, :PackBuild, :PackDelete
-  -- cmd_prefix = '',  -- Creates :Update, :Clean, :Build, :Delete
-})
-```
-
-#### Plugin Defaults
-
-You can set default values that apply to all plugins. Currently supports a default `cond` condition, useful for globally disabling plugins in certain environments (e.g., when running inside VSCode):
 
 ```lua
 require('zpack').setup({
   defaults = {
-    -- Disable all plugins when running in VSCode
-    cond = not vim.g.vscode,
-    -- Or use a function for dynamic conditions
-    -- cond = function(plugin)
-    --   return not vim.g.vscode
-    -- end,
+    confirm = false,         -- skip vim.pack install prompts (default: true)
+    cond = not vim.g.vscode, -- global condition for all plugins
   },
+  performance = {
+    vim_loader = true,       -- enable vim.loader bytecode caching (default: true)
+  },
+  cmd_prefix = 'Z',          -- command prefix: :ZUpdate, :ZClean, etc. (default: 'Z')
 })
 ```
 
-The default `cond` is only applied when a plugin spec doesn't define its own `cond`. Plugin-level `cond` always takes precedence over the default.
+Plugin-level settings always take precedence over `defaults`.
 
 ## Why zpack?
 

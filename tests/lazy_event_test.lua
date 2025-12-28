@@ -13,7 +13,7 @@ return function()
             event = 'BufReadPre *.lua',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -40,7 +40,7 @@ return function()
             },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -67,7 +67,7 @@ return function()
             },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -91,7 +91,7 @@ return function()
             pattern = '*.md',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -115,7 +115,7 @@ return function()
             event = 'VeryLazy',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -142,7 +142,7 @@ return function()
             },
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -170,7 +170,7 @@ return function()
             event = 'BufRead',
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()

@@ -81,19 +81,24 @@ end
 
 ---@class ZpackDefaults
 ---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
+---@field confirm? boolean
+
+---@class ZpackPerformance
+---@field vim_loader? boolean
 
 ---@class ZpackConfig
 ---@field spec? zpack.Spec[]
 ---@field plugins_dir? string
----@field disable_vim_loader? boolean
----@field confirm? boolean
 ---@field cmd_prefix? string
 ---@field defaults? ZpackDefaults
+---@field performance? ZpackPerformance
+---@field confirm? boolean @deprecated Use defaults.confirm instead
+---@field disable_vim_loader? boolean @deprecated Use performance.vim_loader instead
 
 local config = {
-  confirm = true,
   cmd_prefix = 'Z',
-  defaults = {},
+  defaults = { confirm = true },
+  performance = { vim_loader = true },
 }
 
 ---@param opts? ZpackConfig
@@ -108,28 +113,41 @@ M.setup = function(opts)
   state.is_setup = true
 
   opts = opts or {}
-
-  if opts.confirm ~= nil then
-    config.confirm = opts.confirm
-  end
+  local deprecation = require('zpack.deprecation')
 
   if opts.cmd_prefix ~= nil then
     config.cmd_prefix = opts.cmd_prefix
   end
 
   if opts.defaults ~= nil then
-    config.defaults = opts.defaults
+    config.defaults = vim.tbl_extend('force', config.defaults, opts.defaults)
   end
 
-  if not opts.disable_vim_loader then
+  if opts.performance ~= nil then
+    config.performance = vim.tbl_extend('force', config.performance, opts.performance)
+  end
+
+  -- Handle deprecated opts.confirm
+  if opts.confirm ~= nil then
+    deprecation.notify_deprecated('confirm')
+    config.defaults.confirm = opts.confirm
+  end
+
+  -- Handle deprecated opts.disable_vim_loader
+  if opts.disable_vim_loader ~= nil then
+    deprecation.notify_deprecated('disable_vim_loader')
+    config.performance.vim_loader = not opts.disable_vim_loader
+  end
+
+  if config.performance.vim_loader then
     vim.loader.enable()
   end
 
   if opts.auto_import ~= nil then
-    require('zpack.deprecation').notify_removed('auto_import')
+    deprecation.notify_removed('auto_import')
   end
 
-  local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
+  local ctx = create_context({ confirm = config.defaults.confirm, defaults = config.defaults })
 
   -- import_specs handles both single spec and list; ipairs ignores non-numeric keys like `confirm`
   local spec = opts.spec or (opts[1] and opts) or nil

@@ -8,7 +8,7 @@ return function()
 
       helpers.assert_false(state.is_setup, "State should not be setup initially")
 
-      require('zpack').setup({ spec = {}, confirm = false })
+      require('zpack').setup({ spec = {}, defaults = { confirm = false } })
 
       helpers.assert_true(state.is_setup, "State should be setup after setup()")
       helpers.assert_not_nil(state.spec_registry, "Spec registry should exist")
@@ -22,11 +22,11 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ spec = {}, confirm = false })
+      require('zpack').setup({ spec = {}, defaults = { confirm = false } })
       helpers.assert_true(state.is_setup, "State should be setup after first call")
 
       -- Second call should warn but state should remain setup
-      require('zpack').setup({ spec = {}, confirm = false })
+      require('zpack').setup({ spec = {}, defaults = { confirm = false } })
       helpers.assert_true(state.is_setup, "State should still be setup after second call")
 
       helpers.cleanup_test_env()
@@ -35,7 +35,7 @@ return function()
     helpers.test("add() shows deprecation error", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ spec = {}, confirm = false })
+      require('zpack').setup({ spec = {}, defaults = { confirm = false } })
       require('zpack').add({ 'test/plugin' })
 
       helpers.flush_pending()
@@ -88,7 +88,7 @@ return function()
 
       require('zpack').setup({
         spec = { { 'test/plugin' } },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src = 'https://github.com/test/plugin'
@@ -104,7 +104,7 @@ return function()
 
       require('zpack').setup({
         spec = { 'test/plugin', config = function() end },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src = 'https://github.com/test/plugin'
@@ -122,7 +122,7 @@ return function()
           { 'test/plugin1' },
           { 'test/plugin2' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src1 = 'https://github.com/test/plugin1'
@@ -141,7 +141,7 @@ return function()
         spec = {
           { src = 'https://custom.url/plugin.git' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src = 'https://custom.url/plugin.git'
@@ -158,7 +158,7 @@ return function()
         spec = {
           { url = 'https://custom.url/plugin.git' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src = 'https://custom.url/plugin.git'
@@ -175,7 +175,7 @@ return function()
         spec = {
           { dir = '/path/to/local/plugin' },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       local src = '/path/to/local/plugin'

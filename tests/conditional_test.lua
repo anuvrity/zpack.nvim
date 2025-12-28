@@ -13,7 +13,7 @@ return function()
             enabled = false,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -34,7 +34,7 @@ return function()
             enabled = true,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -55,7 +55,7 @@ return function()
             enabled = function() return false end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -79,7 +79,7 @@ return function()
             enabled = function() return true end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -178,7 +178,7 @@ return function()
             cond = false,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
@@ -209,7 +209,7 @@ return function()
             end,
           },
         },
-        confirm = false,
+        defaults = { confirm = false },
       })
 
       helpers.flush_pending()
