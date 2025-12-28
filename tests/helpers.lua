@@ -181,6 +181,7 @@ function M.cleanup_test_env()
   package.loaded['zpack.keymap'] = nil
   package.loaded['zpack.utils'] = nil
   package.loaded['zpack.commands'] = nil
+  package.loaded['zpack.deprecation'] = nil
 end
 
 function M.track_plugin_load(plugin_name)

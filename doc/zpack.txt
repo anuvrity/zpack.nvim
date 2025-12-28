@@ -47,7 +47,6 @@ Install zpack.nvim via vim.pack.add():
 ==============================================================================
 4. USAGE                                                         *zpack-usage*
                                                                *zpack.setup()*
-                                                                 *zpack.add()*
 >lua
     -- Make sure to setup `mapleader` and `maplocalleader` before
     -- loading zpack.nvim so that mappings are correct.
@@ -60,17 +59,18 @@ Install zpack.nvim via vim.pack.add():
     -- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
     require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
 
-    -- or add your specs manually
-    require('zpack').setup({ auto_import = false })
-    require('zpack').add({
+    -- or add your specs inline
+    require('zpack').setup({
+      { 'neovim/nvim-lspconfig', config = function() ... end },
+    })
+
+    -- or via the spec field
+    require('zpack').setup({
+      spec = {
         { 'neovim/nvim-lspconfig', config = function() ... end },
-        ...
+      },
     })
 <
-Note: The initial `setup()`, or `add()` if `auto_import` is false, will batch
-process the plugin specs immediately during initialization. Any subsequent
-`add()` calls are deferred with `vim.schedule()` to avoid interference with
-build hooks. Prefer to add all of your specs in one go.
 
 ------------------------------------------------------------------------------
 4.1 COMMANDS                                                  *zpack-commands*
@@ -169,16 +169,34 @@ speed up startup. You can disable it:
 
 The `setup()` function accepts the following options:
 
+                                                          *zpack-setup-spec*
+spec            (table, optional)
+                Array of plugin specs to load. Use this to define plugins
+                inline instead of importing from a directory.
+
+                Specs can also be passed directly as array elements in the
+                setup table (without the `spec` key). Both forms are equivalent:
+>lua
+                -- Form 1: specs as array elements
+                require('zpack').setup({
+                  { 'nvim-lua/plenary.nvim' },
+                  { 'nvim-telescope/telescope.nvim', cmd = 'Telescope' },
+                })
+
+                -- Form 2: explicit spec field
+                require('zpack').setup({
+                  spec = {
+                    { 'nvim-lua/plenary.nvim' },
+                    { 'nvim-telescope/telescope.nvim', cmd = 'Telescope' },
+                  },
+                })
+<
+
                                                     *zpack-setup-plugins_dir*
 plugins_dir     (string, optional)
-                Directory to auto-import plugin specs from, relative to
+                Directory to import plugin specs from, relative to
                 `lua/` directory. Default: `'plugins'`
-
-                                                    *zpack-setup-auto_import*
-auto_import     (boolean, optional)
-                Whether to automatically import specs from the plugins
-                directory. Set to `false` to manually add all specs via
-                `zpack.add()`. Default: `true`
+                Only used when `spec` is not provided.
 
                                               *zpack-setup-disable_vim_loader*
 disable_vim_loader (boolean, optional)

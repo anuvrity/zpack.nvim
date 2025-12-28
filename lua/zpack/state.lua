@@ -2,8 +2,6 @@ local M = {}
 
 ---@type boolean
 M.is_setup = false
----@type boolean
-M.initial_spec_imported = false
 
 M.lazy_group = vim.api.nvim_create_augroup('LazyPack', { clear = true })
 M.startup_group = vim.api.nvim_create_augroup('StartupPack', { clear = true })

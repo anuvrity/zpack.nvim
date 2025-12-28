@@ -6,16 +6,19 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = false,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = false,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_nil(state.spec_registry[src], "Plugin should not be registered when enabled=false")
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_nil(state.spec_registry[src], "Plugin should not be registered when enabled=false")
 
       helpers.cleanup_test_env()
     end)
@@ -24,16 +27,19 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = true,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = true,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered when enabled=true")
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered when enabled=true")
 
       helpers.cleanup_test_env()
     end)
@@ -42,19 +48,22 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = function() return false end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = function() return false end,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_nil(
-          state.spec_registry[src],
-          "Plugin should not be registered when enabled function returns false"
-        )
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_nil(
+        state.spec_registry[src],
+        "Plugin should not be registered when enabled function returns false"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -63,19 +72,22 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = function() return true end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = function() return true end,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(
-          state.spec_registry[src],
-          "Plugin should be registered when enabled function returns true"
-        )
-      end)
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(
+        state.spec_registry[src],
+        "Plugin should be registered when enabled function returns true"
+      )
 
       helpers.cleanup_test_env()
     end)
@@ -158,24 +170,27 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = true,
-        cond = false,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = true,
+            cond = false,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        local src = 'https://github.com/test/plugin'
-        helpers.assert_not_nil(
-          state.spec_registry[src],
-          "Plugin should be registered (enabled=true)"
-        )
+      helpers.flush_pending()
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(
+        state.spec_registry[src],
+        "Plugin should be registered (enabled=true)"
+      )
 
-        local utils = require('zpack.utils')
-        local should_load = utils.check_cond(state.spec_registry[src].spec)
-        helpers.assert_false(should_load, "Plugin should not load (cond=false)")
-      end)
+      local utils = require('zpack.utils')
+      local should_load = utils.check_cond(state.spec_registry[src].spec)
+      helpers.assert_false(should_load, "Plugin should not load (cond=false)")
 
       helpers.cleanup_test_env()
     end)
@@ -184,18 +199,21 @@ return function()
       helpers.setup_test_env()
       local config_ran = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        enabled = false,
-        config = function()
-          config_ran = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            enabled = false,
+            config = function()
+              config_ran = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
-      vim.schedule(function()
-        helpers.assert_false(config_ran, "Config should not run when enabled=false")
-      end)
+      helpers.flush_pending()
+      helpers.assert_false(config_ran, "Config should not run when enabled=false")
 
       helpers.cleanup_test_env()
     end)

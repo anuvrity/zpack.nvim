@@ -4,19 +4,18 @@ return function()
   helpers.describe("Version Normalization", function()
     helpers.test("version field takes priority over other version fields", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        version = 'main',
-        branch = 'develop',
-        tag = 'v1.0.0',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            version = 'main',
+            branch = 'develop',
+            tag = 'v1.0.0',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -27,17 +26,16 @@ return function()
 
     helpers.test("sem_version field is wrapped with vim.version.range()", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        sem_version = '^6',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            sem_version = '^6',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -52,17 +50,16 @@ return function()
 
     helpers.test("branch field maps to version", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        branch = 'develop',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            branch = 'develop',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -73,17 +70,16 @@ return function()
 
     helpers.test("tag field maps to version", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        tag = 'v1.0.0',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            tag = 'v1.0.0',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -94,17 +90,16 @@ return function()
 
     helpers.test("commit field maps to version", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        commit = 'abc123def',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            commit = 'abc123def',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -115,20 +110,19 @@ return function()
 
     helpers.test("sem_version takes priority over branch/tag/commit", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        sem_version = '^1.0.0',
-        branch = 'main',
-        tag = 'v1.0.0',
-        commit = 'abc123',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            sem_version = '^1.0.0',
+            branch = 'main',
+            tag = 'v1.0.0',
+            commit = 'abc123',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -141,19 +135,18 @@ return function()
 
     helpers.test("branch takes priority over tag and commit", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        branch = 'develop',
-        tag = 'v1.0.0',
-        commit = 'abc123',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            branch = 'develop',
+            tag = 'v1.0.0',
+            commit = 'abc123',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -164,18 +157,17 @@ return function()
 
     helpers.test("tag takes priority over commit", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
-        tag = 'v2.0.0',
-        commit = 'abc123',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            tag = 'v2.0.0',
+            commit = 'abc123',
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -186,16 +178,13 @@ return function()
 
     helpers.test("no version fields results in nil version", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        'test/plugin',
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin' },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")
@@ -206,18 +195,17 @@ return function()
 
     helpers.test("vim.VersionRange passed directly through version field", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
-
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
 
       local range = vim.version.range('^6')
-      require('zpack').add({
-        'test/plugin',
-        version = range,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            version = range,
+          },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local vim_pack_call = _G.test_state.vim_pack_calls[1]
       helpers.assert_not_nil(vim_pack_call, "vim.pack.add should have been called")

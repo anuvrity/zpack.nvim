@@ -6,9 +6,11 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin' },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -23,9 +25,11 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin' },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -42,9 +46,11 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin' },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -61,12 +67,16 @@ return function()
       helpers.setup_test_env()
       local received_plugin = nil
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        config = function(plugin)
-          received_plugin = plugin
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            config = function(plugin)
+              received_plugin = plugin
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -81,12 +91,16 @@ return function()
       helpers.setup_test_env()
       local received_plugin = nil
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        init = function(plugin)
-          received_plugin = plugin
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            init = function(plugin)
+              received_plugin = plugin
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -101,13 +115,17 @@ return function()
       helpers.setup_test_env()
       local received_plugin = nil
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cond = function(plugin)
-          received_plugin = plugin
-          return true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cond = function(plugin)
+              received_plugin = plugin
+              return true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -122,13 +140,17 @@ return function()
       helpers.setup_test_env()
       local path_received = nil
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cond = function(plugin)
-          path_received = plugin.path
-          return true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cond = function(plugin)
+              path_received = plugin.path
+              return true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -251,15 +273,19 @@ return function()
       local keys_called = false
       local received_plugin = nil
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        lazy = false,
-        keys = function(plugin)
-          keys_called = true
-          received_plugin = plugin
-          return { { '<leader>test', function() end } }
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            lazy = false,
+            keys = function(plugin)
+              keys_called = true
+              received_plugin = plugin
+              return { { '<leader>test', function() end } }
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()

@@ -6,10 +6,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        ft = 'rust',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            ft = 'rust',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -26,10 +30,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        ft = { 'lua', 'vim', 'python' },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            ft = { 'lua', 'vim', 'python' },
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -46,10 +54,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        ft = 'lua',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            ft = 'lua',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()

@@ -52,11 +52,16 @@ require('zpack').setup({})
 -- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
 require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
 
--- or add your specs manually
-require('zpack').setup({ auto_import = false })
-require('zpack').add({
+-- or add your specs inline
+require('zpack').setup({
+  { 'neovim/nvim-lspconfig', config = function() ... end },
+})
+
+-- or via the spec field
+require('zpack').setup({
+  spec = {
     { 'neovim/nvim-lspconfig', config = function() ... end },
-    ...
+  },
 })
 ```
 

@@ -5,11 +5,15 @@ return function()
     helpers.test("KeySpec supports string shorthand", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        keys = '<leader>tk',
-        config = function() end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            keys = '<leader>tk',
+            config = function() end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -29,12 +33,16 @@ return function()
     helpers.test("KeySpec supports table format with desc", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        keys = {
-          { '<leader>td', function() end, desc = 'Test description' },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            keys = {
+              { '<leader>td', function() end, desc = 'Test description' },
+            },
+          },
         },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -54,12 +62,16 @@ return function()
     helpers.test("KeySpec supports custom modes", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        keys = {
-          { '<leader>tv', function() end, mode = { 'n', 'v' } },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            keys = {
+              { '<leader>tv', function() end, mode = { 'n', 'v' } },
+            },
+          },
         },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -93,10 +105,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        keys = '<leader>tl',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            keys = '<leader>tl',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()

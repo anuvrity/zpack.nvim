@@ -5,10 +5,14 @@ return function()
     helpers.test("plugin with cmd creates command placeholder", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -21,10 +25,14 @@ return function()
     helpers.test("plugin with multiple cmds creates all commands", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = { 'TestCmd1', 'TestCmd2', 'TestCmd3' },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = { 'TestCmd1', 'TestCmd2', 'TestCmd3' },
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -40,10 +48,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -60,13 +72,17 @@ return function()
       helpers.setup_test_env()
       local loaded = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        config = function()
-          loaded = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            config = function()
+              loaded = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -81,13 +97,17 @@ return function()
       helpers.setup_test_env()
       local loaded = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        config = function()
-          loaded = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            config = function()
+              loaded = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()

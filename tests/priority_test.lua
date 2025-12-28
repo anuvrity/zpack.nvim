@@ -6,9 +6,11 @@ return function()
       helpers.setup_test_env()
       local utils = require('zpack.utils')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin' },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -23,10 +25,14 @@ return function()
       helpers.setup_test_env()
       local utils = require('zpack.utils')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        priority = 100,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            priority = 100,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -41,29 +47,31 @@ return function()
       helpers.setup_test_env()
       local load_order = {}
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        {
-          'test/plugin1',
-          priority = 100,
-          config = function()
-            table.insert(load_order, 'plugin1')
-          end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin1',
+            priority = 100,
+            config = function()
+              table.insert(load_order, 'plugin1')
+            end,
+          },
+          {
+            'test/plugin2',
+            priority = 200,
+            config = function()
+              table.insert(load_order, 'plugin2')
+            end,
+          },
+          {
+            'test/plugin3',
+            priority = 150,
+            config = function()
+              table.insert(load_order, 'plugin3')
+            end,
+          },
         },
-        {
-          'test/plugin2',
-          priority = 200,
-          config = function()
-            table.insert(load_order, 'plugin2')
-          end,
-        },
-        {
-          'test/plugin3',
-          priority = 150,
-          config = function()
-            table.insert(load_order, 'plugin3')
-          end,
-        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -79,11 +87,15 @@ return function()
       helpers.setup_test_env()
       local utils = require('zpack.utils')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        priority = 999,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            priority = 999,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -98,11 +110,13 @@ return function()
       helpers.setup_test_env()
       local utils = require('zpack.utils')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        { 'test/plugin1', priority = 100 },
-        { 'test/plugin2', priority = 50 },
-        { 'test/plugin3', priority = 200 },
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin1', priority = 100 },
+          { 'test/plugin2', priority = 50 },
+          { 'test/plugin3', priority = 200 },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -130,24 +144,26 @@ return function()
       helpers.setup_test_env()
       local load_order = {}
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        {
-          'test/plugin1',
-          event = 'VeryLazy',
-          priority = 50,
-          config = function()
-            table.insert(load_order, 'plugin1')
-          end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin1',
+            event = 'VeryLazy',
+            priority = 50,
+            config = function()
+              table.insert(load_order, 'plugin1')
+            end,
+          },
+          {
+            'test/plugin2',
+            event = 'VeryLazy',
+            priority = 100,
+            config = function()
+              table.insert(load_order, 'plugin2')
+            end,
+          },
         },
-        {
-          'test/plugin2',
-          event = 'VeryLazy',
-          priority = 100,
-          config = function()
-            table.insert(load_order, 'plugin2')
-          end,
-        },
+        confirm = false,
       })
 
       helpers.flush_pending()

@@ -8,18 +8,22 @@ return function()
       local config_ran = false
       local init_ran_before_config = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        init = function()
-          init_ran = true
-          if not config_ran then
-            init_ran_before_config = true
-          end
-        end,
-        config = function()
-          config_ran = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            init = function()
+              init_ran = true
+              if not config_ran then
+                init_ran_before_config = true
+              end
+            end,
+            config = function()
+              config_ran = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -33,12 +37,16 @@ return function()
       helpers.setup_test_env()
       local config_ran = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        config = function()
-          config_ran = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            config = function()
+              config_ran = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -51,13 +59,17 @@ return function()
       helpers.setup_test_env()
       local init_ran = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        init = function()
-          init_ran = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            init = function()
+              init_ran = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -70,14 +82,18 @@ return function()
       helpers.setup_test_env()
       local init_count = 0
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        init = function()
-          init_count = init_count + 1
-        end,
-        config = function() end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            init = function()
+              init_count = init_count + 1
+            end,
+            config = function() end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -94,13 +110,17 @@ return function()
       helpers.setup_test_env()
       local config_ran = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        cmd = 'TestCommand',
-        config = function()
-          config_ran = true
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            cmd = 'TestCommand',
+            config = function()
+              config_ran = true
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -112,10 +132,14 @@ return function()
     helpers.test("build hook is string command", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        build = 'echo "build completed"',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            build = 'echo "build completed"',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -135,10 +159,14 @@ return function()
       helpers.setup_test_env()
       local build_fn = function() end
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        build = build_fn,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            build = build_fn,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -158,15 +186,19 @@ return function()
       helpers.setup_test_env()
       local execution_order = {}
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        init = function()
-          table.insert(execution_order, 'init')
-        end,
-        config = function()
-          table.insert(execution_order, 'config')
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            init = function()
+              table.insert(execution_order, 'init')
+            end,
+            config = function()
+              table.insert(execution_order, 'config')
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -181,12 +213,16 @@ return function()
       helpers.setup_test_env()
       local can_access_globals = false
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        config = function()
-          can_access_globals = (vim ~= nil and vim.fn ~= nil)
-        end,
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            config = function()
+              can_access_globals = (vim ~= nil and vim.fn ~= nil)
+            end,
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()

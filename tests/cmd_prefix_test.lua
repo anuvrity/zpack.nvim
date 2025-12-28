@@ -5,7 +5,7 @@ return function()
     helpers.test("default prefix creates Z-prefixed commands", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false })
+      require('zpack').setup({ spec = {}, confirm = false })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_not_nil(cmds['ZUpdate'], "ZUpdate command should exist")
@@ -23,7 +23,7 @@ return function()
     helpers.test("custom prefix creates correctly prefixed commands", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = 'Pack' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = 'Pack' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_not_nil(cmds['PackUpdate'], "PackUpdate command should exist")
@@ -46,7 +46,7 @@ return function()
     helpers.test("empty prefix creates commands without prefix", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = '' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = '' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_not_nil(cmds['Update'], "Update command should exist")
@@ -64,7 +64,7 @@ return function()
     helpers.test("lowercase prefix is rejected", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = 'pack' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = 'pack' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_nil(cmds['packUpdate'], "Commands should not be created with lowercase prefix")
@@ -76,7 +76,7 @@ return function()
     helpers.test("prefix with hyphen is rejected", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = 'My-Pack' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = 'My-Pack' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_nil(cmds['My-PackUpdate'], "Commands should not be created with hyphen prefix")
@@ -88,7 +88,7 @@ return function()
     helpers.test("prefix starting with digit is rejected", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = '123' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = '123' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_nil(cmds['123Update'], "Commands should not be created with digit prefix")
@@ -100,7 +100,7 @@ return function()
     helpers.test("prefix with special characters is rejected", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = 'Pack!' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = 'Pack!' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_nil(cmds['Pack!Update'], "Commands should not be created with special char prefix")
@@ -112,7 +112,7 @@ return function()
     helpers.test("prefix with whitespace is rejected", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = ' Z' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = ' Z' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_nil(cmds[' ZUpdate'], "Commands should not be created with whitespace prefix")
@@ -124,7 +124,7 @@ return function()
     helpers.test("prefix with digits after first letter is valid", function()
       helpers.setup_test_env()
 
-      require('zpack').setup({ auto_import = false, confirm = false, cmd_prefix = 'Z2' })
+      require('zpack').setup({ spec = {}, confirm = false, cmd_prefix = 'Z2' })
 
       local cmds = vim.api.nvim_get_commands({})
       helpers.assert_not_nil(cmds['Z2Update'], "Z2Update command should exist")

@@ -8,7 +8,7 @@ return function()
 
       helpers.assert_false(state.is_setup, "State should not be setup initially")
 
-      require('zpack').setup({ auto_import = false, confirm = false })
+      require('zpack').setup({ spec = {}, confirm = false })
 
       helpers.assert_true(state.is_setup, "State should be setup after setup()")
       helpers.assert_not_nil(state.spec_registry, "Spec registry should exist")
@@ -22,41 +22,74 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
+      require('zpack').setup({ spec = {}, confirm = false })
       helpers.assert_true(state.is_setup, "State should be setup after first call")
 
-      -- Second call should still work but state should remain setup
-      require('zpack').setup({ auto_import = false, confirm = false })
+      -- Second call should warn but state should remain setup
+      require('zpack').setup({ spec = {}, confirm = false })
       helpers.assert_true(state.is_setup, "State should still be setup after second call")
 
       helpers.cleanup_test_env()
     end)
 
-    helpers.test("add() requires setup() to be called first", function()
+    helpers.test("add() shows deprecation error", function()
       helpers.setup_test_env()
-      local state = require('zpack.state')
 
-      helpers.assert_false(state.is_setup, "State should not be setup initially")
-
-      -- This should not crash but also should not work
+      require('zpack').setup({ spec = {}, confirm = false })
       require('zpack').add({ 'test/plugin' })
+
+      helpers.flush_pending()
+
+      local found_deprecation = false
+      for _, notif in ipairs(_G.test_state.notifications) do
+        if notif.msg:find("REMOVED") and notif.msg:find("add") then
+          found_deprecation = true
+          break
+        end
+      end
+
+      helpers.assert_true(found_deprecation, "Should show deprecation error for add()")
 
       helpers.cleanup_test_env()
     end)
 
-    helpers.test("add() registers single plugin spec", function()
+    helpers.test("setup() with specs as first argument registers plugins", function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
+      require('zpack').setup({
+        { 'test/plugin1' },
+        { 'test/plugin2' },
+      })
 
-      -- Give the initial spec import flag time to be set
-      state.initial_spec_imported = true
+      local src1 = 'https://github.com/test/plugin1'
+      local src2 = 'https://github.com/test/plugin2'
+      helpers.assert_not_nil(state.spec_registry[src1], "Plugin 1 should be registered")
+      helpers.assert_not_nil(state.spec_registry[src2], "Plugin 2 should be registered")
 
-      require('zpack').add({ 'test/plugin' })
+      helpers.cleanup_test_env()
+    end)
 
-      -- Wait a bit for vim.schedule to run
-      vim.wait(100, function() return false end)
+    helpers.test("setup() with single spec as first argument", function()
+      helpers.setup_test_env()
+      local state = require('zpack.state')
+
+      require('zpack').setup({ 'test/plugin' })
+
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src], "Single inline spec should be registered")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("setup() with spec field registers single plugin", function()
+      helpers.setup_test_env()
+      local state = require('zpack.state')
+
+      require('zpack').setup({
+        spec = { { 'test/plugin' } },
+        confirm = false,
+      })
 
       local src = 'https://github.com/test/plugin'
       helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered")
@@ -65,19 +98,32 @@ return function()
       helpers.cleanup_test_env()
     end)
 
-    helpers.test("add() registers multiple plugin specs", function()
+    helpers.test("setup() with spec as single spec (not wrapped in list)", function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        { 'test/plugin1' },
-        { 'test/plugin2' },
+      require('zpack').setup({
+        spec = { 'test/plugin', config = function() end },
+        confirm = false,
       })
 
-      vim.wait(100, function() return false end)
+      local src = 'https://github.com/test/plugin'
+      helpers.assert_not_nil(state.spec_registry[src], "Single spec should be registered")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("setup() with spec field registers multiple plugins", function()
+      helpers.setup_test_env()
+      local state = require('zpack.state')
+
+      require('zpack').setup({
+        spec = {
+          { 'test/plugin1' },
+          { 'test/plugin2' },
+        },
+        confirm = false,
+      })
 
       local src1 = 'https://github.com/test/plugin1'
       local src2 = 'https://github.com/test/plugin2'
@@ -91,14 +137,12 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        src = 'https://custom.url/plugin.git'
+      require('zpack').setup({
+        spec = {
+          { src = 'https://custom.url/plugin.git' },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local src = 'https://custom.url/plugin.git'
       helpers.assert_not_nil(state.spec_registry[src], "Plugin with src should be registered")
@@ -110,14 +154,12 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        url = 'https://custom.url/plugin.git'
+      require('zpack').setup({
+        spec = {
+          { url = 'https://custom.url/plugin.git' },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local src = 'https://custom.url/plugin.git'
       helpers.assert_not_nil(state.spec_registry[src], "Plugin with url should be registered")
@@ -129,14 +171,12 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false, confirm = false })
-      state.initial_spec_imported = true
-
-      require('zpack').add({
-        dir = '/path/to/local/plugin'
+      require('zpack').setup({
+        spec = {
+          { dir = '/path/to/local/plugin' },
+        },
+        confirm = false,
       })
-
-      vim.wait(100, function() return false end)
 
       local src = '/path/to/local/plugin'
       helpers.assert_not_nil(state.spec_registry[src], "Plugin with dir should be registered")

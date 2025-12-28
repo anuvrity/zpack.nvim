@@ -83,8 +83,8 @@ end
 ---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
 
 ---@class ZpackConfig
+---@field spec? zpack.Spec[]
 ---@field plugins_dir? string
----@field auto_import? boolean
 ---@field disable_vim_loader? boolean
 ---@field confirm? boolean
 ---@field cmd_prefix? string
@@ -125,42 +125,28 @@ M.setup = function(opts)
     vim.loader.enable()
   end
 
-  local plugins_dir = opts.plugins_dir or 'plugins'
-  local auto_import = opts.auto_import
-  if auto_import == nil then auto_import = true end
-
-  if auto_import then
-    local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
-    import_specs_from_dir(plugins_dir, ctx)
-    process_all(ctx)
-    state.initial_spec_imported = true
+  if opts.auto_import ~= nil then
+    require('zpack.deprecation').notify_removed('auto_import')
   end
+
+  local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
+
+  -- import_specs handles both single spec and list; ipairs ignores non-numeric keys like `confirm`
+  local spec = opts.spec or (opts[1] and opts) or nil
+  if spec then
+    require('zpack.import').import_specs(spec, ctx)
+  else
+    local plugins_dir = opts.plugins_dir or 'plugins'
+    import_specs_from_dir(plugins_dir, ctx)
+  end
+
+  process_all(ctx)
   require('zpack.commands').setup(config.cmd_prefix)
 end
 
----@param spec_item_or_list zpack.Spec|zpack.Spec[]
-M.add = function(spec_item_or_list)
-  if not check_version() then return end
-
-  local state = require('zpack.state')
-  if not state.is_setup then
-    require('zpack.utils').schedule_notify('zpack.setup() must be called before zpack.add()', vim.log.levels.ERROR)
-    return
-  end
-
-  if not state.initial_spec_imported then
-    local ctx = create_context({ confirm = config.confirm, defaults = config.defaults })
-    require('zpack.import').import_specs(spec_item_or_list, ctx)
-    process_all(ctx)
-    state.initial_spec_imported = true
-    return
-  end
-
-  vim.schedule(function()
-    local ctx = create_context({ load = true, confirm = config.confirm, defaults = config.defaults })
-    require('zpack.import').import_specs(spec_item_or_list, ctx)
-    process_all(ctx)
-  end)
+---@deprecated Use setup({ spec = { ... } }) instead
+M.add = function()
+  require('zpack.deprecation').notify_removed('add')
 end
 
 return M

@@ -6,10 +6,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = 'BufReadPre *.lua',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = 'BufReadPre *.lua',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -26,13 +30,17 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = {
-          event = 'BufRead',
-          pattern = '*.rs',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = {
+              event = 'BufRead',
+              pattern = '*.rs',
+            },
+          },
         },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -49,13 +57,17 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = {
-          event = 'BufRead',
-          pattern = { '*.lua', '*.vim' },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = {
+              event = 'BufRead',
+              pattern = { '*.lua', '*.vim' },
+            },
+          },
         },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -71,11 +83,15 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = 'BufRead',
-        pattern = '*.md',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = 'BufRead',
+            pattern = '*.md',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -92,10 +108,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = 'VeryLazy',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = 'VeryLazy',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -112,13 +132,17 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = {
-          { event = 'BufReadPre', pattern = '*.lua' },
-          { event = 'BufNewFile', pattern = '*.rs' },
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = {
+              { event = 'BufReadPre', pattern = '*.lua' },
+              { event = 'BufNewFile', pattern = '*.rs' },
+            },
+          },
         },
+        confirm = false,
       })
 
       helpers.flush_pending()
@@ -139,10 +163,14 @@ return function()
       helpers.setup_test_env()
       local state = require('zpack.state')
 
-      require('zpack').setup({ auto_import = false })
-      require('zpack').add({
-        'test/plugin',
-        event = 'BufRead',
+      require('zpack').setup({
+        spec = {
+          {
+            'test/plugin',
+            event = 'BufRead',
+          },
+        },
+        confirm = false,
       })
 
       helpers.flush_pending()
