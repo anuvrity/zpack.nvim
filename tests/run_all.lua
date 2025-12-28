@@ -15,6 +15,7 @@ local test_modules = {
   'conditional_test',
   'plugin_data_test',
   'cmd_prefix_test',
+  'version_test',
 }
 
 print("\n" .. string.rep("=", 60))

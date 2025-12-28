@@ -334,12 +334,25 @@ return {
 ```lua
 return {
   'mrcjkb/rustaceanvim',
-  version = vim.version.range('^6'),
-  -- version = 'main',
+  version = vim.version.range('^6'), -- semver version
+  -- version = 'main', -- branch
+  -- version = 'v1.0.0', -- tag
+  -- version = 'abc123', -- commit
 }
 ```
-
 See `:h vim.version.range()` and `:h vim.VersionRange`.
+
+##### for lazy.nvim compatibility:
+
+```lua
+return {
+  'mrcjkb/rustaceanvim',
+  sem_version = '^6',  -- corresponds to lazy.nvim spec's `version`, auto-wrapped to vim.version.range()
+  -- branch = 'main',
+  -- tag = 'v1.0.0',
+  -- commit = 'abc123',
+}
+```
 
 #### Build Hook
 
@@ -443,9 +456,15 @@ return {
   -- Plugin metadata
   name = "my-plugin",                   -- Custom plugin name (optional, overrides auto-derived name)
 
-  -- Source control
+  -- Source control (version for `vim.pack.add`, string|vim.VersionRange)
   version = "main",                     -- Git branch, tag, or commit
   -- version = vim.version.range("1.*"), -- Or semver range via vim.version.range()
+
+  -- Source control (lazy.nvim compat, mapped to version)
+  sem_version = "^1.0.0",               -- Semver string (corresponds to lazy.nvim spec's version), auto-wrapped to vim.version.range()
+  branch = "main",                      -- Git branch
+  tag = "v1.0.0",                       -- Git tag
+  commit = "abc123",                    -- Git commit
 
   -- Loading control
   enabled = true|false|function,        -- Enable/disable plugin
@@ -508,7 +527,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a th
 **key differences:**
 
 - **dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
-- **version**: `vim.pack` expects a `string` for git branch, tag, or commit hash; and `vim.VersionRange` for semver versions. See [Version Pinning](#version-pinning)
+- **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning)
 - **opts**: use `config = function() ... end` instead
 - **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 - **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.

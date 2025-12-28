@@ -38,6 +38,10 @@
 ---@field lazy? boolean
 ---@field priority? number Load priority for startup plugins. Higher priority loads first. Default: 50
 ---@field version? string|vim.VersionRange Git branch/tag/commit (string) or semver range (vim.VersionRange)
+---@field sem_version? string Semver range string, auto-wrapped to vim.version.range() (lazy.nvim compat)
+---@field branch? string Git branch (lazy.nvim compat). Mapped to version
+---@field tag? string Git tag (lazy.nvim compat). Mapped to version
+---@field commit? string Git commit (lazy.nvim compat). Mapped to version
 ---@field keys? zpack.KeysValue|fun(plugin: zpack.Plugin):zpack.KeysValue
 ---@field config? fun(plugin: zpack.Plugin)
 ---@field event? zpack.EventValue|fun(plugin: zpack.Plugin):zpack.EventValue

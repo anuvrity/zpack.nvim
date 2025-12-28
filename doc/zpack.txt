@@ -437,11 +437,24 @@ Pin a plugin to a semver range, branch, tag, or commit:
 >lua
     return {
       'mrcjkb/rustaceanvim',
-      version = vim.version.range('^6'),
-      -- version = 'main',
+      version = vim.version.range('^6'), -- semver version
+      -- version = 'main', -- branch
+      -- version = 'v1.0.0', -- tag
+      -- version = 'abc123', -- commit
     }
 <
 See |vim.version.range()| and |vim.VersionRange|.
+
+For lazy.nvim compatibility: ~
+>lua
+    return {
+      'mrcjkb/rustaceanvim',
+      sem_version = '^6',  -- corresponds to lazy.nvim spec's `version`
+      -- branch = 'main',
+      -- tag = 'v1.0.0',
+      -- commit = 'abc123',
+    }
+<
 
 ------------------------------------------------------------------------------
 6.10 BUILD HOOK                                          *zpack-example-build*
@@ -565,9 +578,15 @@ called in specific orders.
       -- Plugin metadata
       name = "my-plugin",                   -- Custom name (optional)
 
-      -- Source control
+      -- Source control (version for `vim.pack.add`, string|vim.VersionRange)
       version = "main",                     -- Branch/tag/commit
       -- version = vim.version.range("1.*"), -- Or semver range
+
+      -- Source control (lazy.nvim compat, mapped to version)
+      sem_version = "^1.0.0",               -- corresponds to lazy.nvim spec's version
+      branch = "main",                      -- Git branch
+      tag = "v1.0.0",                       -- Git tag
+      commit = "abc123",                    -- Git commit
 
       -- Loading control
       enabled = true|false|function,        -- Enable/disable
@@ -625,7 +644,28 @@ name            (string, optional)
                                                          *zpack-Spec.version*
 version         (string|vim.VersionRange, optional)
                 Git branch, tag, or commit (string), or semver range via
-                |vim.version.range()|.
+                |vim.version.range()|. This is vim.pack.add's version field.
+
+                                                     *zpack-Spec.sem_version*
+sem_version     (string, optional)
+                Semver range string. Corresponds to lazy.nvim spec's
+                `version` field. Auto-wrapped to |vim.version.range()|.
+                For lazy.nvim compatibility.
+
+                                                          *zpack-Spec.branch*
+branch          (string, optional)
+                Git branch. For lazy.nvim compatibility.
+                Mapped to `version` internally.
+
+                                                             *zpack-Spec.tag*
+tag             (string, optional)
+                Git tag. For lazy.nvim compatibility.
+                Mapped to `version` internally.
+
+                                                          *zpack-Spec.commit*
+commit          (string, optional)
+                Git commit hash. For lazy.nvim compatibility.
+                Mapped to `version` internally.
 
                                                          *zpack-Spec.enabled*
 enabled         (boolean|function, optional)
@@ -798,9 +838,8 @@ KEY DIFFERENCES ~
 dependencies              zpack does not have a `dependencies` field. See
                           |zpack-dependency-handling|.
 
-version                   `vim.pack` expects string for git branch, tag, or
-                          commit hash; and `vim.VersionRange` for semver
-                          versions. See |zpack-example-version|.
+version pinning           lazy.nvim's `version` field maps to zpack's
+                          `sem_version`. See |zpack-example-version|.
 
 opts                      use `config = function() ... end` instead.
                           lazy.nvim heuristically speculates a plugin's main
