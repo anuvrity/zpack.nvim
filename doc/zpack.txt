@@ -56,8 +56,8 @@ Install zpack.nvim via vim.pack.add():
     -- automatically import specs from `/lua/plugins/*.lua`
     require('zpack').setup({})
 
-    -- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
-    require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
+    -- or import from a custom directory
+    require('zpack').setup({ { import = 'my_plugins' } })
 
     -- or add your specs inline
     require('zpack').setup({
@@ -184,12 +184,6 @@ spec            (table, optional)
                   },
                 })
 <
-
-                                                    *zpack-setup-plugins_dir*
-plugins_dir     (string, optional)
-                Directory to import plugin specs from, relative to
-                `lua/` directory. Default: `'plugins'`
-                Only used when `spec` is not provided.
 
                                                      *zpack-setup-cmd_prefix*
 cmd_prefix      (string, optional)
@@ -623,6 +617,9 @@ called in specific orders.
       cmd = string|string[]|fn(plugin),     -- Command(s) to create
       keys = KeySpec|KeySpec[]|fn(plugin),  -- Keymap(s) to create
       ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
+
+      -- Spec imports
+      import = "plugins.lsp",               -- Import specs from lua/{path}/
     }
 <
 
@@ -759,6 +756,13 @@ ft              (string|string[]|function(plugin), optional)
                 re-triggers BufReadPre, BufReadPost, and FileType events
                 after loading to ensure LSP clients and Treesitter attach
                 properly. Auto-sets `lazy=true`.
+
+                                                          *zpack-Spec.import*
+import          (string, optional)
+                Module path to import specs from (e.g., 'plugins' or
+                'plugins.lsp'). Imports all .lua files from lua/{path}/
+                and all subdirectories with init.lua (lua/{path}/*/init.lua).
+                Each file should return a spec or list of specs.
 
 ==============================================================================
 9. PLUGIN REFERENCE                                *zpack-plugin-reference*

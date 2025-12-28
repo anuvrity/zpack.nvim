@@ -17,6 +17,7 @@ local test_modules = {
   'cmd_prefix_test',
   'version_test',
   'deprecation_test',
+  'import_test',
 }
 
 print("\n" .. string.rep("=", 60))

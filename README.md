@@ -49,8 +49,8 @@ vim.g.maplocalleader = "\\"
 -- automatically import specs from `/lua/plugins/*.lua`
 require('zpack').setup({})
 
--- or automatically import specs from `/lua/a/b/my_plugins/*.lua`
-require('zpack').setup({ plugins_dir = 'a/b/my_plugins' })
+-- or import from a custom directory
+require('zpack').setup({ { import = 'my_plugins' } })
 
 -- or add your specs inline
 require('zpack').setup({
@@ -476,6 +476,9 @@ return {
   cmd = string|string[]|function(plugin), -- Command(s) to create
   keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
   ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
+
+  -- Spec imports
+  import = "plugins.lsp",               -- Import from lua/{path}/*.lua and lua/{path}/*/init.lua
 }
 ```
 

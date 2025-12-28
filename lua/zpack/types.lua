@@ -48,5 +48,6 @@
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
 ---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue
 ---@field ft? zpack.FtValue|fun(plugin: zpack.Plugin):zpack.FtValue
+---@field import? string Module path to import specs from (e.g., 'plugins')
 
 return {}

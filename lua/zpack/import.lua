@@ -3,6 +3,8 @@ local state = require('zpack.state')
 
 local M = {}
 
+local imported_modules = {}
+
 ---@param spec zpack.Spec
 ---@return boolean
 local is_enabled = function(spec)
@@ -67,6 +69,57 @@ local is_single_spec = function(value)
       or value.src ~= nil
       or value.dir ~= nil
       or value.url ~= nil
+      or value.import ~= nil
+end
+
+---Check if spec is an import spec
+---@param spec zpack.Spec
+---@return boolean
+local is_import_spec = function(spec)
+  return spec.import ~= nil
+end
+
+---Load a spec module and import its specs
+---@param full_module string Full module path (e.g., 'plugins.telescope')
+---@param ctx ProcessContext
+local load_spec_module = function(full_module, ctx)
+  local success, spec_item_or_list = pcall(require, full_module)
+
+  if not success then
+    utils.schedule_notify(
+      ("Failed to load plugin spec from %s: %s"):format(full_module, spec_item_or_list),
+      vim.log.levels.ERROR
+    )
+  elseif type(spec_item_or_list) ~= "table" then
+    utils.schedule_notify(
+      ("Invalid spec from %s, not a table: %s"):format(full_module, spec_item_or_list),
+      vim.log.levels.ERROR
+    )
+  else
+    M.import_specs(spec_item_or_list, ctx)
+  end
+end
+
+---Import specs from a module directory
+---@param module_path string Module path (e.g., 'plugins' imports from lua/plugins/*.lua)
+---@param ctx ProcessContext
+local import_from_module = function(module_path, ctx)
+  if imported_modules[module_path] then
+    return
+  end
+  imported_modules[module_path] = true
+
+  local lua_path = vim.fn.stdpath('config') .. '/lua/' .. module_path:gsub('%.', '/')
+
+  for _, plugin_path in ipairs(vim.fn.glob(lua_path .. '/*.lua', false, true)) do
+    local plugin_name = vim.fn.fnamemodify(plugin_path, ":t:r")
+    load_spec_module(module_path .. "." .. plugin_name, ctx)
+  end
+
+  for _, init_path in ipairs(vim.fn.glob(lua_path .. '/*/init.lua', false, true)) do
+    local dir_name = vim.fn.fnamemodify(init_path, ":h:t")
+    load_spec_module(module_path .. "." .. dir_name, ctx)
+  end
 end
 
 ---@param spec_item_or_list zpack.Spec|zpack.Spec[]
@@ -81,8 +134,12 @@ M.import_specs = function(spec_item_or_list, ctx)
       goto continue
     end
 
+    if is_import_spec(spec) then
+      import_from_module(spec.import, ctx)
+      goto continue
+    end
+
     local src = get_source_url(spec)
-    -- already imported, skip
     if state.spec_registry[src] then
       goto continue
     end
@@ -92,6 +149,10 @@ M.import_specs = function(spec_item_or_list, ctx)
 
     ::continue::
   end
+end
+
+M.reset_imported_modules = function()
+  imported_modules = {}
 end
 
 return M

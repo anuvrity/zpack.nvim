@@ -28,6 +28,10 @@ M.deprecated = {
     message = "opts.disable_vim_loader is deprecated. Use opts.performance.vim_loader instead:",
     replacement = "require('zpack').setup({ performance = { vim_loader = false } })",
   },
+  plugins_dir = {
+    message = "opts.plugins_dir is deprecated. Use { import = 'dir' } in spec instead:",
+    replacement = "require('zpack').setup({ { import = 'plugins' } })",
+  },
 }
 
 M.notify_removed = function(key)

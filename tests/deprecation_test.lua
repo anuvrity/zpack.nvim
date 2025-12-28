@@ -42,6 +42,26 @@ return function()
       helpers.cleanup_test_env()
     end)
 
+    helpers.test("deprecated plugins_dir option shows warning", function()
+      helpers.setup_test_env()
+
+      require('zpack').setup({ plugins_dir = 'my_plugins' })
+
+      helpers.flush_pending()
+
+      local found_deprecation = false
+      for _, notif in ipairs(_G.test_state.notifications) do
+        if notif.msg:find("DEPRECATED") and notif.msg:find("plugins_dir") then
+          found_deprecation = true
+          break
+        end
+      end
+
+      helpers.assert_true(found_deprecation, "Should show deprecation warning for plugins_dir")
+
+      helpers.cleanup_test_env()
+    end)
+
     helpers.test("deprecated options still register plugins", function()
       helpers.setup_test_env()
       local state = require('zpack.state')

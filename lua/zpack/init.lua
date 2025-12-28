@@ -39,31 +39,6 @@ local function check_version()
   return true
 end
 
----@param plugins_dir string
----@param ctx ProcessContext
-local import_specs_from_dir = function(plugins_dir, ctx)
-  local plugin_paths = vim.fn.glob(vim.fn.stdpath('config') .. '/lua/' .. plugins_dir .. '/*.lua', false, true)
-
-  for _, plugin_path in ipairs(plugin_paths) do
-    local plugin_name = vim.fn.fnamemodify(plugin_path, ":t:r")
-    local success, spec_item_or_list = pcall(require, plugins_dir .. "." .. plugin_name)
-
-    if not success then
-      require('zpack.utils').schedule_notify(
-        ("Failed to load plugin spec for %s: %s"):format(plugin_name, spec_item_or_list),
-        vim.log.levels.ERROR
-      )
-    elseif type(spec_item_or_list) ~= "table" then
-      require('zpack.utils').schedule_notify(
-        ("Invalid spec for %s, not a table: %s"):format(plugin_name, spec_item_or_list),
-        vim.log.levels.ERROR
-      )
-    else
-      require('zpack.import').import_specs(spec_item_or_list, ctx)
-    end
-  end
-end
-
 ---@param ctx ProcessContext
 local process_all = function(ctx)
   local hooks = require('zpack.hooks')
@@ -88,10 +63,10 @@ end
 
 ---@class ZpackConfig
 ---@field spec? zpack.Spec[]
----@field plugins_dir? string
 ---@field cmd_prefix? string
 ---@field defaults? ZpackDefaults
 ---@field performance? ZpackPerformance
+---@field plugins_dir? string @deprecated Use { import = 'dir' } in spec instead
 ---@field confirm? boolean @deprecated Use defaults.confirm instead
 ---@field disable_vim_loader? boolean @deprecated Use performance.vim_loader instead
 
@@ -148,14 +123,18 @@ M.setup = function(opts)
   end
 
   local ctx = create_context({ confirm = config.defaults.confirm, defaults = config.defaults })
+  local import = require('zpack.import')
 
-  -- import_specs handles both single spec and list; ipairs ignores non-numeric keys like `confirm`
   local spec = opts.spec or (opts[1] and opts) or nil
   if spec then
-    require('zpack.import').import_specs(spec, ctx)
-  else
-    local plugins_dir = opts.plugins_dir or 'plugins'
-    import_specs_from_dir(plugins_dir, ctx)
+    import.import_specs(spec, ctx)
+  end
+
+  if opts.plugins_dir ~= nil then
+    deprecation.notify_deprecated('plugins_dir')
+    import.import_specs({ import = opts.plugins_dir }, ctx)
+  elseif not spec then
+    import.import_specs({ import = 'plugins' }, ctx)
   end
 
   process_all(ctx)
