@@ -26,6 +26,7 @@ M.register_all = function(ctx)
 
       if lazy.is_lazy(spec, plugin) then
         table.insert(ctx.registered_lazy_packs, pack_spec)
+        state.unloaded_plugin_names[pack_spec.name] = true
         if spec.init then
           table.insert(ctx.src_with_startup_init, pack_spec.src)
         end

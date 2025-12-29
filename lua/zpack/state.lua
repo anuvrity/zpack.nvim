@@ -18,5 +18,7 @@ M.registered_plugins = {}
 M.registered_plugin_names = { 'zpack.nvim' }
 ---@type string[]
 M.plugin_names_with_build = {}
+---@type { [string]: boolean }
+M.unloaded_plugin_names = {}
 
 return M

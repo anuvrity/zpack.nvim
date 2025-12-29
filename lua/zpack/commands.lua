@@ -55,6 +55,8 @@ local remove_from_state = function(plugin_name, src)
   state.plugin_names_with_build = vim.tbl_filter(function(name)
     return name ~= plugin_name
   end, state.plugin_names_with_build)
+
+  state.unloaded_plugin_names[plugin_name] = nil
 end
 
 local clear_all_state = function()
@@ -63,6 +65,7 @@ local clear_all_state = function()
   state.registered_plugins = {}
   state.registered_plugin_names = {}
   state.plugin_names_with_build = {}
+  state.unloaded_plugin_names = {}
 end
 
 M.clean_unused = function()
@@ -146,6 +149,53 @@ M.setup = function(prefix)
     bang = true,
     desc = 'Run build hook for a specific plugin or all plugins',
     complete = function(arg_lead) return filter_completions(state.plugin_names_with_build, arg_lead) end,
+  })
+
+  create_command(prefix .. 'Load', function(opts)
+    local plugin_name = opts.args
+    if plugin_name == '' then
+      if not opts.bang then
+        util.schedule_notify(('Use :%sLoad! to load all unloaded plugins'):format(prefix), vim.log.levels.WARN)
+        return
+      end
+      local count = vim.tbl_count(state.unloaded_plugin_names)
+      if count == 0 then
+        util.schedule_notify('All plugins are already loaded', vim.log.levels.INFO)
+        return
+      end
+      hooks.load_all_unloaded_plugins()
+      util.schedule_notify(('Loaded %d plugin(s)'):format(count), vim.log.levels.INFO)
+      return
+    end
+
+    local pack = get_plugin_or_notify(plugin_name)
+    if not pack then
+      return
+    end
+
+    local registry_entry = state.spec_registry[pack.spec.src]
+    if not registry_entry then
+      util.schedule_notify(('Plugin "%s" not found in registry'):format(plugin_name), vim.log.levels.ERROR)
+      return
+    end
+
+    if registry_entry.loaded then
+      util.schedule_notify(('Plugin "%s" is already loaded'):format(plugin_name), vim.log.levels.INFO)
+      return
+    end
+
+    local loader = require('zpack.loader')
+    loader.process_spec(pack.spec, {})
+    util.schedule_notify(('Loaded %s'):format(plugin_name), vim.log.levels.INFO)
+  end, {
+    nargs = '?',
+    bang = true,
+    desc = 'Load all unloaded plugins or a specific plugin',
+    complete = function(arg_lead)
+      local names = vim.tbl_keys(state.unloaded_plugin_names)
+      table.sort(names, function(a, b) return a:lower() < b:lower() end)
+      return filter_completions(names, arg_lead)
+    end,
   })
 
   create_command(prefix .. 'Delete', function(opts)

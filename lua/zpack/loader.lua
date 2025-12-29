@@ -29,6 +29,7 @@ M.process_spec = function(pack_spec, opts)
   end
 
   registry_entry.loaded = true
+  state.unloaded_plugin_names[pack_spec.name] = nil
 end
 
 return M

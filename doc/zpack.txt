@@ -100,6 +100,13 @@ zpack provides the following commands (default prefix: `Z`, customizable via
                 hooks. This is useful for manually rebuilding plugins without
                 needing to update them.
 
+                                                                      *:ZLoad*
+:ZLoad[!] [plugin]
+                Load a specific unloaded plugin by name, or load all unloaded
+                plugins when called with ! and no plugin name. Without the !,
+                attempting to load all will show a warning message. Supports
+                tab completion of unloaded plugin names.
+
                                                                     *:ZDelete*
 :ZDelete[!] [plugin]
                 Remove a specific plugin by name, or remove all installed
@@ -193,9 +200,11 @@ cmd_prefix      (string, optional)
                 Prefix for user commands. Change this if the default
                 commands conflict with other plugins. Default: `'Z'`
                 Examples:
-                  - `'Z'` creates `:ZUpdate`, `:ZClean`, `:ZBuild`, `:ZDelete`
+                  - `'Z'` creates `:ZUpdate`, `:ZClean`, `:ZBuild`, `:ZLoad`,
+                    `:ZDelete`
                   - `'Pack'` creates `:PackUpdate`, `:PackClean`, etc.
-                  - `''` creates `:Update`, `:Clean`, `:Build`, `:Delete`
+                  - `''` creates `:Update`, `:Clean`, `:Build`, `:Load`,
+                    `:Delete`
 
 defaults        (table, optional)
                 Default values that apply to all plugins. Plugin-level
