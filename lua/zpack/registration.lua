@@ -33,7 +33,7 @@ M.register_all = function(ctx)
       else
         table.insert(ctx.registered_startup_packs, pack_spec)
 
-        if spec.config then
+        if spec.config or spec.opts ~= nil then
           table.insert(ctx.src_with_startup_config, pack_spec.src)
         end
 

@@ -19,6 +19,7 @@ local test_modules = {
   'deprecation_test',
   'import_test',
   'zload_test',
+  'opts_test',
 }
 
 print("\n" .. string.rep("=", 60))

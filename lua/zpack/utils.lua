@@ -96,4 +96,65 @@ M.check_cond = function(spec, plugin, default_cond)
   return true
 end
 
+---Normalize a plugin name for module matching
+---Inspired by lazy.nvim's Util.normname()
+---@param name string
+---@return string
+M.normalize_name = function(name)
+  return name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
+end
+
+---Get the main module for a plugin (for auto-setup)
+---Inspired by lazy.nvim's loader.get_main()
+---Results are cached in spec_registry entry._main
+---@param src string Plugin source in spec_registry
+---@return string? main_module The main module name, or nil if not found
+M.get_main = function(src)
+  local entry = state.spec_registry[src]
+  if not entry or not entry.plugin then
+    return nil
+  end
+
+  if entry._main ~= nil then
+    return entry._main or nil
+  end
+
+  local spec = entry.spec
+  local path = entry.plugin.path
+
+  if spec.main then
+    entry._main = spec.main
+    return spec.main
+  end
+
+  local name = entry.plugin.spec.name
+  if not name then
+    entry._main = false
+    return nil
+  end
+
+  if name:match("^mini%.") and name ~= "mini.nvim" then
+    entry._main = name
+    return name
+  end
+
+  local norm_name = M.normalize_name(name)
+  local lua_dir = path .. "/lua"
+
+  local lua_files = vim.fn.glob(lua_dir .. "/**/*.lua", false, true)
+  for _, file in ipairs(lua_files) do
+    local rel_path = file:match("lua/(.+)%.lua$")
+    if rel_path then
+      local mod = rel_path:gsub("/", "."):gsub("%.init$", "")
+      if M.normalize_name(mod) == norm_name then
+        entry._main = mod
+        return mod
+      end
+    end
+  end
+
+  entry._main = false
+  return nil
+end
+
 return M

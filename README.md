@@ -355,6 +355,54 @@ return {
 }
 ```
 
+#### Using opts for Plugin Configuration
+
+Use `opts` to pass options to a plugin's `setup()` function. zpack automatically detects the plugin's main module and calls `require(main).setup(opts)`:
+
+```lua
+return {
+  'windwp/nvim-autopairs',
+  event = 'InsertEnter',
+  opts = {
+    check_ts = true,
+    fast_wrap = { map = '<M-e>' },
+  },
+}
+```
+
+When you provide a custom `config` function, it replaces the default auto-setup behavior. The resolved `opts` table is passed as the second argument, so you can use it in your custom configuration:
+
+```lua
+return {
+  'nvim-lualine/lualine.nvim',
+  opts = { theme = 'tokyonight' },
+  config = function(plugin, opts)
+    opts.sections = { lualine_a = { 'mode' } }
+    require('lualine').setup(opts)
+  end,
+}
+```
+
+Use `config = true` to explicitly call `setup()` with an empty table when no options are needed:
+
+```lua
+return {
+  'windwp/nvim-autopairs',
+  event = 'InsertEnter',
+  config = true,  -- calls require('nvim-autopairs').setup({})
+}
+```
+
+If automatic module detection fails, specify the module explicitly with `main`:
+
+```lua
+return {
+  'some/plugin-with-unusual-structure',
+  main = 'plugin.core',
+  opts = { enabled = true },
+}
+```
+
 #### Build Hook
 
 ```lua
@@ -473,10 +521,16 @@ return {
   lazy = true|false,                    -- Force eager loading when false (auto-detected)
   priority = 50,                        -- Load priority (higher = earlier, default: 50)
 
-  -- Lifecycle hooks (all receive zpack.Plugin as argument)
+  -- Lifecycle hooks
   init = function(plugin) end,          -- Runs before plugin loads, useful for certain vim plugins
-  config = function(plugin) end,        -- Runs after plugin loads
+  config = function(plugin, opts) end,  -- Runs after plugin loads, receives resolved opts
+  -- config = true,                      -- Calls require(main).setup({})
   build = string|function(plugin),      -- Build command or function
+
+  -- Plugin configuration
+  opts = {},                            -- Options passed to setup(), triggers auto-setup
+  -- opts = function(plugin) return {} end, -- Can also be a function
+  main = "module.name",                 -- Explicit main module (auto-detected if not set)
 
   -- Lazy loading triggers (auto-sets lazy=true unless overridden)
   -- All triggers can also be functions that receive zpack.Plugin and return the respective type
@@ -532,8 +586,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a th
 
 - **dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
 - **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning-for-lazynvim-compatibility)
-- **opts**: use `config = function() ... end` instead
-- **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
+- **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 - **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
 
 #### blink.cmp + lazydev
@@ -576,3 +629,6 @@ nvim --startuptime startuptime.log
 
 While zpack does not provide any UI dashboards, its builtin commands should cover most of the plugin management functionalities. You can also use `:h vim.pack` commands directly.
 
+## Acknowledgements
+
+zpack's spec design and several features are inspired by [lazy.nvim](https://github.com/folke/lazy.nvim). Credit to folke for the excellent plugin manager that influenced this project.

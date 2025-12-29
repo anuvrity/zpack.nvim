@@ -19,6 +19,7 @@
 ---@class zpack.Plugin
 ---@field spec vim.pack.Spec
 ---@field path string
+---@field main? string The detected main module name (available in config hooks)
 
 ---@alias zpack.EventValue string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]
 ---@alias zpack.CmdValue string|string[]
@@ -43,7 +44,9 @@
 ---@field tag? string Git tag (lazy.nvim compat). Mapped to version
 ---@field commit? string Git commit (lazy.nvim compat). Mapped to version
 ---@field keys? zpack.KeysValue|fun(plugin: zpack.Plugin):zpack.KeysValue
----@field config? fun(plugin: zpack.Plugin)
+---@field config? fun(plugin: zpack.Plugin, opts: table)|true
+---@field opts? table|fun(plugin: zpack.Plugin):table
+---@field main? string
 ---@field event? zpack.EventValue|fun(plugin: zpack.Plugin):zpack.EventValue
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
 ---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue

@@ -488,7 +488,55 @@ For lazy.nvim compatibility: ~
 <
 
 ------------------------------------------------------------------------------
-6.10 BUILD HOOK                                          *zpack-example-build*
+6.10 USING OPTS FOR CONFIGURATION                          *zpack-example-opts*
+
+Use `opts` to pass options to a plugin's `setup()` function. zpack
+automatically detects the plugin's main module and calls
+`require(main).setup(opts)`:
+>lua
+    return {
+      'windwp/nvim-autopairs',
+      event = 'InsertEnter',
+      opts = {
+        check_ts = true,
+        fast_wrap = { map = '<M-e>' },
+      },
+    }
+<
+
+When you provide a custom `config` function, it replaces the default auto-setup
+behavior. The resolved `opts` table is passed as the second argument:
+>lua
+    return {
+      'nvim-lualine/lualine.nvim',
+      opts = { theme = 'tokyonight' },
+      config = function(plugin, opts)
+        opts.sections = { lualine_a = { 'mode' } }
+        require('lualine').setup(opts)
+      end,
+    }
+<
+
+Use `config = true` to explicitly call `setup()` with an empty table:
+>lua
+    return {
+      'windwp/nvim-autopairs',
+      event = 'InsertEnter',
+      config = true,  -- calls require('nvim-autopairs').setup({})
+    }
+<
+
+If automatic module detection fails, specify the module with `main`:
+>lua
+    return {
+      'some/plugin-with-unusual-structure',
+      main = 'plugin.core',
+      opts = { enabled = true },
+    }
+<
+
+------------------------------------------------------------------------------
+6.11 BUILD HOOK                                          *zpack-example-build*
 
 Run a build command after installing/updating plugin:
 >lua
@@ -506,7 +554,7 @@ dependencies are available. For example, a plugin's build hook can safely
 call `:TSInstall` even if nvim-treesitter is lazy-loaded.
 
 ------------------------------------------------------------------------------
-6.11 MULTIPLE PLUGINS                                 *zpack-example-multiple*
+6.12 MULTIPLE PLUGINS                                 *zpack-example-multiple*
 
 Define multiple plugins in a single file:
 >lua
@@ -625,10 +673,16 @@ called in specific orders.
       lazy = true|false,                    -- Force eager (auto-detect)
       priority = 50,                        -- Load order (default: 50)
 
-      -- Lifecycle hooks (all receive zpack.Plugin as argument)
+      -- Lifecycle hooks
       init = function(plugin) end,          -- Runs before load
-      config = function(plugin) end,        -- Runs after load
+      config = function(plugin, opts) end,  -- Runs after load
+      -- config = true,                      -- Calls require(main).setup({})
       build = string|function(plugin),      -- Build command/function
+
+      -- Plugin configuration
+      opts = {},                            -- Options passed to setup()
+      -- opts = function(plugin) return {} end,
+      main = "module.name",                 -- Explicit main module
 
       -- Lazy loading triggers (auto-sets lazy=true unless overridden)
       -- All triggers can also be functions receiving zpack.Plugin
@@ -730,8 +784,36 @@ init            (function(plugin), optional)
                 Runs before the plugin loads. Receives |zpack.Plugin|.
 
                                                           *zpack-Spec.config*
-config          (function(plugin), optional)
-                Runs after the plugin loads. Receives |zpack.Plugin|.
+config          (function(plugin, opts)|true, optional)
+                Runs after the plugin loads. When a function is provided, it
+                replaces the default auto-setup behavior. The function
+                receives |zpack.Plugin| and the resolved `opts` table.
+
+                When set to `true`, zpack calls `require(main).setup(opts)`
+                automatically without a custom config function.
+
+                                                            *zpack-Spec.opts*
+opts            (table|function(plugin), optional)
+                Options to pass to the plugin's `setup()` function. When
+                `opts` is present and no custom `config` function is provided,
+                zpack automatically calls `require(main).setup(opts)`.
+
+                Can be a table of options or a function that receives
+                |zpack.Plugin| and returns a table.
+
+                When a custom `config` function is provided, the resolved
+                `opts` is passed as the second argument, but you are
+                responsible for calling `setup()` yourself.
+
+                                                            *zpack-Spec.main*
+main            (string, optional)
+                Explicit main module name for auto-setup. When not set,
+                zpack uses heuristics to detect the module:
+                1. For mini.* plugins, uses the plugin name directly
+                2. Normalizes the plugin name (removes vim-/nvim- prefix,
+                   .vim/.nvim suffix) and searches for a matching module
+
+                Use this when automatic detection fails.
 
                                                            *zpack-Spec.build*
 build           (string|function(plugin), optional)
@@ -883,14 +965,7 @@ dependencies              zpack does not have a `dependencies` field. See
 version pinning           lazy.nvim's `version` field maps to zpack's
                           `sem_version`. See |zpack-example-version|.
 
-opts                      use `config = function() ... end` instead.
-                          lazy.nvim heuristically speculates a plugin's main
-                          module to automatically calls its setup with
-                          `opts`. This requires significant maintenance to
-                          account for edge-cases, isn't guaranteed to resolve
-                          for all plugins, and is out of scope for zpack.
-
-other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
+other unsupported fields  Remove lazy.nvim-specific fields like `dev`,
                           `module`, etc. See |zpack-spec-reference| for
                           supported fields.
 
@@ -942,6 +1017,13 @@ Dashboard ~
 While zpack does not provide any UI dashboards, its builtin commands should
 cover most of the plugin management functionalities. You can also use
 |vim.pack| commands directly.
+
+==============================================================================
+13. ACKNOWLEDGEMENTS                               *zpack-acknowledgements*
+
+zpack's spec design and several features are inspired by lazy.nvim
+(https://github.com/folke/lazy.nvim). Credit to folke for the excellent
+plugin manager that influenced this project.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

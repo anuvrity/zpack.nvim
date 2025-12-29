@@ -2,6 +2,7 @@ local state = require('zpack.state')
 local hooks = require('zpack.hooks')
 local keymap = require('zpack.keymap')
 local util = require('zpack.utils')
+local loader = require('zpack.loader')
 
 local M = {}
 
@@ -19,7 +20,8 @@ M.process_all = function(ctx)
   end
 
   for _, src in ipairs(ctx.src_with_startup_config) do
-    hooks.try_call_hook(src, 'config')
+    local entry = state.spec_registry[src]
+    loader.run_config(src, entry.plugin, entry.spec)
   end
 
   keymap.apply_keys(ctx.startup_keys)
