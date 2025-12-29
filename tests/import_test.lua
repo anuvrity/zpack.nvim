@@ -5,12 +5,16 @@ return function()
     helpers.test("import loads *.lua files from directory", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return { '/mock/config/lua/test_plugins/foo.lua', '/mock/config/lua/test_plugins/bar.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'foo.lua', type = 'file' },
+            { name = 'bar.lua', type = 'file' },
+          }
         end
         return {}
       end
@@ -25,7 +29,7 @@ return function()
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/foo-plugin'], "foo-plugin should be registered")
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/bar-plugin'], "bar-plugin should be registered")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
       package.loaded['test_plugins.foo'] = nil
       package.loaded['test_plugins.bar'] = nil
@@ -35,16 +39,24 @@ return function()
     helpers.test("import loads */init.lua files from subdirectories", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
+      local original_fs_stat = vim.uv.fs_stat
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return {}
-        elseif pattern == '/mock/config/lua/test_plugins/*/init.lua' then
-          return { '/mock/config/lua/test_plugins/mini/init.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'mini', type = 'directory' },
+          }
         end
         return {}
+      end
+      vim.uv.fs_stat = function(path)
+        if path == '/mock/config/lua/test_plugins/mini/init.lua' then
+          return { type = 'file' }
+        end
+        return original_fs_stat(path)
       end
 
       package.loaded['test_plugins.mini'] = { 'test/mini-plugin' }
@@ -56,8 +68,9 @@ return function()
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/mini-plugin'],
         "mini-plugin should be registered")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
+      vim.uv.fs_stat = original_fs_stat
       package.loaded['test_plugins.mini'] = nil
       helpers.cleanup_test_env()
     end)
@@ -65,16 +78,25 @@ return function()
     helpers.test("import loads both *.lua and */init.lua", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
+      local original_fs_stat = vim.uv.fs_stat
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return { '/mock/config/lua/test_plugins/telescope.lua' }
-        elseif pattern == '/mock/config/lua/test_plugins/*/init.lua' then
-          return { '/mock/config/lua/test_plugins/mini/init.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'telescope.lua', type = 'file' },
+            { name = 'mini', type = 'directory' },
+          }
         end
         return {}
+      end
+      vim.uv.fs_stat = function(path)
+        if path == '/mock/config/lua/test_plugins/mini/init.lua' then
+          return { type = 'file' }
+        end
+        return original_fs_stat(path)
       end
 
       package.loaded['test_plugins.telescope'] = { 'test/telescope' }
@@ -87,8 +109,9 @@ return function()
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/telescope'], "telescope should be registered")
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/mini'], "mini should be registered")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
+      vim.uv.fs_stat = original_fs_stat
       package.loaded['test_plugins.telescope'] = nil
       package.loaded['test_plugins.mini'] = nil
       helpers.cleanup_test_env()
@@ -97,16 +120,24 @@ return function()
     helpers.test("import only goes 1 level deep for init.lua", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
+      local original_fs_stat = vim.uv.fs_stat
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return {}
-        elseif pattern == '/mock/config/lua/test_plugins/*/init.lua' then
-          return { '/mock/config/lua/test_plugins/level1/init.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'level1', type = 'directory' },
+          }
         end
         return {}
+      end
+      vim.uv.fs_stat = function(path)
+        if path == '/mock/config/lua/test_plugins/level1/init.lua' then
+          return { type = 'file' }
+        end
+        return original_fs_stat(path)
       end
 
       package.loaded['test_plugins.level1'] = { 'test/level1-plugin' }
@@ -118,8 +149,9 @@ return function()
       helpers.assert_not_nil(state.spec_registry['https://github.com/test/level1-plugin'],
         "level1-plugin should be registered")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
+      vim.uv.fs_stat = original_fs_stat
       package.loaded['test_plugins.level1'] = nil
       helpers.cleanup_test_env()
     end)
@@ -127,12 +159,15 @@ return function()
     helpers.test("import with enabled=false skips import", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return { '/mock/config/lua/test_plugins/foo.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'foo.lua', type = 'file' },
+          }
         end
         return {}
       end
@@ -146,7 +181,7 @@ return function()
       helpers.assert_nil(state.spec_registry['https://github.com/test/foo-plugin'],
         "foo-plugin should NOT be registered when enabled=false")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
       package.loaded['test_plugins.foo'] = nil
       helpers.cleanup_test_env()
@@ -155,20 +190,29 @@ return function()
     helpers.test("nested import works (init.lua with import)", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
+      local original_fs_stat = vim.uv.fs_stat
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern == '/mock/config/lua/test_plugins/*.lua' then
-          return {}
-        elseif pattern == '/mock/config/lua/test_plugins/*/init.lua' then
-          return { '/mock/config/lua/test_plugins/mini/init.lua' }
-        elseif pattern == '/mock/config/lua/test_plugins/mini/*.lua' then
-          return { '/mock/config/lua/test_plugins/mini/ai.lua', '/mock/config/lua/test_plugins/mini/surround.lua' }
-        elseif pattern == '/mock/config/lua/test_plugins/mini/*/init.lua' then
-          return {}
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          return {
+            { name = 'mini', type = 'directory' },
+          }
+        elseif path == '/mock/config/lua/test_plugins/mini' then
+          return {
+            { name = 'ai.lua', type = 'file' },
+            { name = 'surround.lua', type = 'file' },
+          }
         end
         return {}
+      end
+      vim.uv.fs_stat = function(path)
+        if path == '/mock/config/lua/test_plugins/mini/init.lua' then
+          return { type = 'file' }
+        end
+        return original_fs_stat(path)
       end
 
       package.loaded['test_plugins.mini'] = { import = 'test_plugins.mini' }
@@ -184,8 +228,9 @@ return function()
       helpers.assert_not_nil(state.spec_registry['https://github.com/echasnovski/mini.surround'],
         "mini.surround should be registered")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
+      vim.uv.fs_stat = original_fs_stat
       package.loaded['test_plugins.mini'] = nil
       package.loaded['test_plugins.mini.ai'] = nil
       package.loaded['test_plugins.mini.surround'] = nil
@@ -195,14 +240,17 @@ return function()
     helpers.test("duplicate import is skipped", function()
       helpers.setup_test_env()
 
-      local original_glob = vim.fn.glob
+      local utils = require('zpack.utils')
+      local original_lsdir = utils.lsdir
       local original_stdpath = vim.fn.stdpath
-      local glob_call_count = 0
+      local lsdir_call_count = 0
       vim.fn.stdpath = function() return '/mock/config' end
-      vim.fn.glob = function(pattern)
-        if pattern:find('test_plugins/%*.lua') then
-          glob_call_count = glob_call_count + 1
-          return { '/mock/config/lua/test_plugins/foo.lua' }
+      utils.lsdir = function(path)
+        if path == '/mock/config/lua/test_plugins' then
+          lsdir_call_count = lsdir_call_count + 1
+          return {
+            { name = 'foo.lua', type = 'file' },
+          }
         end
         return {}
       end
@@ -215,9 +263,9 @@ return function()
       })
       helpers.flush_pending()
 
-      helpers.assert_equal(glob_call_count, 1, "import should only be processed once")
+      helpers.assert_equal(lsdir_call_count, 1, "import should only be processed once")
 
-      vim.fn.glob = original_glob
+      utils.lsdir = original_lsdir
       vim.fn.stdpath = original_stdpath
       package.loaded['test_plugins.foo'] = nil
       helpers.cleanup_test_env()

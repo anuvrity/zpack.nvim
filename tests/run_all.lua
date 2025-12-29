@@ -20,6 +20,7 @@ local test_modules = {
   'import_test',
   'zload_test',
   'opts_test',
+  'utils_test',
 }
 
 print("\n" .. string.rep("=", 60))

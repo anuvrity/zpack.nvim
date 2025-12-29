@@ -111,14 +111,16 @@ local import_from_module = function(module_path, ctx)
 
   local lua_path = vim.fn.stdpath('config') .. '/lua/' .. module_path:gsub('%.', '/')
 
-  for _, plugin_path in ipairs(vim.fn.glob(lua_path .. '/*.lua', false, true)) do
-    local plugin_name = vim.fn.fnamemodify(plugin_path, ":t:r")
-    load_spec_module(module_path .. "." .. plugin_name, ctx)
-  end
-
-  for _, init_path in ipairs(vim.fn.glob(lua_path .. '/*/init.lua', false, true)) do
-    local dir_name = vim.fn.fnamemodify(init_path, ":h:t")
-    load_spec_module(module_path .. "." .. dir_name, ctx)
+  for _, entry in ipairs(utils.lsdir(lua_path)) do
+    if entry.name:sub(-4) == ".lua" then
+      local plugin_name = entry.name:sub(1, -5)
+      load_spec_module(module_path .. "." .. plugin_name, ctx)
+    elseif entry.type == "directory" or entry.type == "link" then
+      local init_path = lua_path .. "/" .. entry.name .. "/init.lua"
+      if vim.uv.fs_stat(init_path) then
+        load_spec_module(module_path .. "." .. entry.name, ctx)
+      end
+    end
   end
 end
 

@@ -32,7 +32,7 @@ end
 function M.run_config(src, plugin, spec)
   local resolved_opts = utils.resolve_field(spec.opts, plugin) or {}
 
-  -- local main = utils.get_main(src)
+  local main = utils.get_main(src)
   plugin.main = main
 
   if type(spec.config) == "function" then

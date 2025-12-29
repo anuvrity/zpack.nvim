@@ -2,6 +2,45 @@ local state = require('zpack.state')
 
 local M = {}
 
+local lsdir_cache = {}
+
+---@class zpack.DirEntry
+---@field name string
+---@field type string
+
+---Scan a directory and cache the results (uses vim.uv.fs_scandir)
+---@param path string
+---@return zpack.DirEntry[]
+M.lsdir = function(path)
+  if lsdir_cache[path] then
+    return lsdir_cache[path]
+  end
+
+  local entries = {}
+  local handle = vim.uv.fs_scandir(path)
+  if handle then
+    while true do
+      local name, entry_type = vim.uv.fs_scandir_next(handle)
+      if not name then
+        break
+      end
+      -- HACK: type is not always returned due to a bug in luv
+      if not entry_type then
+        local stat = vim.uv.fs_stat(path .. "/" .. name)
+        entry_type = stat and stat.type or "file"
+      end
+      entries[#entries + 1] = { name = name, type = entry_type }
+    end
+  end
+
+  lsdir_cache[path] = entries
+  return entries
+end
+
+M.reset_lsdir_cache = function()
+  lsdir_cache = {}
+end
+
 M.schedule_notify = function(msg, level)
   vim.schedule(function()
     vim.notify(msg, level)
@@ -141,15 +180,17 @@ M.get_main = function(src)
   local norm_name = M.normalize_name(name)
   local lua_dir = path .. "/lua"
 
-  local lua_files = vim.fn.glob(lua_dir .. "/**/*.lua", false, true)
-  for _, file in ipairs(lua_files) do
-    local rel_path = file:match("lua/(.+)%.lua$")
-    if rel_path then
-      local mod = rel_path:gsub("/", "."):gsub("%.init$", "")
-      if M.normalize_name(mod) == norm_name then
-        entry._main = mod
-        return mod
-      end
+  for _, dir_entry in ipairs(M.lsdir(lua_dir)) do
+    local mod
+    if dir_entry.name:sub(-4) == ".lua" then
+      mod = dir_entry.name:sub(1, -5)
+    elseif dir_entry.type == "directory" or dir_entry.type == "link" then
+      mod = dir_entry.name
+    end
+
+    if mod and M.normalize_name(mod) == norm_name then
+      entry._main = mod
+      return mod
     end
   end
 
