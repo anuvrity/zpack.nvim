@@ -107,6 +107,10 @@ zpack provides the following commands (default prefix: `Z`, customizable via
                 attempting to load all will show a warning message. Supports
                 tab completion of unloaded plugin names.
 
+                Note: When manually loading plugins, ensure any dependencies
+                are already loaded (either manually with :ZLoad or see
+                |zpack-dependency-handling|).
+
                                                                     *:ZDelete*
 :ZDelete[!] [plugin]
                 Remove a specific plugin by name, or remove all installed
