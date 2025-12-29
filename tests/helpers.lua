@@ -125,6 +125,8 @@ function M.setup_test_env()
 
     for _, pack_spec in ipairs(specs) do
       local name = pack_spec.name or pack_spec.src:match('[^/]+$')
+      pack_spec.name = name
+      _G.test_state.registered_pack_specs[name] = pack_spec
       local mock_plugin = {
         spec = pack_spec,
         path = vim.fn.stdpath('data') .. '/site/pack/zpack/opt/' .. name,
@@ -135,6 +137,29 @@ function M.setup_test_env()
         opts.load(mock_plugin)
       end
     end
+  end
+
+  _G.test_state.original_vim_cmd_packadd = vim.cmd.packadd
+  vim.cmd.packadd = function(args)
+    local plugin_name = type(args) == 'table' and args[1] or args
+    table.insert(_G.test_state.loaded_plugins, plugin_name)
+  end
+
+  _G.test_state.original_vim_pack_get = vim.pack.get
+  _G.test_state.registered_pack_specs = {}
+  vim.pack.get = function(names)
+    local results = {}
+    for _, name in ipairs(names) do
+      local pack_spec = _G.test_state.registered_pack_specs[name]
+      if pack_spec then
+        table.insert(results, {
+          spec = pack_spec,
+          path = vim.fn.stdpath('data') .. '/site/pack/zpack/opt/' .. name,
+          name = name,
+        })
+      end
+    end
+    return #results > 0 and results or nil
   end
 end
 
@@ -153,10 +178,16 @@ function M.cleanup_test_env()
     end
   end
 
-  -- Restore original vim.pack.add and vim.notify
+  -- Restore original vim.pack.add, vim.pack.get, vim.cmd.packadd, and vim.notify
   if _G.test_state then
     if _G.test_state.original_vim_pack_add then
       vim.pack.add = _G.test_state.original_vim_pack_add
+    end
+    if _G.test_state.original_vim_pack_get then
+      vim.pack.get = _G.test_state.original_vim_pack_get
+    end
+    if _G.test_state.original_vim_cmd_packadd then
+      vim.cmd.packadd = _G.test_state.original_vim_cmd_packadd
     end
     if _G.test_state.original_notify then
       vim.notify = _G.test_state.original_notify
