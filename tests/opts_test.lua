@@ -241,8 +241,8 @@ return function()
     end)
   end)
 
-  helpers.describe("get_main caching", function()
-    helpers.test("get_main result is cached in spec_registry", function()
+  helpers.describe("resolve_main caching", function()
+    helpers.test("resolve_main result is cached in plugin.main", function()
       helpers.setup_test_env()
 
       require('zpack').setup({
@@ -260,14 +260,15 @@ return function()
       local state = require('zpack.state')
       local utils = require('zpack.utils')
       local src = 'https://github.com/test/plugin'
+      local entry = state.spec_registry[src]
 
-      utils.get_main(src)
-      helpers.assert_equal(state.spec_registry[src]._main, 'custom.module')
+      utils.resolve_main(entry.plugin, entry.spec)
+      helpers.assert_equal(entry.plugin.main, 'custom.module')
 
       helpers.cleanup_test_env()
     end)
 
-    helpers.test("get_main uses cached value on subsequent calls", function()
+    helpers.test("resolve_main uses cached value on subsequent calls", function()
       helpers.setup_test_env()
 
       require('zpack').setup({
@@ -285,10 +286,11 @@ return function()
       local state = require('zpack.state')
       local utils = require('zpack.utils')
       local src = 'https://github.com/test/plugin'
+      local entry = state.spec_registry[src]
 
-      local first_result = utils.get_main(src)
-      state.spec_registry[src].spec.main = 'changed.module'
-      local second_result = utils.get_main(src)
+      local first_result = utils.resolve_main(entry.plugin, entry.spec)
+      entry.spec.main = 'changed.module'
+      local second_result = utils.resolve_main(entry.plugin, entry.spec)
 
       helpers.assert_equal(first_result, 'cached.module')
       helpers.assert_equal(second_result, 'cached.module', "should use cached value")
@@ -312,10 +314,12 @@ return function()
       })
 
       helpers.flush_pending()
+      local state = require('zpack.state')
       local utils = require('zpack.utils')
       local src = 'https://github.com/nvim-mini/mini.surround'
+      local entry = state.spec_registry[src]
 
-      local main = utils.get_main(src)
+      local main = utils.resolve_main(entry.plugin, entry.spec)
       helpers.assert_equal(main, 'mini.surround')
 
       helpers.cleanup_test_env()
@@ -335,10 +339,12 @@ return function()
       })
 
       helpers.flush_pending()
+      local state = require('zpack.state')
       local utils = require('zpack.utils')
       local src = 'https://github.com/nvim-mini/mini.nvim'
+      local entry = state.spec_registry[src]
 
-      local main = utils.get_main(src)
+      local main = utils.resolve_main(entry.plugin, entry.spec)
       helpers.assert_nil(main, "mini.nvim should not match special case")
 
       helpers.cleanup_test_env()

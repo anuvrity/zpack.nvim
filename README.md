@@ -103,9 +103,7 @@ return {
   keys = {
     { '<leader>ff', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
   },
-  config = function()
-    require('telescope').setup({})
-  end,
+  opts = {},
 }
 ```
 
@@ -157,9 +155,7 @@ For more examples, refer to my personal config:
 return {
   'nvim-tree/nvim-tree.lua',
   cmd = { 'NvimTreeToggle', 'NvimTreeFocus' },
-  config = function()
-    require('nvim-tree').setup({})
-  end,
+  opts = {},
 }
 ```
 
@@ -172,9 +168,7 @@ return {
     { 's', function() require('flash').jump() end, mode = { 'n', 'x', 'o' }, desc = 'Flash' },
     { 'S', function() require('flash').treesitter() end, mode = { 'n', 'x', 'o' }, desc = 'Flash Treesitter' },
   },
-  config = function()
-    require('flash').setup({})
-  end,
+  opts = {},
 }
 ```
 
@@ -184,9 +178,7 @@ return {
 return {
   'windwp/nvim-autopairs',
   event = 'InsertEnter', -- Also supports 'VeryLazy'
-  config = function()
-    require('nvim-autopairs').setup({})
-  end,
+  opts = { check_ts = true },
 }
 ```
 
@@ -197,45 +189,17 @@ return {
 return {
   'rust-lang/rust.vim',
   event = 'BufReadPre *.rs',
-  config = function()
-    vim.g.rustfmt_autosave = 1
-  end,
+  init = function() vim.g.rustfmt_autosave = 1 end,
 }
 
--- Or using EventSpec
-return {
-  'rust-lang/rust.vim',
-  event = {
-    event = 'BufReadPre',
-    pattern = '*.rs',
-  },
-  config = function()
-    vim.g.rustfmt_autosave = 1
-  end,
-}
-
--- Multiple patterns for same event
+-- Or using EventSpec for multiple patterns
 return {
   'polyglot-plugin',
   event = {
     event = 'BufReadPre',
     pattern = { '*.lua', '*.rs' },
   },
-  config = function()
-    -- plugin config
-  end,
-}
-
--- Multiple events with different patterns
-return {
-  'file-type-plugin',
-  event = {
-    { event = 'BufReadPre', pattern = '*.lua' },
-    { event = 'BufNewFile', pattern = '*.rs' },
-  },
-  config = function()
-    -- plugin config
-  end,
+  opts = {},
 }
 ```
 
@@ -246,19 +210,8 @@ Load plugin when opening files of specific types. Automatically re-triggers `Buf
 ```lua
 return {
   'rust-lang/rust.vim',
-  ft = 'rust',
-  config = function()
-    vim.g.rustfmt_autosave = 1
-  end,
-}
-
--- Multiple filetypes
-return {
-  'some-plugin',
-  ft = { 'lua', 'rust', 'go' },
-  config = function()
-    -- plugin config
-  end,
+  ft = { 'rust', 'toml' },
+  init = function() vim.g.rustfmt_autosave = 1 end,
 }
 ```
 
@@ -271,20 +224,14 @@ Use `enabled` to skip `vim.pack.add` entirely, or `cond` to conditionally load a
 return {
   'linux-only-plugin',
   enabled = vim.fn.has('linux') == 1,
-  config = function()
-    -- plugin config
-  end,
+  opts = {},
 }
 
 -- cond: Checked at load time, vim.pack.add called but won't load if false
 return {
   'project-specific-plugin',
-  cond = function()
-    return vim.fn.filereadable('.project-marker') == 1
-  end,
-  config = function()
-    -- plugin config
-  end,
+  cond = function() return vim.fn.filereadable('.project-marker') == 1 end,
+  opts = {},
 }
 ```
 
@@ -312,19 +259,7 @@ Control plugin load order with priority (higher values load first; default: 50):
 return {
   'folke/tokyonight.nvim',
   priority = 1000,
-  config = function()
-    vim.cmd('colorscheme tokyonight')
-  end,
-}
-
--- Lazy plugin: ensure base plugin loads before dependent
-return {
-  'user/base-plugin',
-  event = 'VeryLazy',
-  priority = 100,  -- Loads before other VeryLazy plugins
-  config = function()
-    _G.MyAPI = { setup = function() end }
-  end,
+  config = function() vim.cmd('colorscheme tokyonight') end,
 }
 ```
 
@@ -355,22 +290,9 @@ return {
 }
 ```
 
-#### Using opts for Plugin Configuration
+#### Custom Config Function
 
-Use `opts` to pass options to a plugin's `setup()` function. zpack automatically detects the plugin's main module and calls `require(main).setup(opts)`:
-
-```lua
-return {
-  'windwp/nvim-autopairs',
-  event = 'InsertEnter',
-  opts = {
-    check_ts = true,
-    fast_wrap = { map = '<M-e>' },
-  },
-}
-```
-
-When you provide a custom `config` function, it replaces the default auto-setup behavior. The resolved `opts` table is passed as the second argument, so you can use it in your custom configuration:
+When you need custom configuration logic, use a `config` function. The resolved `opts` table is passed as the second argument:
 
 ```lua
 return {
@@ -383,15 +305,7 @@ return {
 }
 ```
 
-Use `config = true` to explicitly call `setup()` with an empty table when no options are needed:
-
-```lua
-return {
-  'windwp/nvim-autopairs',
-  event = 'InsertEnter',
-  config = true,  -- calls require('nvim-autopairs').setup({})
-}
-```
+#### Explicit Main Module
 
 If automatic module detection fails, specify the module explicitly with `main`:
 
@@ -409,13 +323,10 @@ return {
 return {
   'nvim-telescope/telescope-fzf-native.nvim',
   build = 'make',
-  config = function()
-    require('telescope').load_extension('fzf')
-  end,
 }
 ```
 
-Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available. For example, a plugin's build hook can safely call `:TSInstall` even if nvim-treesitter is lazy-loaded.
+Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available.
 
 #### Multiple Plugins in One File
 
@@ -423,12 +334,7 @@ Build hooks run after plugin installation or update. When a build hook runs, zpa
 return {
   { 'nvim-lua/plenary.nvim' },
   { 'nvim-tree/nvim-web-devicons' },
-  {
-    'nvim-lualine/lualine.nvim',
-    config = function()
-      require('lualine').setup({})
-    end,
-  },
+  { 'nvim-lualine/lualine.nvim', opts = { theme = 'auto' } },
 }
 ```
 
@@ -483,9 +389,7 @@ return {
     "ThePrimeagen/harpoon",
     version = "harpoon2",
     keys = harpoon_triggers,
-    config = function()
-      ...
-    end
+    opts = {},
   }
 }
 ```

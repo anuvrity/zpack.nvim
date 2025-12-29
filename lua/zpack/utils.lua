@@ -143,42 +143,42 @@ M.normalize_name = function(name)
   return name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
 end
 
----Get the main module for a plugin (for auto-setup)
+local resolve_main_cache = {}
+
+---Resolve the main module for a plugin (for auto-setup)
 ---Inspired by lazy.nvim's loader.get_main()
----Results are cached in spec_registry entry._main
----@param src string Plugin source in spec_registry
+---Results are cached in plugin.main (for found modules) and internally (for not-found)
+---@param plugin zpack.Plugin
+---@param spec zpack.Spec
 ---@return string? main_module The main module name, or nil if not found
-M.get_main = function(src)
-  local entry = state.spec_registry[src]
-  if not entry or not entry.plugin then
+M.resolve_main = function(plugin, spec)
+  if plugin.main ~= nil then
+    return plugin.main
+  end
+
+  local cache_key = plugin.spec.src
+  if resolve_main_cache[cache_key] then
     return nil
   end
 
-  if entry._main ~= nil then
-    return entry._main or nil
-  end
-
-  local spec = entry.spec
-  local path = entry.plugin.path
-
   if spec.main then
-    entry._main = spec.main
+    plugin.main = spec.main
     return spec.main
   end
 
-  local name = entry.plugin.spec.name
+  local name = plugin.spec.name
   if not name then
-    entry._main = false
+    resolve_main_cache[cache_key] = true
     return nil
   end
 
   if name:match("^mini%.") and name ~= "mini.nvim" then
-    entry._main = name
+    plugin.main = name
     return name
   end
 
   local norm_name = M.normalize_name(name)
-  local lua_dir = path .. "/lua"
+  local lua_dir = plugin.path .. "/lua"
 
   for _, dir_entry in ipairs(M.lsdir(lua_dir)) do
     local mod
@@ -189,13 +189,17 @@ M.get_main = function(src)
     end
 
     if mod and M.normalize_name(mod) == norm_name then
-      entry._main = mod
+      plugin.main = mod
       return mod
     end
   end
 
-  entry._main = false
+  resolve_main_cache[cache_key] = true
   return nil
+end
+
+M.reset_resolve_main_cache = function()
+  resolve_main_cache = {}
 end
 
 return M

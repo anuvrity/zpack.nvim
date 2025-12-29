@@ -31,13 +31,11 @@ end
 ---@param spec zpack.Spec
 function M.run_config(src, plugin, spec)
   local resolved_opts = utils.resolve_field(spec.opts, plugin) or {}
-
-  local main = utils.get_main(src)
-  plugin.main = main
+  local main = utils.resolve_main(plugin, spec)
 
   if type(spec.config) == "function" then
-    local success, err = pcall(spec.config, plugin, resolved_opts)
-    if not success then
+    local ok, err = pcall(spec.config, plugin, resolved_opts)
+    if not ok then
       utils.schedule_notify(("Failed to run config for %s: %s"):format(src, err), vim.log.levels.ERROR)
     end
   elseif spec.config == true or spec.opts ~= nil then
@@ -63,7 +61,7 @@ M.process_spec = function(pack_spec, opts)
   end
 
   local spec = registry_entry.spec
-  local plugin = registry_entry.plugin
+  local plugin = registry_entry.plugin --[[@as zpack.Plugin]]
 
   vim.cmd.packadd({ pack_spec.name, bang = opts.bang })
 
