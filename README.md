@@ -343,7 +343,7 @@ return {
 ```
 See `:h vim.pack.Spec`, `:h vim.version.range()`, and `:h vim.VersionRange`.
 
-##### for lazy.nvim compatibility:
+##### Version Pinning for lazy.nvim compatibility
 
 ```lua
 return {
@@ -526,37 +526,15 @@ The plugin data object passed to hooks and trigger functions:
 
 ## Migrating from lazy.nvim
 
-#### Spec
-
 Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a thin layer, zpack specs have some differences to minimize complexity and maintain compatibility with `vim.pack`.
 
 **key differences:**
 
 - **dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
-- **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning)
+- **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning-for-lazynvim-compatibility)
 - **opts**: use `config = function() ... end` instead
 - **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 - **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
-
-#### Dev Mode
-
-Pass a local directory to your plugin spec's `src`.
-```lua
-return {
-    src = vim.fn.expand('~/projects/my_plugin.nvim')
-}
-```
-
-#### Profiling
-
-Use the builtin profiling argument when starting Neovim with:
-```
-nvim --startuptime startuptime.log
-```
-
-#### UI Dashboard
-
-While zpack does not provide any UI dashboards, its builtin commands should cover most of the plugin management functionalities. You can also use `:h vim.pack` commands directly.
 
 #### blink.cmp + lazydev
 
@@ -576,3 +554,25 @@ require('blink.cmp').setup({
   },
 })
 ```
+
+#### Other Features
+##### Dev Mode
+
+Pass a local directory to your plugin spec's `src`.
+```lua
+return {
+    src = vim.fn.expand('~/projects/my_plugin.nvim')
+}
+```
+
+##### Profiling
+
+Use the builtin profiling argument when starting Neovim with:
+```
+nvim --startuptime startuptime.log
+```
+
+##### Dashboard
+
+While zpack does not provide any UI dashboards, its builtin commands should cover most of the plugin management functionalities. You can also use `:h vim.pack` commands directly.
+

@@ -869,9 +869,8 @@ nowait          (boolean, optional)
 
 ==============================================================================
 12. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
-
-SPEC ~
                                                        *zpack-migration-spec*
+
 Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a
 thin layer, zpack specs have some differences to minimize complexity and
 maintain compatibility with `vim.pack`.
@@ -898,22 +897,6 @@ other unsupported fields  Remove lazy.nvim-specific fields like `dev`, `main`,
 spec merging              zpack does not merge duplicate specs. Please only
                           define each plugin spec once.
 
-DEV MODE ~
-                                                        *zpack-migration-dev*
-Pass a local directory to your plugin spec's `src`.
->lua
-    return {
-        src = vim.fn.expand('~/projects/my_plugin.nvim')
-    }
-<
-
-PROFILING ~
-                                                  *zpack-migration-profiling*
-Use the builtin profiling argument when starting Neovim with:
->
-    nvim --startuptime startuptime.log
-<
-
 BLINK.CMP + LAZYDEV ~
                                               *zpack-migration-blink-lazydev*
 
@@ -935,6 +918,30 @@ the default sources).
       },
     })
 <
+
+OTHER FEATURES ~
+
+Dev Mode ~
+                                                        *zpack-migration-dev*
+Pass a local directory to your plugin spec's `src`.
+>lua
+    return {
+        src = vim.fn.expand('~/projects/my_plugin.nvim')
+    }
+<
+
+Profiling ~
+                                                  *zpack-migration-profiling*
+Use the builtin profiling argument when starting Neovim with:
+>
+    nvim --startuptime startuptime.log
+<
+
+Dashboard ~
+                                                  *zpack-migration-dashboard*
+While zpack does not provide any UI dashboards, its builtin commands should
+cover most of the plugin management functionalities. You can also use
+|vim.pack| commands directly.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:
