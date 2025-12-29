@@ -10,11 +10,16 @@ local M = {}
 ---@param resolved_opts table
 ---@return boolean success
 local function run_auto_setup(src, main, resolved_opts)
-  local ok, mod = pcall(require, main)
-  if not ok or type(mod) ~= "table" or type(mod.setup) ~= "function" then
-    utils.schedule_notify(("Could not find setup() for %s (main: %s)"):format(src, main), vim.log.levels.WARN)
+  local ok, mod_or_err = pcall(require, main)
+  if not ok then
+    utils.schedule_notify(("Failed to require '%s' for %s: %s"):format(main, src, mod_or_err), vim.log.levels.ERROR)
     return false
   end
+  if type(mod_or_err) ~= "table" or type(mod_or_err.setup) ~= "function" then
+    utils.schedule_notify(("Module '%s' for %s has no setup() function"):format(main, src), vim.log.levels.WARN)
+    return false
+  end
+  local mod = mod_or_err
 
   local success, err = pcall(mod.setup, resolved_opts)
   if not success then
@@ -34,7 +39,8 @@ function M.run_config(src, plugin, spec)
   local main = utils.resolve_main(plugin, spec)
 
   if type(spec.config) == "function" then
-    local ok, err = pcall(spec.config, plugin, resolved_opts)
+    local config_fn = spec.config --[[@as fun(plugin: zpack.Plugin, opts: table)]]
+    local ok, err = pcall(config_fn, plugin, resolved_opts)
     if not ok then
       utils.schedule_notify(("Failed to run config for %s: %s"):format(src, err), vim.log.levels.ERROR)
     end
