@@ -74,10 +74,12 @@ zpack provides the following commands (default prefix: `Z`, customizable via `cm
 - `:ZUpdate [plugin]` - Update all plugins, or a specific plugin if provided (supports tab completion). See `:h vim.pack.update()`
 - `:ZClean` - Remove plugins that are no longer in your spec
 - `:ZBuild[!] [plugin]` - Run build hook for a specific plugin, or all plugins with `!` (supports tab completion)
-- `:ZLoad[!] [plugin]` - Load a specific unloaded plugin, or all unloaded plugins with `!` (supports tab completion)
 - `:ZDelete[!] [plugin]` - Remove a specific plugin, or all plugins with `!` (supports tab completion)
+- `:ZLoad[!] [plugin]` - Load a specific unloaded plugin, or all unloaded plugins with `!` (supports tab completion)
 
-**Note:** Deleting active plugins in your spec can result in errors in your current session. Restart Neovim to re-install them.
+**Note:**
+- Deleting active plugins in your spec with `:ZDelete` can result in errors in your current session. Restart Neovim to re-install them.
+- When manually loading plugins with `:ZLoad`, please ensure any dependencies are already loaded (either manually with `:ZLoad` or see [Dependency Handling](#dependency-handling)).
 
 ### Directory Structure
 
@@ -551,6 +553,10 @@ Use the builtin profiling argument when starting Neovim with:
 ```
 nvim --startuptime startuptime.log
 ```
+
+#### UI Dashboard
+
+While zpack does not provide any UI dashboards, its builtin commands should cover most of the plugin management functionalities. You can also use `:h vim.pack` commands directly.
 
 #### blink.cmp + lazydev
 

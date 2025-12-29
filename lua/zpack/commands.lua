@@ -91,7 +91,8 @@ end
 M.setup = function(prefix)
   if not validate_prefix(prefix) then
     util.schedule_notify(
-      ('Invalid cmd_prefix "%s": must be empty or start with uppercase letter and contain only letters/digits'):format(prefix),
+      ('Invalid cmd_prefix "%s": must be empty or start with uppercase letter and contain only letters/digits'):format(
+        prefix),
       vim.log.levels.ERROR
     )
     return
@@ -193,6 +194,7 @@ M.setup = function(prefix)
     desc = 'Load all unloaded plugins or a specific plugin',
     complete = function(arg_lead)
       local names = vim.tbl_keys(state.unloaded_plugin_names)
+      -- sorted on each invocation; negligible for typical plugin counts
       table.sort(names, function(a, b) return a:lower() < b:lower() end)
       return filter_completions(names, arg_lead)
     end,
@@ -231,7 +233,7 @@ M.setup = function(prefix)
     remove_from_state(plugin_name, pack.spec.src)
     util.schedule_notify(
       ('%s deleted. This can result in errors in your current session. Restart Neovim to re-install it or remove it from your spec.')
-        :format(plugin_name),
+      :format(plugin_name),
       vim.log.levels.WARN
     )
   end, {
