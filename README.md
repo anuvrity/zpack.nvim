@@ -46,21 +46,23 @@ vim.pack.add({ 'https://github.com/zuqini/zpack.nvim' })
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- automatically import specs from `/lua/plugins/*.lua`
-require('zpack').setup({})
+-- automatically import specs from `/lua/plugins/`
+require('zpack').setup()
 
--- or import from a custom directory
-require('zpack').setup({ { import = 'my_plugins' } })
+-- or import from a custom directory e.g. `/lua/a/b/plugins/`
+require('zpack').setup({ { import = 'a.b.plugins' } })
 
--- or add your specs inline
+-- or add your specs inline in setup
 require('zpack').setup({
   { 'neovim/nvim-lspconfig', config = function() ... end },
+  { import = 'plugins.mini' }, -- additionally import from `/lua/plugins/mini/`
 })
 
 -- or via the spec field
 require('zpack').setup({
   spec = {
     { 'neovim/nvim-lspconfig', config = function() ... end },
+    { import = 'plugins.mini' }, -- additionally import from `/lua/plugins/mini/`
   },
 })
 ```
@@ -108,12 +110,13 @@ return {
 
 ```lua
 require('zpack').setup({
+  -- { import = 'plugins' }  -- default import spec if not explicitly passed in via [1] or spec
   defaults = {
-    confirm = false,         -- skip vim.pack install prompts (default: true)
-    cond = not vim.g.vscode, -- global condition for all plugins
+    confirm = true,          -- set to false to skip vim.pack install prompts (default: true)
+    cond = nil,              -- global condition for all plugins, e.g. not vim.g.is_vscode (default: nil)
   },
   performance = {
-    vim_loader = true,       -- enable vim.loader bytecode caching (default: true)
+    vim_loader = true,       -- enables vim.loader for faster startup (default: true)
   },
   cmd_prefix = 'Z',          -- command prefix: :ZUpdate, :ZClean, etc. (default: 'Z')
 })
@@ -128,14 +131,17 @@ Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles plugi
 zpack might be for you if:
 - you're a lazy.nvim user, love its declarative spec, and its wide adoption by plugin authors, but you don't need most of its advanced features
 - you're a lazy.nvim user, want to try `vim.pack`, but don't want to rewrite your entire plugins spec from scratch
-- you're already comfortable with `vim.pack`, and want:
-    - A minimalist lazy-loading implementation for faster startup
-    - Declarative plugin specs to keep your config neat and tidy
+- you're mostly happy with a core plugin manager like `vim.pack` without bells and whistles, but would like just a few additional features like:
+    - lazy-loading triggers for a faster startup on slower machines
+    - a minimalist set of commands and tools to manage your plugin's lifecycle e.g. updates, cleaning, and builds
+    - a declarative plugin spec to keep your main neovim config neat and tidy
 
 As a thin layer, zpack does not provide:
 - UI dashboard for your plugins
 - Profiling, dev mode, etc.
 - Implicit dependency inference (see [Dependency Handling](#dependency-handling) for the explicit approach)
+
+Although you can achieve most of these through other means. See [Migrating from lazy.nvim](#migrating-from-lazynvim). If something you need isn't achievable natively or through zpack, please submit an issue or PR!
 
 ## Examples
 For more examples, refer to my personal config:
@@ -517,6 +523,8 @@ The plugin data object passed to hooks and trigger functions:
 
 ## Migrating from lazy.nvim
 
+#### Spec
+
 Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a thin layer, zpack specs have some differences to minimize complexity and maintain compatibility with `vim.pack`.
 
 **key differences:**
@@ -527,7 +535,23 @@ Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a th
 - **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `main`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
 - **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
 
-### blink.cmp + lazydev
+#### Dev Mode
+
+Pass a local directory to your plugin spec's `src`.
+```lua
+return {
+    src = vim.fn.expand('~/projects/my_plugin.nvim')
+}
+```
+
+#### Profiling
+
+Use the builtin profiling argument when starting Neovim with:
+```
+nvim --startuptime startuptime.log
+```
+
+#### blink.cmp + lazydev
 
 Due to the lack of implicit dependency inference, when using `blink.cmp` with `lazydev`, add lazydev to `per_filetype` instead of `default` sources.
 
