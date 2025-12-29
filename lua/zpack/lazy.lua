@@ -24,7 +24,7 @@ M.is_lazy = function(spec, plugin)
   return (event ~= nil) or (cmd ~= nil) or (keys ~= nil and #keys > 0) or (ft ~= nil)
 end
 
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 M.process_all = function(ctx)
   if next(state.src_with_pending_build) ~= nil then
     return

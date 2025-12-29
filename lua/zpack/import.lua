@@ -81,7 +81,7 @@ end
 
 ---Load a spec module and import its specs
 ---@param full_module string Full module path (e.g., 'plugins.telescope')
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 local load_spec_module = function(full_module, ctx)
   local success, spec_item_or_list = pcall(require, full_module)
 
@@ -102,7 +102,7 @@ end
 
 ---Import specs from a module directory
 ---@param module_path string Module path (e.g., 'plugins' imports from lua/plugins/*.lua)
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 local import_from_module = function(module_path, ctx)
   if imported_modules[module_path] then
     return
@@ -123,7 +123,7 @@ local import_from_module = function(module_path, ctx)
 end
 
 ---@param spec_item_or_list zpack.Spec|zpack.Spec[]
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 M.import_specs = function(spec_item_or_list, ctx)
   local specs = is_single_spec(spec_item_or_list)
       and { spec_item_or_list }

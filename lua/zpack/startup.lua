@@ -5,7 +5,7 @@ local util = require('zpack.utils')
 
 local M = {}
 
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 M.process_all = function(ctx)
   table.sort(ctx.src_with_startup_init, util.compare_priority)
   table.sort(ctx.src_with_startup_config, util.compare_priority)

@@ -2,7 +2,7 @@
 
 local M = {}
 
----@class ProcessContext
+---@class zpack.ProcessContext
 ---@field vim_packs vim.pack.Spec[]
 ---@field src_with_startup_init string[]
 ---@field src_with_startup_config string[]
@@ -11,9 +11,9 @@ local M = {}
 ---@field registered_lazy_packs vim.pack.Spec[]
 ---@field load boolean?
 ---@field confirm boolean?
----@field defaults ZpackDefaults
+---@field defaults zpack.Config.Defaults
 
----@return ProcessContext
+---@return zpack.ProcessContext
 local function create_context(opts)
   opts = opts or {}
   return {
@@ -39,7 +39,7 @@ local function check_version()
   return true
 end
 
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 local process_all = function(ctx)
   local hooks = require('zpack.hooks')
   local state = require('zpack.state')
@@ -54,18 +54,18 @@ local process_all = function(ctx)
   hooks.setup_lazy_build_tracking()
 end
 
----@class ZpackDefaults
+---@class zpack.Config.Defaults
 ---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
 ---@field confirm? boolean
 
----@class ZpackPerformance
+---@class zpack.Config.Performance
 ---@field vim_loader? boolean
 
----@class ZpackConfig
+---@class zpack.Config
 ---@field spec? zpack.Spec[]
 ---@field cmd_prefix? string
----@field defaults? ZpackDefaults
----@field performance? ZpackPerformance
+---@field defaults? zpack.Config.Defaults
+---@field performance? zpack.Config.Performance
 ---@field plugins_dir? string @deprecated Use { import = 'dir' } in spec instead
 ---@field confirm? boolean @deprecated Use defaults.confirm instead
 ---@field disable_vim_loader? boolean @deprecated Use performance.vim_loader instead
@@ -76,7 +76,7 @@ local config = {
   performance = { vim_loader = true },
 }
 
----@param opts? ZpackConfig
+---@param opts? zpack.Config
 M.setup = function(opts)
   if not check_version() then return end
 

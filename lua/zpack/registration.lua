@@ -4,7 +4,7 @@ local utils = require('zpack.utils')
 
 local M = {}
 
----@param ctx ProcessContext
+---@param ctx zpack.ProcessContext
 M.register_all = function(ctx)
   vim.pack.add(ctx.vim_packs, {
     confirm = ctx.confirm,
