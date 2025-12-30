@@ -59,7 +59,19 @@ M.get_priority = function(src)
   return spec and spec.priority or 50
 end
 
+---Get import order for a plugin source (used as tiebreaker)
+---@param src string
+---@return number
+M.get_import_order = function(src)
+  local entry = state.spec_registry[src]
+  if not entry or not entry.specs or not entry.specs[1] then
+    return math.huge
+  end
+  return entry.specs[1]._import_order or math.huge
+end
+
 ---Comparison function for sorting items by priority (descending)
+---Uses import order as tiebreaker for deterministic sorting
 ---Works with both source strings and vim.pack.Spec objects
 ---@param a string|vim.pack.Spec
 ---@param b string|vim.pack.Spec
@@ -67,7 +79,12 @@ end
 M.compare_priority = function(a, b)
   local src_a = type(a) == "string" and a or a.src
   local src_b = type(b) == "string" and b or b.src
-  return M.get_priority(src_a) > M.get_priority(src_b)
+  local priority_a = M.get_priority(src_a)
+  local priority_b = M.get_priority(src_b)
+  if priority_a ~= priority_b then
+    return priority_a > priority_b
+  end
+  return M.get_import_order(src_a) < M.get_import_order(src_b)
 end
 
 ---Normalize keys to a consistent format

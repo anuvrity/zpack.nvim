@@ -4,9 +4,7 @@ local M = {}
 
 ---@class zpack.ProcessContext
 ---@field vim_packs vim.pack.Spec[]
----@field src_with_startup_init string[]
----@field src_with_startup_config string[]
----@field startup_keys zpack.KeySpec[]
+---@field src_with_init string[]
 ---@field registered_startup_packs vim.pack.Spec[]
 ---@field registered_lazy_packs vim.pack.Spec[]
 ---@field load boolean?
@@ -19,9 +17,7 @@ local function create_context(opts)
   opts = opts or {}
   return {
     vim_packs = {},
-    src_with_startup_init = {},
-    src_with_startup_config = {},
-    startup_keys = {},
+    src_with_init = {},
     registered_startup_packs = {},
     registered_lazy_packs = {},
     load = opts.load,

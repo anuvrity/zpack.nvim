@@ -140,6 +140,40 @@ return function()
       helpers.cleanup_test_env()
     end)
 
+    helpers.test("compare_priority uses import order as tiebreaker", function()
+      helpers.setup_test_env()
+      local utils = require('zpack.utils')
+
+      require('zpack').setup({
+        spec = {
+          { 'test/first' },  -- import_order = 0
+          { 'test/second' }, -- import_order = 1
+          { 'test/third' },  -- import_order = 2
+        },
+        defaults = { confirm = false },
+      })
+
+      helpers.flush_pending()
+      local src1 = 'https://github.com/test/first'
+      local src2 = 'https://github.com/test/second'
+      local src3 = 'https://github.com/test/third'
+
+      helpers.assert_true(
+        utils.compare_priority(src1, src2),
+        "first (import 0) should come before second (import 1) when priority equal"
+      )
+      helpers.assert_true(
+        utils.compare_priority(src2, src3),
+        "second (import 1) should come before third (import 2) when priority equal"
+      )
+      helpers.assert_false(
+        utils.compare_priority(src3, src1),
+        "third (import 2) should not come before first (import 0)"
+      )
+
+      helpers.cleanup_test_env()
+    end)
+
     helpers.test("priority affects lazy plugin load order on same trigger", function()
       helpers.setup_test_env()
       local load_order = {}
