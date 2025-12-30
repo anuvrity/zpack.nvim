@@ -55,7 +55,8 @@ M.get_priority = function(src)
   if not entry then
     return 50
   end
-  return entry.spec.priority or 50
+  local spec = entry.merged_spec
+  return spec and spec.priority or 50
 end
 
 ---Comparison function for sorting items by priority (descending)
@@ -143,11 +144,9 @@ M.normalize_name = function(name)
   return name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
 end
 
-local resolve_main_cache = {}
-
 ---Resolve the main module for a plugin (for auto-setup)
 ---Inspired by lazy.nvim's loader.get_main()
----Results are cached in plugin.main (for found modules) and internally (for not-found)
+---Results are cached in plugin.main (for found modules) and state.resolve_main_not_found (for not-found)
 ---@param plugin zpack.Plugin
 ---@param spec zpack.Spec
 ---@return string? main_module The main module name, or nil if not found
@@ -157,7 +156,7 @@ M.resolve_main = function(plugin, spec)
   end
 
   local cache_key = plugin.spec.src
-  if resolve_main_cache[cache_key] then
+  if state.resolve_main_not_found[cache_key] then
     return nil
   end
 
@@ -168,7 +167,7 @@ M.resolve_main = function(plugin, spec)
 
   local name = plugin.spec.name
   if not name then
-    resolve_main_cache[cache_key] = true
+    state.resolve_main_not_found[cache_key] = true
     return nil
   end
 
@@ -194,12 +193,8 @@ M.resolve_main = function(plugin, spec)
     end
   end
 
-  resolve_main_cache[cache_key] = true
+  state.resolve_main_not_found[cache_key] = true
   return nil
-end
-
-M.reset_resolve_main_cache = function()
-  resolve_main_cache = {}
 end
 
 return M

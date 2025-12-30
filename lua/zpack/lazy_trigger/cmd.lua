@@ -9,7 +9,7 @@ M.setup = function(registered_pack_specs)
   local cmd_to_pack_specs = {}
   for _, pack_spec in ipairs(registered_pack_specs) do
     local registry_entry = state.spec_registry[pack_spec.src]
-    local spec = registry_entry.spec
+    local spec = registry_entry.merged_spec --[[@as zpack.Spec]]
     local plugin = registry_entry.plugin
 
     local cmd = util.resolve_field(spec.cmd, plugin)

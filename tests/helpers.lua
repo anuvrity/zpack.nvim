@@ -213,6 +213,7 @@ function M.cleanup_test_env()
   package.loaded['zpack.utils'] = nil
   package.loaded['zpack.commands'] = nil
   package.loaded['zpack.deprecation'] = nil
+  package.loaded['zpack.merge'] = nil
 end
 
 function M.track_plugin_load(plugin_name)

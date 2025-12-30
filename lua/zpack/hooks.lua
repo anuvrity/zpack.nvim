@@ -8,11 +8,7 @@ local M = {}
 ---@return boolean
 M.try_call_hook = function(src, hook_name)
   local registry_entry = state.spec_registry[src]
-  local spec = registry_entry.spec
-  if not spec then
-    util.schedule_notify("expected spec missing for " .. src, vim.log.levels.ERROR)
-    return false
-  end
+  local spec = registry_entry.merged_spec
 
   local hook = spec[hook_name] --[[@as fun(plugin: zpack.Plugin)]]
   if not hook then
@@ -61,9 +57,10 @@ M.setup_lazy_build_tracking = function()
     if event.data.kind == "update" or event.data.kind == "install" then
       local src = event.data.spec.src
       local registry_entry = state.spec_registry[src]
-      if registry_entry and registry_entry.spec.build then
+      local spec = registry_entry and registry_entry.merged_spec
+      if spec and spec.build then
         M.load_all_unloaded_plugins()
-        M.execute_build(registry_entry.spec.build, registry_entry.plugin)
+        M.execute_build(spec.build, registry_entry.plugin)
       end
     end
   end, { group = state.lazy_build_group })
@@ -75,7 +72,7 @@ M.load_all_unloaded_plugins = function(opts)
 
   for _, pack_spec in ipairs(state.registered_plugins) do
     local entry = state.spec_registry[pack_spec.src]
-    if entry and not entry.loaded then
+    if entry and entry.load_status ~= "loaded" then
       loader.process_spec(pack_spec, opts)
     end
   end
@@ -90,8 +87,9 @@ M.run_pending_builds_on_startup = function(ctx)
 
   for src in pairs(state.src_with_pending_build) do
     local entry = state.spec_registry[src]
-    if entry and entry.spec.build then
-      M.execute_build(entry.spec.build, entry.plugin)
+    local spec = entry and entry.merged_spec
+    if spec and spec.build then
+      M.execute_build(spec.build, entry.plugin)
     end
   end
 
@@ -103,8 +101,9 @@ M.run_all_builds = function()
 
   local count = 0
   for _, entry in pairs(state.spec_registry) do
-    if entry.spec.build then
-      M.execute_build(entry.spec.build, entry.plugin)
+    local spec = entry.merged_spec
+    if spec and spec.build then
+      M.execute_build(spec.build, entry.plugin)
       count = count + 1
     end
   end

@@ -51,6 +51,18 @@
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
 ---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue
 ---@field ft? zpack.FtValue|fun(plugin: zpack.Plugin):zpack.FtValue
+---@field dependencies? string|string[]|zpack.Spec|zpack.Spec[] Plugin dependencies
 ---@field import? string Module path to import specs from (e.g., 'plugins')
+---@field _import_order? number Internal: Order in which spec was imported
+---@field _is_dependency? boolean Internal: Whether spec was imported as a dependency
+
+---@alias zpack.LoadStatus "pending" | "loading" | "loaded"
+
+---@class zpack.RegistryEntry
+---@field specs zpack.Spec[]
+---@field sorted_specs? zpack.Spec[]
+---@field merged_spec? zpack.Spec
+---@field plugin zpack.Plugin?
+---@field load_status zpack.LoadStatus
 
 return {}

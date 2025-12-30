@@ -145,9 +145,10 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_not_nil(spec.build, "Build hook should be stored")
       helpers.assert_equal(
-        type(state.spec_registry[src].spec.build),
+        type(spec.build),
         'string',
         "Build hook should be string"
       )
@@ -172,9 +173,10 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_not_nil(state.spec_registry[src].spec.build, "Build hook should be stored")
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_not_nil(spec.build, "Build hook should be stored")
       helpers.assert_equal(
-        type(state.spec_registry[src].spec.build),
+        type(spec.build),
         'function',
         "Build hook should be function"
       )

@@ -11,8 +11,12 @@ M.register_all = function(ctx)
     load = function(plugin)
       local pack_spec = plugin.spec
       local registry_entry = state.spec_registry[pack_spec.src]
-      local spec = registry_entry.spec
 
+      if not registry_entry or not registry_entry.merged_spec then
+        return
+      end
+
+      local spec = registry_entry.merged_spec --[[@as zpack.Spec]]
       registry_entry.plugin = plugin
 
       if not utils.check_cond(spec, plugin, ctx.defaults.cond) then
@@ -24,7 +28,7 @@ M.register_all = function(ctx)
         table.insert(state.plugin_names_with_build, pack_spec.name)
       end
 
-      if lazy.is_lazy(spec, plugin) then
+      if lazy.is_lazy(spec, plugin, pack_spec.src) then
         table.insert(ctx.registered_lazy_packs, pack_spec)
         state.unloaded_plugin_names[pack_spec.name] = true
         if spec.init then

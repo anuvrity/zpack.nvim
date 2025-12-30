@@ -12,6 +12,7 @@ local M = {}
 ---@field load boolean?
 ---@field confirm boolean?
 ---@field defaults zpack.Config.Defaults
+---@field is_dependency? boolean Internal: Whether currently importing as dependency
 
 ---@return zpack.ProcessContext
 local function create_context(opts)
@@ -45,6 +46,7 @@ local process_all = function(ctx)
   local state = require('zpack.state')
 
   vim.api.nvim_clear_autocmds({ group = state.lazy_build_group })
+  require('zpack.merge').resolve_all()
   hooks.setup_build_tracking()
   require('zpack.registration').register_all(ctx)
   require('zpack.startup').process_all(ctx)

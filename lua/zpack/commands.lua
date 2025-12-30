@@ -137,13 +137,14 @@ M.setup = function(prefix)
     end
 
     local registry_entry = state.spec_registry[pack.spec.src]
-    if not registry_entry or not registry_entry.spec.build then
+    local spec = registry_entry and registry_entry.merged_spec
+    if not spec or not spec.build then
       util.schedule_notify(('Plugin "%s" has no build hook'):format(plugin_name), vim.log.levels.WARN)
       return
     end
 
     hooks.load_all_unloaded_plugins()
-    hooks.execute_build(registry_entry.spec.build, registry_entry.plugin)
+    hooks.execute_build(spec.build, registry_entry.plugin)
     util.schedule_notify(('Running build hook for %s'):format(plugin_name), vim.log.levels.INFO)
   end, {
     nargs = '?',
@@ -180,7 +181,7 @@ M.setup = function(prefix)
       return
     end
 
-    if registry_entry.loaded then
+    if registry_entry.load_status == "loaded" then
       util.schedule_notify(('Plugin "%s" is already loaded'):format(plugin_name), vim.log.levels.INFO)
       return
     end

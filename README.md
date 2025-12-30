@@ -10,22 +10,22 @@ A super lightweight layer on top of Neovim's native `vim.pack`, adding support f
 ```lua
 -- ./lua/plugins/fundo.lua
 return {
-  { 'kevinhwang91/promise-async' },
   {
     'kevinhwang91/nvim-fundo',
+    dependencies = { "kevinhwang91/promise-async" },
+    cond = not vim.g.vscode,
     version = 'main',
     build = function() require('fundo').install() end,
-    config = function()
+    opts = {},
+    config = function(_, opts)
       vim.o.undofile = true
-      require('fundo').setup()
+      require('fundo').setup(opts)
     end,
   },
 }
 ```
 
-The built-in plugin manager itself is currently a work in progress, so please expect breaking changes.
-
-**[Why zpack?](#why-zpack)** | **[Examples](#examples)** | **[Dependency Handling](#dependency-handling)** | **[Spec Reference](#spec-reference)** | **[Migrating from lazy.nvim](#migrating-from-lazynvim)**
+**[Why zpack?](#why-zpack)** | **[Examples](#examples)** | **[Spec Reference](#spec-reference)** | **[Migrating from lazy.nvim](#migrating-from-lazynvim)**
 
 ## Requirements
 
@@ -74,12 +74,9 @@ zpack provides the following commands (default prefix: `Z`, customizable via `cm
 - `:ZUpdate [plugin]` - Update all plugins, or a specific plugin if provided (supports tab completion). See `:h vim.pack.update()`
 - `:ZClean` - Remove plugins that are no longer in your spec
 - `:ZBuild[!] [plugin]` - Run build hook for a specific plugin, or all plugins with `!` (supports tab completion)
-- `:ZDelete[!] [plugin]` - Remove a specific plugin, or all plugins with `!` (supports tab completion)
 - `:ZLoad[!] [plugin]` - Load a specific unloaded plugin, or all unloaded plugins with `!` (supports tab completion)
-
-**Note:**
-- Deleting active plugins in your spec with `:ZDelete` can result in errors in your current session. Restart Neovim to re-install them.
-- When manually loading plugins with `:ZLoad`, please ensure any dependencies are already loaded (either manually with `:ZLoad` or see [Dependency Handling](#dependency-handling)).
+- `:ZDelete[!] [plugin]` - Remove a specific plugin, or all plugins with `!` (supports tab completion)
+  - Deleting active plugins in your spec can result in errors in your current session. Restart Neovim to re-install them.
 
 ### Directory Structure
 
@@ -103,7 +100,7 @@ return {
   keys = {
     { '<leader>ff', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
   },
-  opts = {},
+  opts = {}, -- automatically calls require(MAIN).setup(opts) when defined
 }
 ```
 
@@ -132,15 +129,14 @@ Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles plugi
 zpack might be for you if:
 - you're a lazy.nvim user, love its declarative spec, and its wide adoption by plugin authors, but you don't need most of its advanced features
 - you're a lazy.nvim user, want to try `vim.pack`, but don't want to rewrite your entire plugins spec from scratch
-- you're mostly happy with a core plugin manager like `vim.pack` without bells and whistles, but would like just a few additional features like:
+- you're mostly happy with a core plugin manager like `vim.pack` without bells and whistles, but would benefit from:
     - lazy-loading triggers for a faster startup on slower machines
     - a minimalist set of commands and tools to manage your plugin's lifecycle e.g. updates, cleaning, and builds
-    - a declarative plugin spec to keep your main neovim config neat and tidy
+    - lazy.nvim's declarative plugin spec support to keep your main neovim config neat and tidy
 
 As a thin layer, zpack does not provide:
 - UI dashboard for your plugins
 - Profiling, dev mode, etc.
-- Implicit dependency inference (see [Dependency Handling](#dependency-handling) for the explicit approach)
 
 Although you can achieve most of these through other means. See [Migrating from lazy.nvim](#migrating-from-lazynvim). If something you need isn't achievable natively or through zpack, please submit an issue or PR!
 
@@ -220,52 +216,43 @@ return {
 Use `enabled` to skip `vim.pack.add` entirely, or `cond` to conditionally load after calling `vim.pack.add`:
 
 ```lua
--- enabled: Checked at setup time, vim.pack.add never called if false
-return {
-  'linux-only-plugin',
-  enabled = vim.fn.has('linux') == 1,
-  opts = {},
-}
-
--- cond: Checked at load time, vim.pack.add called but won't load if false
 return {
   'project-specific-plugin',
-  cond = function() return vim.fn.filereadable('.project-marker') == 1 end,
+  enabled = vim.fn.has('linux') == 1, -- skip installation
+  cond = function() return vim.fn.filereadable('.project-marker') == 1 end, -- skip loading
   opts = {},
 }
 ```
 
-#### Using Plugin Data in Hooks
-
-All lifecycle hooks (`init`, `config`, `build`, `cond`) and lazy-loading triggers (`event`, `cmd`, `keys`, `ft`) can be functions that receive a `zpack.Plugin` object containing the resolved plugin path and spec:
+#### Build Hook
 
 ```lua
 return {
-  'some/plugin',
-  build = function(plugin)
-    -- plugin.path: absolute path to the plugin directory
-    -- plugin.spec: the vim.pack.Spec with resolved name, src, version
-    vim.fn.system({ 'make', '-C', plugin.path })
-  end,
+  'nvim-telescope/telescope-fzf-native.nvim',
+  build = 'make',
 }
 ```
 
-#### Load Priority
+Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available.
 
-Control plugin load order with priority (higher values load first; default: 50):
+## Dependencies
 
 ```lua
--- Startup plugin: load colorscheme early
 return {
-  'folke/tokyonight.nvim',
-  priority = 1000,
-  config = function() vim.cmd('colorscheme tokyonight') end,
+  'nvim-telescope/telescope.nvim',
+  cmd = 'Telescope',
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    { 'nvim-tree/nvim-web-devicons', opts = {} },
+  },
 }
 ```
+
+Dependencies are automatically loaded before the parent plugin when the parent's lazy trigger fires.
 
 #### Version Pinning
 
-`vim.pack.add` expects `string|vim.VersionRange`:
+`vim.pack.add` expects `version` to be `string|vim.VersionRange`:
 
 ```lua
 return {
@@ -290,6 +277,19 @@ return {
 }
 ```
 
+#### Load Priority
+
+Control plugin load order with priority (higher values load first; default: 50):
+
+```lua
+-- Startup plugin: load colorscheme early
+return {
+  'folke/tokyonight.nvim',
+  priority = 1000,
+  config = function() vim.cmd('colorscheme tokyonight') end,
+}
+```
+
 #### Custom Config Function
 
 When you need custom configuration logic, use a `config` function. The resolved `opts` table is passed as the second argument:
@@ -298,9 +298,24 @@ When you need custom configuration logic, use a `config` function. The resolved 
 return {
   'nvim-lualine/lualine.nvim',
   opts = { theme = 'tokyonight' },
-  config = function(plugin, opts)
+  config = function(_, opts)
     opts.sections = { lualine_a = { 'mode' } }
     require('lualine').setup(opts)
+  end,
+}
+```
+
+#### Using Plugin Data in Hooks
+
+All lifecycle hooks (`init`, `config`, `build`, `cond`) and lazy-loading triggers (`event`, `cmd`, `keys`, `ft`) can be functions that receive a `zpack.Plugin` object containing the resolved plugin path and spec:
+
+```lua
+return {
+  'some/plugin',
+  build = function(plugin)
+    -- plugin.path: absolute path to the plugin directory
+    -- plugin.spec: the vim.pack.Spec with resolved name, src, version
+    vim.fn.system({ 'make', '-C', plugin.path })
   end,
 }
 ```
@@ -317,17 +332,6 @@ return {
 }
 ```
 
-#### Build Hook
-
-```lua
-return {
-  'nvim-telescope/telescope-fzf-native.nvim',
-  build = 'make',
-}
-```
-
-Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available.
-
 #### Multiple Plugins in One File
 
 ```lua
@@ -337,64 +341,6 @@ return {
   { 'nvim-lualine/lualine.nvim', opts = { theme = 'auto' } },
 }
 ```
-
-## Dependency Handling
-
-Unlike lazy.nvim, zpack does not have a `dependencies` field to automatically infer plugin load order. Instead, you explicitly control dependencies using one of two approaches:
-
-### Option 1: Load Dependencies at Startup
-
-The simplest approach is to load dependency plugins at startup (without lazy-loading triggers) while keeping the dependent plugin lazy-loaded. For most plugins, loading small dependencies at startup has negligible impact on startup time while keeping your config simple.
-
-**lazy.nvim:**
-```lua
-return {
-  'nvim-telescope/telescope.nvim',
-  dependencies = { 'nvim-lua/plenary.nvim' },
-  cmd = 'Telescope',
-}
-```
-
-**zpack:**
-```lua
-return {
-  { 'nvim-lua/plenary.nvim' },  -- Loads at startup
-  {
-    'nvim-telescope/telescope.nvim',
-    cmd = 'Telescope',  -- Lazy-loaded on command
-  }
-}
-```
-
-### Option 2: Use Priority with Same Trigger
-
-If you want both plugins lazy-loaded, use the same trigger with `priority` to control load order (higher = earlier):
-
-```lua
--- /lua/plugins/plenary.lua
-local telescope_triggers = 'Telescope'
-local harpoon_triggers = '<leader>a'
-return {
-  {
-    'nvim-lua/plenary.nvim',
-    cmd = telescope_triggers,
-    keys = harpoon_triggers,
-    priority = 1000,
-  },
-  {
-    'nvim-telescope/telescope.nvim',
-    cmd = telescope_triggers,
-  },
-  {
-    "ThePrimeagen/harpoon",
-    version = "harpoon2",
-    keys = harpoon_triggers,
-    opts = {},
-  }
-}
-```
-
-**Note:** For non-lazy plugins, packages are all loaded via `packadd` in priority order before executing their config hooks, thus all dependencies are available without having to explicitly set priority. There should almost never be a need to define dependency priority for non-lazy plugins unless configs need to be called in specific orders.
 
 ## Spec Reference
 
@@ -444,6 +390,9 @@ return {
   keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
   ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
 
+  -- Dependencies
+  dependencies = string|string[]|zpack.Spec|zpack.Spec[], -- Plugin dependencies
+
   -- Spec imports
   import = "plugins.lsp",               -- Import from lua/{path}/*.lua and lua/{path}/*/init.lua
 }
@@ -488,10 +437,8 @@ Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a th
 
 **key differences:**
 
-- **dependencies**: zpack does not have a `dependencies` field. See [Dependency Handling](#dependency-handling)
 - **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning-for-lazynvim-compatibility)
 - **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
-- **spec merging**: zpack does not merge duplicate specs. Please only define each plugin spec once.
 
 #### blink.cmp + lazydev
 

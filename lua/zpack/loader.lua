@@ -1,6 +1,7 @@
 local state = require('zpack.state')
 local keymap = require('zpack.keymap')
 local utils = require('zpack.utils')
+local merge = require('zpack.merge')
 
 local M = {}
 
@@ -35,7 +36,13 @@ end
 ---@param plugin zpack.Plugin
 ---@param spec zpack.Spec
 function M.run_config(src, plugin, spec)
-  local resolved_opts = utils.resolve_field(spec.opts, plugin) or {}
+  local registry_entry = state.spec_registry[src]
+  local resolved_opts
+  if registry_entry.sorted_specs and #registry_entry.sorted_specs > 1 then
+    resolved_opts = merge.resolve_opts(registry_entry.sorted_specs, plugin)
+  else
+    resolved_opts = utils.resolve_field(spec.opts, plugin) or {}
+  end
   local main = utils.resolve_main(plugin, spec)
 
   if type(spec.config) == "function" then
@@ -57,19 +64,60 @@ function M.run_config(src, plugin, spec)
   end
 end
 
+---Find pack_spec by source URL
+---@param src string
+---@return vim.pack.Spec?
+local function find_pack_spec_by_src(src)
+  return state.src_to_pack_spec[src]
+end
+
 ---@param pack_spec vim.pack.Spec
 M.process_spec = function(pack_spec, opts)
   opts = opts or {}
   local registry_entry = state.spec_registry[pack_spec.src]
 
-  if registry_entry.loaded then
+  if registry_entry.load_status == "loaded" then
     return
   end
 
-  local spec = registry_entry.spec
-  local plugin = registry_entry.plugin --[[@as zpack.Plugin]]
+  if registry_entry.load_status == "loading" then
+    utils.schedule_notify(
+      ("Circular dependency detected: %s is already being loaded"):format(pack_spec.src),
+      vim.log.levels.ERROR
+    )
+    return
+  end
 
-  vim.cmd.packadd({ pack_spec.name, bang = opts.bang })
+  registry_entry.load_status = "loading"
+
+  local deps = state.dependency_graph[pack_spec.src]
+  if deps then
+    for dep_src in pairs(deps) do
+      local dep_entry = state.spec_registry[dep_src]
+      if dep_entry and dep_entry.load_status ~= "loaded" then
+        local dep_pack_spec = find_pack_spec_by_src(dep_src)
+        if dep_pack_spec then
+          M.process_spec(dep_pack_spec, opts)
+        else
+          utils.schedule_notify(
+            ("Dependency %s not found for %s"):format(dep_src, pack_spec.src),
+            vim.log.levels.WARN
+          )
+        end
+      end
+    end
+  end
+
+  local spec = registry_entry.merged_spec
+  local plugin = registry_entry.plugin
+
+  if not plugin then
+    utils.schedule_notify(("Cannot load %s: plugin not registered"):format(pack_spec.src), vim.log.levels.ERROR)
+    return
+  end
+
+  local name = plugin.spec.name
+  vim.cmd.packadd({ name, bang = opts.bang })
 
   if spec.config or spec.opts ~= nil then
     M.run_config(pack_spec.src, plugin, spec)
@@ -80,8 +128,8 @@ M.process_spec = function(pack_spec, opts)
     keymap.apply_keys(keys)
   end
 
-  registry_entry.loaded = true
-  state.unloaded_plugin_names[pack_spec.name] = nil
+  registry_entry.load_status = "loaded"
+  state.unloaded_plugin_names[name] = nil
 end
 
 return M

@@ -117,8 +117,9 @@ return function()
 
       helpers.flush_pending()
       local src = 'https://github.com/test/plugin'
-      helpers.assert_false(
-        state.spec_registry[src].loaded,
+      helpers.assert_equal(
+        state.spec_registry[src].load_status,
+        "pending",
         "Lazy keys plugin should not be loaded at startup"
       )
 

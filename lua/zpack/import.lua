@@ -79,6 +79,40 @@ local is_import_spec = function(spec)
   return spec.import ~= nil
 end
 
+---Normalize dependencies to spec array
+---@param deps string|string[]|zpack.Spec|zpack.Spec[]
+---@param parent_src string
+---@return zpack.Spec[]
+local normalize_dependencies = function(deps, parent_src)
+  if type(deps) == "string" then
+    return { { deps } }
+  end
+  if type(deps) ~= "table" then
+    utils.schedule_notify(
+      ("Invalid dependencies for %s: expected string or table, got %s"):format(parent_src, type(deps)),
+      vim.log.levels.WARN
+    )
+    return {}
+  end
+  if type(deps[1]) == "string" and deps.src == nil and deps.dir == nil and deps.url == nil then
+    local result = {}
+    for i, dep in ipairs(deps) do
+      if type(dep) == "string" then
+        table.insert(result, { dep })
+      elseif type(dep) == "table" then
+        table.insert(result, dep)
+      else
+        utils.schedule_notify(
+          ("Invalid dependency at index %d for %s: expected string or table, got %s"):format(i, parent_src, type(dep)),
+          vim.log.levels.WARN
+        )
+      end
+    end
+    return result
+  end
+  return is_single_spec(deps) and { deps } or deps
+end
+
 ---Load a spec module and import its specs
 ---@param full_module string Full module path (e.g., 'plugins.telescope')
 ---@param ctx zpack.ProcessContext
@@ -142,12 +176,42 @@ M.import_specs = function(spec_item_or_list, ctx)
     end
 
     local src = get_source_url(spec)
+    local is_dep = ctx.is_dependency or false
+
+    spec._import_order = state.import_order
+    state.import_order = state.import_order + 1
+    spec._is_dependency = is_dep
+
     if state.spec_registry[src] then
-      goto continue
+      table.insert(state.spec_registry[src].specs, spec)
+    else
+      state.spec_registry[src] = { specs = { spec }, load_status = "pending" }
+      local pack_spec = { src = src, version = normalize_version(spec), name = spec.name }
+      table.insert(ctx.vim_packs, pack_spec)
+      state.src_to_pack_spec[src] = pack_spec
     end
 
-    state.spec_registry[src] = { spec = spec, loaded = false }
-    table.insert(ctx.vim_packs, { src = src, version = normalize_version(spec), name = spec.name })
+    if spec.dependencies then
+      local dep_specs = normalize_dependencies(spec.dependencies, src)
+      state.dependency_graph[src] = state.dependency_graph[src] or {}
+      local dep_ctx = vim.tbl_extend('force', ctx, { is_dependency = true })
+      for _, dep_spec in ipairs(dep_specs) do
+        local dep_src, err = normalize_source(dep_spec)
+        if not dep_src then
+          if err then
+            utils.schedule_notify(("Invalid dependency for %s: %s"):format(src, err), vim.log.levels.WARN)
+          end
+          goto skip_dep
+        end
+        if not state.dependency_graph[src][dep_src] then
+          state.dependency_graph[src][dep_src] = true
+          state.reverse_dependency_graph[dep_src] = state.reverse_dependency_graph[dep_src] or {}
+          state.reverse_dependency_graph[dep_src][src] = true
+        end
+        M.import_specs(dep_spec, dep_ctx)
+        ::skip_dep::
+      end
+    end
 
     ::continue::
   end

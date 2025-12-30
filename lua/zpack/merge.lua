@@ -1,0 +1,245 @@
+local M = {}
+
+M.OVERRIDE = "override"
+M.LIST_EXTEND = "list_extend"
+M.DEEP_MERGE = "deep_merge"
+M.AND_LOGIC = "and_logic"
+
+M.field_strategies = {
+  name = M.OVERRIDE,
+  main = M.OVERRIDE,
+  priority = M.OVERRIDE,
+  build = M.OVERRIDE,
+  version = M.OVERRIDE,
+  sem_version = M.OVERRIDE,
+  branch = M.OVERRIDE,
+  tag = M.OVERRIDE,
+  commit = M.OVERRIDE,
+  lazy = M.OVERRIDE,
+  config = M.OVERRIDE,
+  init = M.OVERRIDE,
+  pattern = M.OVERRIDE,
+
+  event = M.LIST_EXTEND,
+  cmd = M.LIST_EXTEND,
+  ft = M.LIST_EXTEND,
+  keys = M.LIST_EXTEND,
+
+  opts = M.DEEP_MERGE,
+
+  cond = M.AND_LOGIC,
+  enabled = M.AND_LOGIC,
+}
+
+local internal_fields = {
+  _import_order = true,
+  _is_dependency = true,
+}
+
+---Normalize value to array for LIST_EXTEND fields (event, cmd, ft, keys).
+---Handles three cases:
+---  1. nil -> empty array
+---  2. Non-table (string) -> wrap in array: "BufRead" -> {"BufRead"}
+---  3. Table:
+---     - Already array-like (has [1]) or empty -> return as-is
+---     - Dict-like (e.g., EventSpec {event="X", pattern="Y"}) -> wrap in array
+---@param val any
+---@return any[]
+local function to_array(val)
+  if val == nil then
+    return {}
+  end
+  if type(val) ~= "table" then
+    return { val }
+  end
+  if val[1] ~= nil or next(val) == nil then
+    return val
+  end
+  return { val }
+end
+
+---Get unique key for a value (handles KeySpec with mode)
+---@param v any
+---@return string
+local function get_unique_key(v)
+  if type(v) ~= "table" then
+    return tostring(v)
+  end
+  local lhs = v[1] or ""
+  local mode = v.mode or "n"
+  if type(mode) == "table" then
+    local sorted = vim.list_slice(mode)
+    table.sort(sorted)
+    mode = table.concat(sorted, ",")
+  end
+  return lhs .. ":" .. mode
+end
+
+---Extend list with unique values
+---@param base any[]
+---@param incoming any[]
+---@return any[]
+local function extend_unique(base, incoming)
+  local seen = {}
+  local result = {}
+
+  for _, v in ipairs(base) do
+    local key = get_unique_key(v)
+    if not seen[key] then
+      seen[key] = true
+      table.insert(result, v)
+    end
+  end
+
+  for _, v in ipairs(incoming) do
+    local key = get_unique_key(v)
+    if not seen[key] then
+      seen[key] = true
+      table.insert(result, v)
+    end
+  end
+
+  return result
+end
+
+---@alias zpack.CondValue boolean|fun(plugin: zpack.Plugin):boolean
+
+---Merge AND logic fields (both must be truthy or nil)
+---@param base zpack.CondValue?
+---@param incoming zpack.CondValue?
+---@return zpack.CondValue?
+local function merge_and(base, incoming)
+  if base == nil then
+    return incoming
+  end
+  if incoming == nil then
+    return base
+  end
+
+  if type(base) == "function" or type(incoming) == "function" then
+    return function(plugin)
+      local base_result = type(base) == "function" and base(plugin) or base
+      local incoming_result = type(incoming) == "function" and incoming(plugin) or incoming
+      return base_result and incoming_result
+    end
+  end
+
+  return base and incoming
+end
+
+---Merge two specs according to field strategies
+---@param base zpack.Spec
+---@param incoming zpack.Spec
+---@return zpack.Spec
+function M.merge_specs(base, incoming)
+  local result = {}
+
+  local all_keys = {}
+  for k in pairs(base) do all_keys[k] = true end
+  for k in pairs(incoming) do all_keys[k] = true end
+
+  for key in pairs(all_keys) do
+    if internal_fields[key] then
+      result[key] = incoming[key] ~= nil and incoming[key] or base[key]
+    else
+      local strategy = M.field_strategies[key] or M.OVERRIDE
+      local base_val = base[key]
+      local incoming_val = incoming[key]
+
+      if incoming_val == nil then
+        result[key] = base_val
+      elseif base_val == nil then
+        result[key] = incoming_val
+      elseif strategy == M.OVERRIDE then
+        result[key] = incoming_val
+      elseif strategy == M.LIST_EXTEND then
+        result[key] = extend_unique(to_array(base_val), to_array(incoming_val))
+      elseif strategy == M.DEEP_MERGE then
+        if type(base_val) == "table" and type(incoming_val) == "table" then
+          result[key] = vim.tbl_deep_extend("force", base_val, incoming_val)
+        else
+          result[key] = incoming_val
+        end
+      elseif strategy == M.AND_LOGIC then
+        result[key] = merge_and(base_val, incoming_val)
+      end
+    end
+  end
+
+  return result
+end
+
+---Sort specs: dependencies first, then standalone (so standalone wins on conflict)
+---@param specs zpack.Spec[]
+---@return zpack.Spec[]
+function M.sort_specs(specs)
+  if not specs or #specs == 0 then
+    return {}
+  end
+  local sorted = vim.list_slice(specs)
+  table.sort(sorted, function(a, b)
+    local a_dep = a._is_dependency and 1 or 0
+    local b_dep = b._is_dependency and 1 or 0
+    if a_dep ~= b_dep then
+      return a_dep > b_dep
+    end
+    return (a._import_order or 0) < (b._import_order or 0)
+  end)
+  return sorted
+end
+
+---Merge an array of specs in order (lowest priority first)
+---@param specs zpack.Spec[]
+---@return zpack.Spec
+function M.merge_spec_array(specs)
+  if #specs == 0 then
+    return {}
+  end
+  if #specs == 1 then
+    return specs[1]
+  end
+
+  local result = specs[1]
+  for i = 2, #specs do
+    result = M.merge_specs(result, specs[i])
+  end
+  return result
+end
+
+---Resolve opts through all specs, supporting function-based opts
+---@param specs zpack.Spec[]
+---@param plugin zpack.Plugin
+---@return table
+function M.resolve_opts(specs, plugin)
+  local accumulated = {}
+
+  for _, spec in ipairs(specs) do
+    local opts = spec.opts
+    if opts ~= nil then
+      if type(opts) == "function" then
+        local result = opts(plugin, accumulated)
+        if type(result) == "table" then
+          accumulated = result
+        end
+      elseif type(opts) == "table" then
+        accumulated = vim.tbl_deep_extend("force", accumulated, opts)
+      end
+    end
+  end
+
+  return accumulated
+end
+
+---Pre-compute merged_spec for all entries in the registry
+function M.resolve_all()
+  local state = require('zpack.state')
+
+  for _, entry in pairs(state.spec_registry) do
+    if entry.specs and #entry.specs > 0 then
+      entry.sorted_specs = M.sort_specs(entry.specs)
+      entry.merged_spec = M.merge_spec_array(entry.sorted_specs)
+    end
+  end
+end
+
+return M

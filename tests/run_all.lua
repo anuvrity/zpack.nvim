@@ -21,6 +21,8 @@ local test_modules = {
   'zload_test',
   'opts_test',
   'utils_test',
+  'merge_test',
+  'dependencies_test',
 }
 
 print("\n" .. string.rep("=", 60))

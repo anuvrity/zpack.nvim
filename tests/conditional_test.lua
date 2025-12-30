@@ -189,7 +189,8 @@ return function()
       )
 
       local utils = require('zpack.utils')
-      local should_load = utils.check_cond(state.spec_registry[src].spec)
+      local spec = state.spec_registry[src].merged_spec
+      local should_load = utils.check_cond(spec)
       helpers.assert_false(should_load, "Plugin should not load (cond=false)")
 
       helpers.cleanup_test_env()

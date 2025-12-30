@@ -21,13 +21,13 @@ M.process_all = function(ctx)
 
   for _, src in ipairs(ctx.src_with_startup_config) do
     local entry = state.spec_registry[src]
-    loader.run_config(src, entry.plugin, entry.spec)
+    loader.run_config(src, entry.plugin, entry.merged_spec)
   end
 
   keymap.apply_keys(ctx.startup_keys)
 
   for _, pack_spec in ipairs(ctx.registered_startup_packs) do
-    state.spec_registry[pack_spec.src].loaded = true
+    state.spec_registry[pack_spec.src].load_status = "loaded"
   end
 end
 

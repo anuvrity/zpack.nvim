@@ -21,10 +21,10 @@ local normalize_and_apply_fallback_pattern = function(spec, event)
       and { event }
       or event --[[@as string[]|zpack.EventSpec[] ]]
 
-  for _, event in ipairs(event_list) do
-    if type(event) == "string" then
+  for _, ev in ipairs(event_list) do
+    if type(ev) == "string" then
       -- Parse "EventName pattern" format (e.g., "BufEnter *.lua")
-      local event_name, pattern = event:match("^(%w+)%s+(.*)$")
+      local event_name, pattern = ev:match("^(%w+)%s+(.*)$")
       if event_name then
         table.insert(result, {
           events = { event_name },
@@ -32,14 +32,14 @@ local normalize_and_apply_fallback_pattern = function(spec, event)
         })
       else
         table.insert(result, {
-          events = { event },
+          events = { ev },
           pattern = fallback_pattern
         })
       end
-    elseif is_event_spec(event) then
+    elseif is_event_spec(ev) then
       table.insert(result, {
-        events = util.normalize_string_list(event.event),
-        pattern = event.pattern or fallback_pattern
+        events = util.normalize_string_list(ev.event),
+        pattern = ev.pattern or fallback_pattern
       })
     end
   end

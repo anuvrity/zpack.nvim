@@ -93,7 +93,8 @@ return function()
 
       local src = 'https://github.com/test/plugin'
       helpers.assert_not_nil(state.spec_registry[src], "Plugin should be registered")
-      helpers.assert_equal(state.spec_registry[src].spec[1], 'test/plugin', "Spec should match")
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(spec[1], 'test/plugin', "Spec should match")
 
       helpers.cleanup_test_env()
     end)

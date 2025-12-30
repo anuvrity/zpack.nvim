@@ -18,9 +18,10 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_not_nil(state.spec_registry[src].spec.opts, "opts should be stored")
-      helpers.assert_equal(state.spec_registry[src].spec.opts.enabled, true)
-      helpers.assert_equal(state.spec_registry[src].spec.opts.theme, 'dark')
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_not_nil(spec.opts, "opts should be stored")
+      helpers.assert_equal(spec.opts.enabled, true)
+      helpers.assert_equal(spec.opts.theme, 'dark')
 
       helpers.cleanup_test_env()
     end)
@@ -42,7 +43,8 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_equal(type(state.spec_registry[src].spec.opts), 'function')
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(type(spec.opts), 'function')
 
       helpers.cleanup_test_env()
     end)
@@ -64,7 +66,8 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_equal(state.spec_registry[src].spec.main, 'custom.module')
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(spec.main, 'custom.module')
 
       helpers.cleanup_test_env()
     end)
@@ -85,7 +88,8 @@ return function()
       helpers.flush_pending()
       local state = require('zpack.state')
       local src = 'https://github.com/test/plugin'
-      helpers.assert_equal(state.spec_registry[src].spec.config, true)
+      local spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(spec.config, true)
 
       helpers.cleanup_test_env()
     end)
@@ -262,7 +266,8 @@ return function()
       local src = 'https://github.com/test/plugin'
       local entry = state.spec_registry[src]
 
-      utils.resolve_main(entry.plugin, entry.spec)
+      local spec = entry.merged_spec
+      utils.resolve_main(entry.plugin, spec)
       helpers.assert_equal(entry.plugin.main, 'custom.module')
 
       helpers.cleanup_test_env()
@@ -288,9 +293,10 @@ return function()
       local src = 'https://github.com/test/plugin'
       local entry = state.spec_registry[src]
 
-      local first_result = utils.resolve_main(entry.plugin, entry.spec)
-      entry.spec.main = 'changed.module'
-      local second_result = utils.resolve_main(entry.plugin, entry.spec)
+      local spec = entry.merged_spec
+      local first_result = utils.resolve_main(entry.plugin, spec)
+      spec.main = 'changed.module'
+      local second_result = utils.resolve_main(entry.plugin, spec)
 
       helpers.assert_equal(first_result, 'cached.module')
       helpers.assert_equal(second_result, 'cached.module', "should use cached value")
@@ -319,7 +325,8 @@ return function()
       local src = 'https://github.com/nvim-mini/mini.surround'
       local entry = state.spec_registry[src]
 
-      local main = utils.resolve_main(entry.plugin, entry.spec)
+      local spec = entry.merged_spec
+      local main = utils.resolve_main(entry.plugin, spec)
       helpers.assert_equal(main, 'mini.surround')
 
       helpers.cleanup_test_env()
@@ -344,7 +351,8 @@ return function()
       local src = 'https://github.com/nvim-mini/mini.nvim'
       local entry = state.spec_registry[src]
 
-      local main = utils.resolve_main(entry.plugin, entry.spec)
+      local spec = entry.merged_spec
+      local main = utils.resolve_main(entry.plugin, spec)
       helpers.assert_nil(main, "mini.nvim should not match special case")
 
       helpers.cleanup_test_env()
