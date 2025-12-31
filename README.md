@@ -81,7 +81,11 @@ return {
   keys = {
     { '<leader>ff', function() require('telescope.builtin').find_files() end, desc = 'Find files' },
   },
-  opts = {}, -- automatically calls require(MAIN).setup(opts) when defined
+  opts = {},
+  -- config is executed when the plugin loads. The default implementation will automatically run require(MAIN).setup(opts) if opts or config = true is set.
+  config = function()
+    ...
+  end,
 }
 ```
 

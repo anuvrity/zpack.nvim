@@ -120,6 +120,12 @@ Each file returns a spec or list of specs (see |zpack-examples| or
           desc = 'Find files' },
       },
       opts = {},
+      -- config is executed when the plugin loads.
+      -- The default implementation will automatically run
+      -- require(MAIN).setup(opts) if opts or config = true is set.
+      config = function()
+        ...
+      end,
     }
 <
 
