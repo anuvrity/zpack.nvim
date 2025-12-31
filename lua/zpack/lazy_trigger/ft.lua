@@ -15,6 +15,9 @@ M.setup = function(pack_spec, ft)
     -- Re-trigger events for the buffer that triggered loading to ensure LSP/Treesitter attach
     vim.schedule(function()
       local bufnr = ev.buf
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
       vim.api.nvim_exec_autocmds("BufReadPre", { buffer = bufnr, modeline = false })
       vim.api.nvim_exec_autocmds("BufReadPost", { buffer = bufnr, modeline = false })
       vim.api.nvim_exec_autocmds("FileType", { buffer = bufnr, modeline = false })
