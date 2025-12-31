@@ -41,7 +41,12 @@ function M.run_config(src, plugin, spec)
   if registry_entry.sorted_specs and #registry_entry.sorted_specs > 1 then
     resolved_opts = merge.resolve_opts(registry_entry.sorted_specs, plugin)
   else
-    resolved_opts = utils.resolve_field(spec.opts, plugin) or {}
+    local opts = spec.opts
+    if type(opts) == "function" then
+      resolved_opts = opts(plugin, {}) or {}
+    else
+      resolved_opts = opts or {}
+    end
   end
   local main = utils.resolve_main(plugin, spec)
 

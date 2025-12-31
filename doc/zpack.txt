@@ -456,8 +456,8 @@ Define multiple plugins in a single file:
     }
 <
 
-==============================================================================
-7. DEPENDENCY HANDLING                             *zpack-dependency-handling*
+------------------------------------------------------------------------------
+6.14 DEPENDENCIES                                *zpack-example-dependencies*
 
 zpack supports the `dependencies` field, allowing plugins to declare their
 dependencies inline:
@@ -476,7 +476,7 @@ Dependencies are automatically loaded before the parent plugin when the
 parent's lazy trigger fires.
 
 ==============================================================================
-8. SPEC REFERENCE                                       *zpack-spec-reference*
+7. SPEC REFERENCE                                       *zpack-spec-reference*
                                                                   *zpack-Spec*
 
 >lua
@@ -487,18 +487,8 @@ parent's lazy trigger fires.
       dir = "/path/to/plugin",              -- Local path (lazy.nvim compat)
       url = "https://...",                  -- Git URL (lazy.nvim compat)
 
-      -- Plugin metadata
-      name = "my-plugin",                   -- Custom name (optional)
-
-      -- Source control (version for `vim.pack.add`, string|vim.VersionRange)
-      version = "main",                     -- Branch/tag/commit
-      -- version = vim.version.range("1.*"), -- Or semver range
-
-      -- Source control (lazy.nvim compat, mapped to version)
-      sem_version = "^1.0.0",               -- lazy.nvim's version field
-      branch = "main",                      -- Git branch
-      tag = "v1.0.0",                       -- Git tag
-      commit = "abc123",                    -- Git commit
+      -- Dependencies
+      dependencies = string|string[]|Spec|Spec[], -- Plugin dependencies
 
       -- Loading control
       enabled = true|false|function,        -- Enable/disable
@@ -506,16 +496,15 @@ parent's lazy trigger fires.
       lazy = true|false,                    -- Force eager (auto-detect)
       priority = 50,                        -- Load order (default: 50)
 
+      -- Plugin configuration
+      opts = {},                            -- Options passed to setup()
+      -- opts = function(plugin, opts) return {} end,
+
       -- Lifecycle hooks
       init = function(plugin) end,          -- Runs before load
       config = function(plugin, opts) end,  -- Runs after load
       -- config = true,                      -- Calls require(main).setup({})
       build = string|function(plugin),      -- Build command/function
-
-      -- Plugin configuration
-      opts = {},                            -- Options passed to setup()
-      -- opts = function(plugin) return {} end,
-      main = "module.name",                 -- Explicit main module
 
       -- Lazy loading triggers (auto-sets lazy=true unless overridden)
       -- All triggers can also be functions receiving zpack.Plugin
@@ -528,8 +517,19 @@ parent's lazy trigger fires.
       keys = KeySpec|KeySpec[]|fn(plugin),  -- Keymap(s) to create
       ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
 
-      -- Dependencies
-      dependencies = string|string[]|Spec|Spec[], -- Plugin dependencies
+      -- Source control (version for `vim.pack.add`, string|vim.VersionRange)
+      version = "main",                     -- Branch/tag/commit
+      -- version = vim.version.range("1.*"), -- Or semver range
+
+      -- Source control (lazy.nvim compat, mapped to version)
+      sem_version = "^1.0.0",               -- lazy.nvim's version field
+      branch = "main",                      -- Git branch
+      tag = "v1.0.0",                       -- Git tag
+      commit = "abc123",                    -- Git commit
+
+      -- Plugin metadata
+      name = "my-plugin",                   -- Custom name (optional)
+      main = "module.name",                 -- Explicit main module
 
       -- Spec imports
       import = "plugins.lsp",               -- Import specs from lua/{path}/
@@ -559,37 +559,13 @@ url             (string, optional)
                 Mapped to `src` internally. Provide exactly one of:
                 [1], src, dir, or url.
 
-                                                            *zpack-Spec.name*
-name            (string, optional)
-                Custom plugin name. Overrides the name automatically derived
-                from the source URL. Useful when you need a specific directory
-                name or want to avoid naming conflicts.
-
-                                                         *zpack-Spec.version*
-version         (string|vim.VersionRange, optional)
-                Git branch, tag, or commit (string), or semver range via
-                |vim.version.range()|. This is vim.pack.add's version field.
-
-                                                     *zpack-Spec.sem_version*
-sem_version     (string, optional)
-                Semver range string. Corresponds to lazy.nvim spec's
-                `version` field. Auto-wrapped to |vim.version.range()|.
-                For lazy.nvim compatibility.
-
-                                                          *zpack-Spec.branch*
-branch          (string, optional)
-                Git branch. For lazy.nvim compatibility.
-                Mapped to `version` internally.
-
-                                                             *zpack-Spec.tag*
-tag             (string, optional)
-                Git tag. For lazy.nvim compatibility.
-                Mapped to `version` internally.
-
-                                                          *zpack-Spec.commit*
-commit          (string, optional)
-                Git commit hash. For lazy.nvim compatibility.
-                Mapped to `version` internally.
+                                                    *zpack-Spec.dependencies*
+dependencies    (string|string[]|zpack.Spec|zpack.Spec[], optional)
+                Plugin dependencies. Dependencies are automatically loaded
+                before the parent plugin when the parent's lazy trigger fires.
+                Can be a string (plugin short name), array of strings, inline
+                spec, or array of specs. Dependency specs can have their own
+                configuration (opts, config, etc.) and nested dependencies.
 
                                                          *zpack-Spec.enabled*
 enabled         (boolean|function, optional)
@@ -615,6 +591,22 @@ priority        (number, optional)
                 plugins load first. Useful for colorschemes and plugins
                 that other plugins depend on.
 
+                                                            *zpack-Spec.opts*
+opts            (table|function(plugin, opts), optional)
+                Options to pass to the plugin's `setup()` function. When
+                `opts` is present and no custom `config` function is provided,
+                zpack automatically calls `require(main).setup(opts)`.
+
+                Can be a table of options or a function that receives
+                |zpack.Plugin| and accumulated opts table, and returns a table.
+                The accumulated opts is useful when multiple specs for the same
+                plugin are merged - each opts function receives the result from
+                previous specs.
+
+                When a custom `config` function is provided, the resolved
+                `opts` is passed as the second argument, but you are
+                responsible for calling `setup()` yourself.
+
                                                             *zpack-Spec.init*
 init            (function(plugin), optional)
                 Runs before the plugin loads. Receives |zpack.Plugin|.
@@ -627,29 +619,6 @@ config          (function(plugin, opts)|true, optional)
 
                 When set to `true`, zpack calls `require(main).setup(opts)`
                 automatically without a custom config function.
-
-                                                            *zpack-Spec.opts*
-opts            (table|function(plugin), optional)
-                Options to pass to the plugin's `setup()` function. When
-                `opts` is present and no custom `config` function is provided,
-                zpack automatically calls `require(main).setup(opts)`.
-
-                Can be a table of options or a function that receives
-                |zpack.Plugin| and returns a table.
-
-                When a custom `config` function is provided, the resolved
-                `opts` is passed as the second argument, but you are
-                responsible for calling `setup()` yourself.
-
-                                                            *zpack-Spec.main*
-main            (string, optional)
-                Explicit main module name for auto-setup. When not set,
-                zpack uses heuristics to detect the module:
-                1. For mini.* plugins, uses the plugin name directly
-                2. Normalizes the plugin name (removes vim-/nvim- prefix,
-                   .vim/.nvim suffix) and searches for a matching module
-
-                Use this when automatic detection fails.
 
                                                            *zpack-Spec.build*
 build           (string|function(plugin), optional)
@@ -698,6 +667,48 @@ ft              (string|string[]|function(plugin), optional)
                 after loading to ensure LSP clients and Treesitter attach
                 properly. Auto-sets `lazy=true`.
 
+                                                         *zpack-Spec.version*
+version         (string|vim.VersionRange, optional)
+                Git branch, tag, or commit (string), or semver range via
+                |vim.version.range()|. This is vim.pack.add's version field.
+
+                                                     *zpack-Spec.sem_version*
+sem_version     (string, optional)
+                Semver range string. Corresponds to lazy.nvim spec's
+                `version` field. Auto-wrapped to |vim.version.range()|.
+                For lazy.nvim compatibility.
+
+                                                          *zpack-Spec.branch*
+branch          (string, optional)
+                Git branch. For lazy.nvim compatibility.
+                Mapped to `version` internally.
+
+                                                             *zpack-Spec.tag*
+tag             (string, optional)
+                Git tag. For lazy.nvim compatibility.
+                Mapped to `version` internally.
+
+                                                          *zpack-Spec.commit*
+commit          (string, optional)
+                Git commit hash. For lazy.nvim compatibility.
+                Mapped to `version` internally.
+
+                                                            *zpack-Spec.name*
+name            (string, optional)
+                Custom plugin name. Overrides the name automatically derived
+                from the source URL. Useful when you need a specific directory
+                name or want to avoid naming conflicts.
+
+                                                            *zpack-Spec.main*
+main            (string, optional)
+                Explicit main module name for auto-setup. When not set,
+                zpack uses heuristics to detect the module:
+                1. For mini.* plugins, uses the plugin name directly
+                2. Normalizes the plugin name (removes vim-/nvim- prefix,
+                   .vim/.nvim suffix) and searches for a matching module
+
+                Use this when automatic detection fails.
+
                                                           *zpack-Spec.import*
 import          (string, optional)
                 Module path to import specs from (e.g., 'plugins' or
@@ -706,7 +717,7 @@ import          (string, optional)
                 Each file should return a spec or list of specs.
 
 ==============================================================================
-9. PLUGIN REFERENCE                                *zpack-plugin-reference*
+8. PLUGIN REFERENCE                                *zpack-plugin-reference*
                                                               *zpack.Plugin*
 
 The plugin data object passed to hooks and trigger functions:
@@ -726,7 +737,7 @@ path            (string)
                 Absolute path to the plugin directory.
 
 ==============================================================================
-10. EVENTSPEC REFERENCE                           *zpack-eventspec-reference*
+9. EVENTSPEC REFERENCE                            *zpack-eventspec-reference*
                                                        *zpack.EventSpec*
 
 >lua
@@ -746,7 +757,7 @@ pattern         (string|string[], optional)
                 patterns. If not specified, defaults to '*' (match all).
 
 ==============================================================================
-11. KEYSPEC REFERENCE                               *zpack-keyspec-reference*
+10. KEYSPEC REFERENCE                              *zpack-keyspec-reference*
                                                              *zpack.KeySpec*
 
 >lua
@@ -786,7 +797,7 @@ nowait          (boolean, optional)
                 Whether to use nowait. Default: false.
 
 ==============================================================================
-12. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
+11. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
                                                        *zpack-migration-spec*
 
 Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a
@@ -849,7 +860,7 @@ cover most of the plugin management functionalities. You can also use
 |vim.pack| commands directly.
 
 ==============================================================================
-13. ACKNOWLEDGEMENTS                               *zpack-acknowledgements*
+12. ACKNOWLEDGEMENTS                               *zpack-acknowledgements*
 
 zpack's spec design and several features are inspired by lazy.nvim
 (https://github.com/folke/lazy.nvim). Credit to folke for the excellent

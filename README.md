@@ -235,7 +235,7 @@ return {
 
 Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available.
 
-## Dependencies
+#### Dependencies
 
 ```lua
 return {
@@ -352,8 +352,32 @@ return {
   dir = "/path/to/plugin",              -- Local plugin directory (lazy.nvim compat, mapped to src)
   url = "https://...",                  -- Custom git URL (lazy.nvim compat, mapped to src)
 
-  -- Plugin metadata
-  name = "my-plugin",                   -- Custom plugin name (optional, overrides auto-derived name)
+  -- Dependencies
+  dependencies = string|string[]|zpack.Spec|zpack.Spec[], -- Plugin dependencies
+
+  -- Loading control
+  enabled = true|false|function,        -- Enable/disable plugin
+  cond = true|false|function(plugin),   -- Condition to load plugin
+  lazy = true|false,                    -- Force eager loading when false (auto-detected)
+  priority = 50,                        -- Load priority (higher = earlier, default: 50)
+
+  -- Plugin configuration
+  opts = {},                            -- Options passed to setup(), triggers auto-setup
+  -- opts = function(plugin, opts) return {} end, -- Can also be a function
+
+  -- Lifecycle hooks
+  init = function(plugin) end,          -- Runs before plugin loads, useful for certain vim plugins
+  config = function(plugin, opts) end,  -- Runs after plugin loads, receives resolved opts
+  -- config = true,                      -- Calls require(main).setup({})
+  build = string|function(plugin),      -- Build command or function
+
+  -- Lazy loading triggers (auto-sets lazy=true unless overridden)
+  -- All triggers can also be functions that receive zpack.Plugin and return the respective type
+  event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]|function(plugin), -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
+  pattern = string|string[],            -- Global fallback pattern(s) for all events
+  cmd = string|string[]|function(plugin), -- Command(s) to create
+  keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
+  ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
 
   -- Source control (version for `vim.pack.add`, string|vim.VersionRange)
   version = "main",                     -- Git branch, tag, or commit
@@ -365,33 +389,9 @@ return {
   tag = "v1.0.0",                       -- Git tag
   commit = "abc123",                    -- Git commit
 
-  -- Loading control
-  enabled = true|false|function,        -- Enable/disable plugin
-  cond = true|false|function(plugin),   -- Condition to load plugin
-  lazy = true|false,                    -- Force eager loading when false (auto-detected)
-  priority = 50,                        -- Load priority (higher = earlier, default: 50)
-
-  -- Lifecycle hooks
-  init = function(plugin) end,          -- Runs before plugin loads, useful for certain vim plugins
-  config = function(plugin, opts) end,  -- Runs after plugin loads, receives resolved opts
-  -- config = true,                      -- Calls require(main).setup({})
-  build = string|function(plugin),      -- Build command or function
-
-  -- Plugin configuration
-  opts = {},                            -- Options passed to setup(), triggers auto-setup
-  -- opts = function(plugin) return {} end, -- Can also be a function
+  -- Plugin metadata
+  name = "my-plugin",                   -- Custom plugin name (optional, overrides auto-derived name)
   main = "module.name",                 -- Explicit main module (auto-detected if not set)
-
-  -- Lazy loading triggers (auto-sets lazy=true unless overridden)
-  -- All triggers can also be functions that receive zpack.Plugin and return the respective type
-  event = string|string[]|zpack.EventSpec|(string|zpack.EventSpec)[]|function(plugin), -- Autocommand event(s). Supports 'VeryLazy' and inline patterns: "BufReadPre *.lua"
-  pattern = string|string[],            -- Global fallback pattern(s) for all events
-  cmd = string|string[]|function(plugin), -- Command(s) to create
-  keys = zpack.KeySpec|zpack.KeySpec[]|function(plugin), -- Keymap(s) to create
-  ft = string|string[]|function(plugin), -- FileType(s) to lazy load on
-
-  -- Dependencies
-  dependencies = string|string[]|zpack.Spec|zpack.Spec[], -- Plugin dependencies
 
   -- Spec imports
   import = "plugins.lsp",               -- Import from lua/{path}/*.lua and lua/{path}/*/init.lua
