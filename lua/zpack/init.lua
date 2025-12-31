@@ -16,7 +16,6 @@ local M = {}
 local function create_context(opts)
   opts = opts or {}
   return {
-    vim_packs = {},
     src_with_init = {},
     registered_startup_packs = {},
     registered_lazy_packs = {},
@@ -70,7 +69,7 @@ local process_all = function(ctx)
   local state = require('zpack.state')
 
   vim.api.nvim_clear_autocmds({ group = state.lazy_build_group })
-  require('zpack.merge').resolve_all()
+  ctx.vim_packs = require('zpack.merge').resolve_all()
   hooks.setup_build_tracking()
   require('zpack.registration').register_all(ctx)
 

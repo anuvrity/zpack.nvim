@@ -231,22 +231,31 @@ function M.resolve_opts(specs, plugin)
 end
 
 ---Pre-compute merged_spec for all entries in the registry
----Also updates pack_spec.version based on merged specs
+---Creates pack_specs with merged data and returns sorted vim_packs array
+---@return vim.pack.Spec[]
 function M.resolve_all()
   local state = require('zpack.state')
   local utils = require('zpack.utils')
+
+  local vim_packs = {}
 
   for src, entry in pairs(state.spec_registry) do
     if entry.specs and #entry.specs > 0 then
       entry.sorted_specs = M.sort_specs(entry.specs)
       entry.merged_spec = M.merge_spec_array(entry.sorted_specs)
 
-      local pack_spec = state.src_to_pack_spec[src]
-      if pack_spec then
-        pack_spec.version = utils.normalize_version(entry.merged_spec)
-      end
+      local pack_spec = {
+        src = src,
+        version = utils.normalize_version(entry.merged_spec),
+        name = entry.merged_spec.name,
+      }
+      table.insert(vim_packs, pack_spec)
+      state.src_to_pack_spec[src] = pack_spec
     end
   end
+
+  table.sort(vim_packs, utils.compare_priority)
+  return vim_packs
 end
 
 return M

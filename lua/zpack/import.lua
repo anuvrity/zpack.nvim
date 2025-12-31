@@ -169,9 +169,6 @@ M.import_specs = function(spec_item_or_list, ctx)
       table.insert(state.spec_registry[src].specs, spec)
     else
       state.spec_registry[src] = { specs = { spec }, load_status = "pending" }
-      local pack_spec = { src = src, version = utils.normalize_version(spec), name = spec.name }
-      table.insert(ctx.vim_packs, pack_spec)
-      state.src_to_pack_spec[src] = pack_spec
     end
 
     if spec.dependencies then

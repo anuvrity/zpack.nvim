@@ -10,18 +10,16 @@ A thin layer on top of Neovim's native `vim.pack`, adding support for lazy-loadi
 ```lua
 -- ./lua/plugins/fundo.lua
 return {
-  {
-    'kevinhwang91/nvim-fundo',
-    dependencies = { "kevinhwang91/promise-async" },
-    cond = not vim.g.vscode,
-    version = 'main',
-    build = function() require('fundo').install() end,
-    opts = {},
-    config = function(_, opts)
-      vim.o.undofile = true
-      require('fundo').setup(opts)
-    end,
-  },
+  'kevinhwang91/nvim-fundo',
+  dependencies = { "kevinhwang91/promise-async" },
+  cond = not vim.g.vscode,
+  version = 'main',
+  build = function() require('fundo').install() end,
+  opts = {},
+  config = function(_, opts)
+    vim.o.undofile = true
+    require('fundo').setup(opts)
+  end,
 }
 ```
 
@@ -46,25 +44,8 @@ vim.pack.add({ 'https://github.com/zuqini/zpack.nvim' })
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- automatically import specs from `/lua/plugins/`
+-- automatically import specs from `./lua/plugins/`
 require('zpack').setup()
-
--- or import from a custom directory e.g. `/lua/a/b/plugins/`
-require('zpack').setup({ { import = 'a.b.plugins' } })
-
--- or add your specs inline in setup
-require('zpack').setup({
-  { 'neovim/nvim-lspconfig', config = function() ... end },
-  { import = 'plugins.mini' }, -- additionally import from `/lua/plugins/mini/`
-})
-
--- or via the spec field
-require('zpack').setup({
-  spec = {
-    { 'neovim/nvim-lspconfig', config = function() ... end },
-    { import = 'plugins.mini' }, -- additionally import from `/lua/plugins/mini/`
-  },
-})
 ```
 
 ### Commands
@@ -122,20 +103,45 @@ require('zpack').setup({
 
 Plugin-level settings always take precedence over `defaults`.
 
+### Importing Specs
+
+```lua
+-- automatically import specs from `./lua/plugins/`
+require('zpack').setup()
+
+-- or import from a custom directory e.g. `./lua/a/b/plugins/`
+require('zpack').setup({ { import = 'a.b.plugins' } })
+
+-- or add your specs inline in setup
+require('zpack').setup({
+  { 'neovim/nvim-lspconfig', config = function() ... end },
+  ...
+  { import = 'plugins.mini' }, -- or additionally import from `./lua/plugins/mini/`
+})
+
+-- or via the spec field
+require('zpack').setup({
+  spec = {
+    { 'neovim/nvim-lspconfig', config = function() ... end },
+    ...
+  },
+})
+```
+
 ## Why zpack?
 
 Neovim 0.12+ includes a built-in package manager (`vim.pack`) that handles plugin installation, updates, and version management. zpack is a thin layer that adds lazy-loading capabilities and support for a lazy.nvim-like declarative spec while completely leveraging the native infrastructure.
 
 #### Features
-- z***pack*** is completely native
-    - Install and manage your plugins _(including zpack)_ all within `vim.pack`.
-- ⚡pack is "batteries included":
-    - Add plugins using the same lazy.nvim spec provided by plugin authors you know and love, with minimal configuration
-- 💤pack powers up `vim.pack` without the bells and whistles
+- [z***pack***] is completely native
+    - Install and manage your plugins _(including zpack)_ all within `vim.pack`
+- [🔋pack] is "batteries included"
+    - Add plugins using the same lazy.nvim spec provided by plugin authors you know and love
+    - Minimal configurations necessary
+- [💤pack] powers up `vim.pack` without the frills
+    - Powerful lazy-loading triggers
     - Build triggers for installation/updates
     - Basic plugin management commands
-    - Powerful lazy-loading triggers
-
 
 zpack might be for you if:
 - you're a lazy.nvim user, love its declarative spec, and its wide adoption by plugin authors, but you don't need most of its advanced features
@@ -149,6 +155,8 @@ zpack might be for you if:
 As a thin layer, zpack does not provide:
 - UI dashboard for your plugins
 - Advanced profiling, dev mode, change-detection, etc.
+
+If you're a lazy.nvim user, see [Migrating from lazy.nvim](#migrating-from-lazynvim)
 
 ## Examples
 For more examples, refer to my personal config:
@@ -347,6 +355,7 @@ return {
   { 'nvim-lua/plenary.nvim' },
   { 'nvim-tree/nvim-web-devicons' },
   { 'nvim-lualine/lualine.nvim', opts = { theme = 'auto' } },
+  { import = 'plugins.mini' },
 }
 ```
 

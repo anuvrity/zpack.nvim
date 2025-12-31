@@ -95,7 +95,7 @@ M.normalize_keys = function(keys)
   -- Normalize to always be an array
   local key_list = (type(keys) == "string" or (keys[1] and type(keys[1]) == "string"))
       and { keys }
-      or keys --[[@as string[]|KeySpec[] ]]
+      or keys --[[@as string[]|zpack.KeySpec[] ]]
 
   local result = {}
   for _, key in ipairs(key_list) do
