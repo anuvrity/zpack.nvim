@@ -159,7 +159,7 @@ As a thin layer, zpack does not provide:
 If you're a lazy.nvim user, see [Migrating from lazy.nvim](#migrating-from-lazynvim)
 
 ## Examples
-For more examples, refer to my personal config:
+For more examples, refer to example config:
 - [zpack installation and setup](https://github.com/zuqini/nvim/blob/main/init.lua)
 - [plugins directory structure](https://github.com/zuqini/nvim/tree/main/lua/plugins)
 
@@ -366,7 +366,7 @@ return {
   -- Plugin source (provide exactly one)
   [1] = "user/repo",                    -- Plugin short name. Expands to https://github.com/{user/repo}
   src = "https://...",                  -- Custom git URL or local path
-  dir = "/path/to/plugin",              -- Local plugin directory (lazy.nvim compat, mapped to src)
+  dir = "/path/to/plugin",              -- Local plugin directory (lazy.nvim compat, ~ expanded, mapped to src)
   url = "https://...",                  -- Custom git URL (lazy.nvim compat, mapped to src)
 
   -- Dependencies
@@ -454,7 +454,7 @@ The plugin data object passed to hooks and trigger functions:
 Most of your lazy.nvim plugin specs will work as-is with zpack. However, zpack follows `vim.pack` conventions over lazy.nvim conventions, and is missing a few advanced features:
 - **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning-for-lazynvim-compatibility)
 - **dev mode**: Use `src = vim.fn.expand('~/projects/my_plugin.nvim')` for local development
-- **profiling**: Use `nvim --startuptime startuptime.log`. Also see my [Neovim Profiler script](https://gist.github.com/zuqini/35993710f81983fbfa6baca67bdb32ed)
+- **profiling**: Use `nvim --startuptime startuptime.log`. Also refer to example [Neovim Profiler script](https://gist.github.com/zuqini/35993710f81983fbfa6baca67bdb32ed)
 
 ## Acknowledgements
 

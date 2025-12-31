@@ -27,7 +27,7 @@ local normalize_source = function(spec)
   elseif spec.url then
     return spec.url
   elseif spec.dir then
-    return spec.dir
+    return vim.fn.expand(spec.dir)
   else
     return nil, "spec must provide one of: [1], src, dir, or url"
   end

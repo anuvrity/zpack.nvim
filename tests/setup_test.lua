@@ -184,5 +184,22 @@ return function()
 
       helpers.cleanup_test_env()
     end)
+
+    helpers.test("dir field expands ~ to home directory", function()
+      helpers.setup_test_env()
+      local state = require('zpack.state')
+
+      require('zpack').setup({
+        spec = {
+          { dir = '~/projects/my-plugin' },
+        },
+        defaults = { confirm = false },
+      })
+
+      local expected_src = vim.fn.expand('~/projects/my-plugin')
+      helpers.assert_not_nil(state.spec_registry[expected_src], "dir should expand ~ to home directory")
+
+      helpers.cleanup_test_env()
+    end)
   end)
 end
