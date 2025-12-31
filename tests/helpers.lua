@@ -204,7 +204,7 @@ function M.cleanup_test_env()
   package.loaded['zpack.startup'] = nil
   package.loaded['zpack.lazy'] = nil
   package.loaded['zpack.hooks'] = nil
-  package.loaded['zpack.loader'] = nil
+  package.loaded['zpack.plugin_loader'] = nil
   package.loaded['zpack.lazy_trigger.event'] = nil
   package.loaded['zpack.lazy_trigger.ft'] = nil
   package.loaded['zpack.lazy_trigger.cmd'] = nil
@@ -214,6 +214,18 @@ function M.cleanup_test_env()
   package.loaded['zpack.commands'] = nil
   package.loaded['zpack.deprecation'] = nil
   package.loaded['zpack.merge'] = nil
+  package.loaded['zpack.module_loader'] = nil
+
+  -- Remove our module loader from package.loaders if present
+  for i = #package.loaders, 1, -1 do
+    local loader = package.loaders[i]
+    if type(loader) == "function" then
+      local info = debug.getinfo(loader, "S")
+      if info and info.source and info.source:find("module_loader") then
+        table.remove(package.loaders, i)
+      end
+    end
+  end
 end
 
 function M.track_plugin_load(plugin_name)
@@ -259,6 +271,28 @@ function M.find_autocmd(autocmds, event, pattern)
     end
   end
   return nil
+end
+
+function M.create_mock_plugin_dir(name, modules)
+  local base_path = vim.fn.tempname()
+  vim.fn.mkdir(base_path, 'p')
+  local plugin_path = base_path .. '/' .. name
+  vim.fn.mkdir(plugin_path .. '/lua', 'p')
+
+  for _, mod_name in ipairs(modules) do
+    local mod_path = plugin_path .. '/lua/' .. mod_name .. '.lua'
+    local f = io.open(mod_path, 'w')
+    if f then
+      f:write('return {}')
+      f:close()
+    end
+  end
+
+  return plugin_path, base_path
+end
+
+function M.cleanup_mock_plugin_dir(base_path)
+  vim.fn.delete(base_path, 'rf')
 end
 
 return M

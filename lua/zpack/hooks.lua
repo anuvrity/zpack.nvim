@@ -68,7 +68,7 @@ end
 
 M.load_all_unloaded_plugins = function(opts)
   opts = opts or {}
-  local loader = require('zpack.loader')
+  local loader = require('zpack.plugin_loader')
 
   for _, pack_spec in ipairs(state.registered_plugins) do
     local entry = state.spec_registry[pack_spec.src]

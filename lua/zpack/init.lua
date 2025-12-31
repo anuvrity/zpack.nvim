@@ -36,6 +36,34 @@ local function check_version()
   return true
 end
 
+---@class zpack.Config.Defaults
+---@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
+---@field confirm? boolean
+
+---@class zpack.Config.Performance
+---@field vim_loader? boolean
+
+---@class zpack.Config.Profiling
+---@field loader? boolean Gather stats about module loader (default: false)
+---@field require? boolean Track each require in the module loader (default: false)
+
+---@class zpack.Config
+---@field spec? zpack.Spec[]
+---@field cmd_prefix? string
+---@field defaults? zpack.Config.Defaults
+---@field performance? zpack.Config.Performance
+---@field profiling? zpack.Config.Profiling
+---@field plugins_dir? string @deprecated Use { import = 'dir' } in spec instead
+---@field confirm? boolean @deprecated Use defaults.confirm instead
+---@field disable_vim_loader? boolean @deprecated Use performance.vim_loader instead
+
+local config = {
+  cmd_prefix = 'Z',
+  defaults = { confirm = true },
+  performance = { vim_loader = true },
+  profiling = { loader = false, require = false },
+}
+
 ---@param ctx zpack.ProcessContext
 local process_all = function(ctx)
   local hooks = require('zpack.hooks')
@@ -45,34 +73,20 @@ local process_all = function(ctx)
   require('zpack.merge').resolve_all()
   hooks.setup_build_tracking()
   require('zpack.registration').register_all(ctx)
+
+  -- Install module loader AFTER registration (when we know lazy plugins)
+  -- but BEFORE startup processing (when configs may require lazy modules)
+  local module_loader = require('zpack.module_loader')
+  module_loader.setup(config.profiling)
+  module_loader.initialize_cache(ctx.registered_lazy_packs)
+  module_loader.install()
+
   require('zpack.startup').process_all(ctx)
   require('zpack.lazy').process_all(ctx)
   hooks.run_pending_builds_on_startup(ctx)
   vim.api.nvim_clear_autocmds({ group = state.startup_group })
   hooks.setup_lazy_build_tracking()
 end
-
----@class zpack.Config.Defaults
----@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
----@field confirm? boolean
-
----@class zpack.Config.Performance
----@field vim_loader? boolean
-
----@class zpack.Config
----@field spec? zpack.Spec[]
----@field cmd_prefix? string
----@field defaults? zpack.Config.Defaults
----@field performance? zpack.Config.Performance
----@field plugins_dir? string @deprecated Use { import = 'dir' } in spec instead
----@field confirm? boolean @deprecated Use defaults.confirm instead
----@field disable_vim_loader? boolean @deprecated Use performance.vim_loader instead
-
-local config = {
-  cmd_prefix = 'Z',
-  defaults = { confirm = true },
-  performance = { vim_loader = true },
-}
 
 ---@param opts? zpack.Config
 M.setup = function(opts)
@@ -98,6 +112,10 @@ M.setup = function(opts)
 
   if opts.performance ~= nil then
     config.performance = vim.tbl_extend('force', config.performance, opts.performance)
+  end
+
+  if opts.profiling ~= nil then
+    config.profiling = vim.tbl_extend('force', config.profiling, opts.profiling)
   end
 
   -- Handle deprecated opts.confirm
@@ -136,6 +154,7 @@ M.setup = function(opts)
   end
 
   process_all(ctx)
+
   require('zpack.commands').setup(config.cmd_prefix)
 end
 

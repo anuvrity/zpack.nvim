@@ -1,7 +1,7 @@
 local util = require('zpack.utils')
 local state = require('zpack.state')
 local keymap = require('zpack.keymap')
-local loader = require('zpack.loader')
+local loader = require('zpack.plugin_loader')
 
 local M = {}
 

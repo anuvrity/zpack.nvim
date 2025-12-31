@@ -530,6 +530,7 @@ parent's lazy trigger fires.
       -- Plugin metadata
       name = "my-plugin",                   -- Custom name (optional)
       main = "module.name",                 -- Explicit main module
+      module = false,                       -- Disable module-based lazy loading
 
       -- Spec imports
       import = "plugins.lsp",               -- Import specs from lua/{path}/
@@ -709,6 +710,18 @@ main            (string, optional)
 
                 Use this when automatic detection fails.
 
+                                                          *zpack-Spec.module*
+module          (boolean, optional)
+                Set to `false` to disable module-based lazy loading for this
+                plugin. When disabled, the plugin will not be automatically
+                loaded when its modules are `require()`d.
+
+                zpack automatically loads lazy plugins when their modules are
+                required. It first tries to match module names against plugin
+                names, then falls back to scanning plugin `/lua` directories.
+
+                Default: true (module loading enabled)
+
                                                           *zpack-Spec.import*
 import          (string, optional)
                 Module path to import specs from (e.g., 'plugins' or
@@ -809,9 +822,8 @@ KEY DIFFERENCES ~
 version pinning           lazy.nvim's `version` field maps to zpack's
                           `sem_version`. See |zpack-example-version|.
 
-other unsupported fields  Remove lazy.nvim-specific fields like `dev`,
-                          `module`, etc. See |zpack-spec-reference| for
-                          supported fields.
+other unsupported fields  Remove lazy.nvim-specific fields like `dev`, etc.
+                          See |zpack-spec-reference| for supported fields.
 
 BLINK.CMP + LAZYDEV ~
                                               *zpack-migration-blink-lazydev*

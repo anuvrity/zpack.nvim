@@ -392,6 +392,7 @@ return {
   -- Plugin metadata
   name = "my-plugin",                   -- Custom plugin name (optional, overrides auto-derived name)
   main = "module.name",                 -- Explicit main module (auto-detected if not set)
+  module = false,                       -- Disable module-based lazy loading for this plugin
 
   -- Spec imports
   import = "plugins.lsp",               -- Import from lua/{path}/*.lua and lua/{path}/*/init.lua
@@ -438,7 +439,7 @@ Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a th
 **key differences:**
 
 - **version pinning**: lazy.nvim's `version` field maps to zpack's `sem_version`. See [Version Pinning](#version-pinning-for-lazynvim-compatibility)
-- **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, `module`, etc. See the [Spec Reference](#spec-reference) for supported fields
+- **other unsupported fields**: Remove lazy.nvim-specific fields like `dev`, etc. See the [Spec Reference](#spec-reference) for supported fields
 
 #### blink.cmp + lazydev
 

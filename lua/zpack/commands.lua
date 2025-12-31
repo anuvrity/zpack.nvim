@@ -186,7 +186,7 @@ M.setup = function(prefix)
       return
     end
 
-    local loader = require('zpack.loader')
+    local loader = require('zpack.plugin_loader')
     loader.process_spec(pack.spec, {})
     util.schedule_notify(('Loaded %s'):format(plugin_name), vim.log.levels.INFO)
   end, {

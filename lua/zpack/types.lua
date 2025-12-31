@@ -51,6 +51,7 @@
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
 ---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue
 ---@field ft? zpack.FtValue|fun(plugin: zpack.Plugin):zpack.FtValue
+---@field module? boolean Auto-load when require()'d (default: true for lazy plugins)
 ---@field dependencies? string|string[]|zpack.Spec|zpack.Spec[] Plugin dependencies
 ---@field import? string Module path to import specs from (e.g., 'plugins')
 ---@field _import_order? number Internal: Order in which spec was imported

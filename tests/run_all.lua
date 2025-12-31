@@ -23,6 +23,7 @@ local test_modules = {
   'utils_test',
   'merge_test',
   'dependencies_test',
+  'module_loader_test',
 }
 
 print("\n" .. string.rep("=", 60))
