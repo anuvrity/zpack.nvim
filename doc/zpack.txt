@@ -9,9 +9,8 @@ Repository: https://github.com/zuqini/zpack.nvim
 ==============================================================================
 1. INTRODUCTION                                           *zpack-introduction*
 
-A super lightweight layer on top of Neovim's native `vim.pack`, with support
-for the widely adopted lazy.nvim-like declarative spec and minimalist
-lazy-loading using only Neovim's builtin features.
+A thin layer on top of Neovim's native `vim.pack`, adding support for
+lazy-loading and the widely adopted lazy.nvim-like declarative spec.
 >lua
     -- ./lua/plugins/fundo.lua
     return {
@@ -234,7 +233,7 @@ zpack might be for you if:
 
 As a thin layer, zpack does not provide:
 - UI dashboard for your plugins
-- Profiling, dev mode, etc.
+- Advanced profiling, dev mode, change-detection, etc.
 
 Although you can achieve most of these through other means. See
 |zpack-migrating-lazy|. If something you need isn't achievable natively or
@@ -622,9 +621,7 @@ config          (function(plugin, opts)|true, optional)
 build           (string|function(plugin), optional)
                 Build command (string) or function to run after
                 installing/updating the plugin. Function receives
-                |zpack.Plugin|. When a build hook runs, all plugins are
-                loaded first (in priority order) to ensure cross-plugin
-                dependencies are available.
+                |zpack.Plugin|.
 
                                                            *zpack-Spec.event*
 event           (string|string[]|EventSpec|(string|EventSpec)[]|fn(plugin),
@@ -808,65 +805,22 @@ nowait          (boolean, optional)
 
 ==============================================================================
 11. MIGRATING FROM LAZY.NVIM                           *zpack-migrating-lazy*
+
+Most of your lazy.nvim plugin specs will work as-is with zpack. However,
+zpack follows `vim.pack` conventions over lazy.nvim conventions, and is
+missing a few advanced features:
+
                                                        *zpack-migration-spec*
-
-Most of your lazy.nvim plugin specs will work as-is with zpack, however, as a
-thin layer, zpack specs have some differences to minimize complexity and
-maintain compatibility with `vim.pack`.
-
-KEY DIFFERENCES ~
-
 version pinning           lazy.nvim's `version` field maps to zpack's
                           `sem_version`. See |zpack-example-version|.
 
-other unsupported fields  Remove lazy.nvim-specific fields like `dev`, etc.
-                          See |zpack-spec-reference| for supported fields.
-
-BLINK.CMP + LAZYDEV ~
-                                              *zpack-migration-blink-lazydev*
-
-Due to the lack of implicit dependency inference, when using `blink.cmp`
-with `lazydev`, add lazydev to `per_filetype` instead of `default` sources.
-This approach also ensures lazydev loads only in Lua files, rather than every
-time blink.cmp loads (which happens even with lazy.nvim if lazydev is part of
-the default sources).
->lua
-    require('blink.cmp').setup({
-      sources = {
-        per_filetype = {
-          lua = { inherit_defaults = true, 'lazydev' }
-        },
-        providers = {
-          lazydev = { name = "LazyDev", module = "lazydev.integrations.blink",
-                      fallbacks = { "lsp" } },
-        },
-      },
-    })
-<
-
-OTHER FEATURES ~
-
-Dev Mode ~
                                                         *zpack-migration-dev*
-Pass a local directory to your plugin spec's `src`.
->lua
-    return {
-        src = vim.fn.expand('~/projects/my_plugin.nvim')
-    }
-<
+dev mode                  Use `src = vim.fn.expand('~/projects/my_plugin.nvim')`
+                          for local development.
 
-Profiling ~
                                                   *zpack-migration-profiling*
-Use the builtin profiling argument when starting Neovim with:
->
-    nvim --startuptime startuptime.log
-<
-
-Dashboard ~
-                                                  *zpack-migration-dashboard*
-While zpack does not provide any UI dashboards, its builtin commands should
-cover most of the plugin management functionalities. You can also use
-|vim.pack| commands directly.
+profiling                 Use `nvim --startuptime startuptime.log`.
+                          Also see: https://gist.github.com/zuqini/35993710f81983fbfa6baca67bdb32ed
 
 ==============================================================================
 12. ACKNOWLEDGEMENTS                               *zpack-acknowledgements*
