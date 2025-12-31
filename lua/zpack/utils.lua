@@ -3,6 +3,7 @@ local state = require('zpack.state')
 local M = {}
 
 local lsdir_cache = {}
+local normalized_name_cache = {}
 
 ---@class zpack.DirEntry
 ---@field name string
@@ -158,7 +159,13 @@ end
 ---@param name string
 ---@return string
 M.normalize_name = function(name)
-  return name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
+  local cached = normalized_name_cache[name]
+  if cached then
+    return cached
+  end
+  local norm = (name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", ""))
+  normalized_name_cache[name] = norm
+  return norm
 end
 
 ---Normalize plugin version using priority: version > sem_version > branch > tag > commit

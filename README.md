@@ -233,8 +233,6 @@ return {
 }
 ```
 
-Build hooks run after plugin installation or update. When a build hook runs, zpack loads all plugins first (in priority order) to ensure any cross-plugin dependencies are available.
-
 #### Dependencies
 
 ```lua

@@ -1,12 +1,10 @@
 local state = require('zpack.state')
+local util = require('zpack.utils')
 
 local M = {}
 
 ---@type { [string]: true }
 local currently_loading_sources = {}
-
----@type { [string]: string }
-local normalized_name_cache = {}
 
 ---@type { [string]: { src: string, topmod: string }|false }
 local module_lookup_cache = {}
@@ -103,18 +101,6 @@ local function get_time()
   return vim.uv.hrtime() / 1e9
 end
 
----@param name string
----@return string
-local function normalize_name(name)
-  local cached = normalized_name_cache[name]
-  if cached then
-    return cached
-  end
-  local norm = name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
-  normalized_name_cache[name] = norm
-  return norm
-end
-
 ---Scan a plugin's /lua directory for top-level modules
 ---@param path string plugin path
 ---@return { [string]: true }? topmods map of top-level module names
@@ -168,7 +154,7 @@ local function find_src_by_scanning(topmod)
   end
 
   local srcs = {}
-  local norm_topmod = normalize_name(topmod)
+  local norm_topmod = util.normalize_name(topmod)
 
   for _, pack_spec in ipairs(lazy_pack_specs) do
     local registry_entry = state.spec_registry[pack_spec.src]
@@ -184,7 +170,7 @@ local function find_src_by_scanning(topmod)
             matched = true
           elseif topmods and next(topmods) then
             for mod_name in pairs(topmods) do
-              if normalize_name(mod_name) == norm_topmod then
+              if util.normalize_name(mod_name) == norm_topmod then
                 matched = true
                 break
               end
@@ -193,9 +179,9 @@ local function find_src_by_scanning(topmod)
         end
 
         if not matched then
-          if spec.main and normalize_name(spec.main) == norm_topmod then
+          if spec.main and util.normalize_name(spec.main) == norm_topmod then
             matched = true
-          elseif pack_spec.name and normalize_name(pack_spec.name) == norm_topmod then
+          elseif pack_spec.name and util.normalize_name(pack_spec.name) == norm_topmod then
             matched = true
           end
         end

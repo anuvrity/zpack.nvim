@@ -32,10 +32,10 @@
 ---@field dir? string Local plugin directory path (lazy.nvim compat). Mapped to src
 ---@field url? string Custom git URL (lazy.nvim compat). Mapped to src
 ---@field name? string Custom plugin name. Overrides auto-derived name from URL
----@field init? fun(plugin: zpack.Plugin)
----@field build? string|fun(plugin: zpack.Plugin)
+---@field init? fun(plugin: zpack.Plugin?)
+---@field build? string|fun(plugin: zpack.Plugin?)
 ---@field enabled? boolean|(fun():boolean)
----@field cond? boolean|(fun(plugin: zpack.Plugin):boolean)
+---@field cond? boolean|(fun(plugin: zpack.Plugin?):boolean)
 ---@field lazy? boolean
 ---@field priority? number Load priority for startup plugins. Higher priority loads first. Default: 50
 ---@field version? string|vim.VersionRange Git branch/tag/commit (string) or semver range (vim.VersionRange)
@@ -43,14 +43,14 @@
 ---@field branch? string Git branch (lazy.nvim compat). Mapped to version
 ---@field tag? string Git tag (lazy.nvim compat). Mapped to version
 ---@field commit? string Git commit (lazy.nvim compat). Mapped to version
----@field keys? zpack.KeysValue|fun(plugin: zpack.Plugin):zpack.KeysValue
----@field config? fun(plugin: zpack.Plugin, opts: table)|true
----@field opts? table|fun(plugin: zpack.Plugin):table
+---@field keys? zpack.KeysValue|fun(plugin: zpack.Plugin?):zpack.KeysValue
+---@field config? fun(plugin: zpack.Plugin?, opts: table)|true
+---@field opts? table|fun(plugin: zpack.Plugin?, opts: table):table
 ---@field main? string
----@field event? zpack.EventValue|fun(plugin: zpack.Plugin):zpack.EventValue
+---@field event? zpack.EventValue|fun(plugin: zpack.Plugin?):zpack.EventValue
 ---@field pattern? string|string[] Global fallback pattern applied to all events (unless zpack.EventSpec specifies its own)
----@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin):zpack.CmdValue
----@field ft? zpack.FtValue|fun(plugin: zpack.Plugin):zpack.FtValue
+---@field cmd? zpack.CmdValue|fun(plugin: zpack.Plugin?):zpack.CmdValue
+---@field ft? zpack.FtValue|fun(plugin: zpack.Plugin?):zpack.FtValue
 ---@field module? boolean Auto-load when require()'d (default: true for lazy plugins)
 ---@field dependencies? string|string[]|zpack.Spec|zpack.Spec[] Plugin dependencies
 ---@field import? string Module path to import specs from (e.g., 'plugins')

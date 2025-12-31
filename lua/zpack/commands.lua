@@ -143,7 +143,10 @@ M.setup = function(prefix)
       return
     end
 
-    hooks.load_all_unloaded_plugins()
+    local pack_spec = state.src_to_pack_spec[pack.spec.src]
+    if pack_spec then
+      require('zpack.plugin_loader').process_spec(pack_spec, { bang = true })
+    end
     hooks.execute_build(spec.build, registry_entry.plugin)
     util.schedule_notify(('Running build hook for %s'):format(plugin_name), vim.log.levels.INFO)
   end, {
@@ -165,7 +168,13 @@ M.setup = function(prefix)
         util.schedule_notify('All plugins are already loaded', vim.log.levels.INFO)
         return
       end
-      hooks.load_all_unloaded_plugins()
+      local loader = require('zpack.plugin_loader')
+      for _, pack_spec in ipairs(state.registered_plugins) do
+        local entry = state.spec_registry[pack_spec.src]
+        if entry and entry.load_status ~= "loaded" then
+          loader.process_spec(pack_spec)
+        end
+      end
       util.schedule_notify(('Loaded %d plugin(s)'):format(count), vim.log.levels.INFO)
       return
     end

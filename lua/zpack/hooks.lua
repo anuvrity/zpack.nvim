@@ -59,23 +59,14 @@ M.setup_lazy_build_tracking = function()
       local registry_entry = state.spec_registry[src]
       local spec = registry_entry and registry_entry.merged_spec
       if spec and spec.build then
-        M.load_all_unloaded_plugins()
+        local pack_spec = state.src_to_pack_spec[src]
+        if pack_spec then
+          require('zpack.plugin_loader').process_spec(pack_spec, { bang = true })
+        end
         M.execute_build(spec.build, registry_entry.plugin)
       end
     end
   end, { group = state.lazy_build_group })
-end
-
-M.load_all_unloaded_plugins = function(opts)
-  opts = opts or {}
-  local loader = require('zpack.plugin_loader')
-
-  for _, pack_spec in ipairs(state.registered_plugins) do
-    local entry = state.spec_registry[pack_spec.src]
-    if entry and entry.load_status ~= "loaded" then
-      loader.process_spec(pack_spec, opts)
-    end
-  end
 end
 
 M.run_pending_builds_on_startup = function(ctx)
@@ -83,12 +74,16 @@ M.run_pending_builds_on_startup = function(ctx)
     return
   end
 
-  M.load_all_unloaded_plugins({ bang = not ctx.load })
+  local loader = require('zpack.plugin_loader')
 
   for src in pairs(state.src_with_pending_build) do
     local entry = state.spec_registry[src]
     local spec = entry and entry.merged_spec
     if spec and spec.build then
+      local pack_spec = state.src_to_pack_spec[src]
+      if pack_spec then
+        loader.process_spec(pack_spec, { bang = not ctx.load })
+      end
       M.execute_build(spec.build, entry.plugin)
     end
   end
@@ -97,12 +92,16 @@ M.run_pending_builds_on_startup = function(ctx)
 end
 
 M.run_all_builds = function()
-  M.load_all_unloaded_plugins()
-
+  local loader = require('zpack.plugin_loader')
   local count = 0
-  for _, entry in pairs(state.spec_registry) do
+
+  for src, entry in pairs(state.spec_registry) do
     local spec = entry.merged_spec
     if spec and spec.build then
+      local pack_spec = state.src_to_pack_spec[src]
+      if pack_spec then
+        loader.process_spec(pack_spec, { bang = true })
+      end
       M.execute_build(spec.build, entry.plugin)
       count = count + 1
     end
