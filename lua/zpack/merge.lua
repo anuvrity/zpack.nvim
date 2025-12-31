@@ -231,13 +231,20 @@ function M.resolve_opts(specs, plugin)
 end
 
 ---Pre-compute merged_spec for all entries in the registry
+---Also updates pack_spec.version based on merged specs
 function M.resolve_all()
   local state = require('zpack.state')
+  local utils = require('zpack.utils')
 
-  for _, entry in pairs(state.spec_registry) do
+  for src, entry in pairs(state.spec_registry) do
     if entry.specs and #entry.specs > 0 then
       entry.sorted_specs = M.sort_specs(entry.specs)
       entry.merged_spec = M.merge_spec_array(entry.sorted_specs)
+
+      local pack_spec = state.src_to_pack_spec[src]
+      if pack_spec then
+        pack_spec.version = utils.normalize_version(entry.merged_spec)
+      end
     end
   end
 end

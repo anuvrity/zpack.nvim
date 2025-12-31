@@ -161,6 +161,24 @@ M.normalize_name = function(name)
   return name:lower():gsub("^n?vim%-", ""):gsub("%.n?vim$", ""):gsub("[%.%-]lua", ""):gsub("[^a-z]+", "")
 end
 
+---Normalize plugin version using priority: version > sem_version > branch > tag > commit
+---@param spec zpack.Spec
+---@return string|vim.VersionRange|nil version
+M.normalize_version = function(spec)
+  if spec.version ~= nil then
+    return spec.version
+  elseif spec.sem_version then
+    return vim.version.range(spec.sem_version)
+  elseif spec.branch then
+    return spec.branch
+  elseif spec.tag then
+    return spec.tag
+  elseif spec.commit then
+    return spec.commit
+  end
+  return nil
+end
+
 ---Resolve the main module for a plugin (for auto-setup)
 ---Inspired by lazy.nvim's loader.get_main()
 ---Results are cached in plugin.main (for found modules) and state.resolve_main_not_found (for not-found)

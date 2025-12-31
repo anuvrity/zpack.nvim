@@ -14,23 +14,6 @@ local is_enabled = function(spec)
   return true
 end
 
----Normalize plugin version using priority: version > sem_version > branch > tag > commit
----@param spec zpack.Spec
----@return string|vim.VersionRange|nil version
-local normalize_version = function(spec)
-  if spec.version ~= nil then
-    return spec.version
-  elseif spec.sem_version then
-    return vim.version.range(spec.sem_version)
-  elseif spec.branch then
-    return spec.branch
-  elseif spec.tag then
-    return spec.tag
-  elseif spec.commit then
-    return spec.commit
-  end
-  return nil
-end
 
 ---Normalize plugin source using priority: [1] > src > url > dir
 ---@param spec zpack.Spec
@@ -186,7 +169,7 @@ M.import_specs = function(spec_item_or_list, ctx)
       table.insert(state.spec_registry[src].specs, spec)
     else
       state.spec_registry[src] = { specs = { spec }, load_status = "pending" }
-      local pack_spec = { src = src, version = normalize_version(spec), name = spec.name }
+      local pack_spec = { src = src, version = utils.normalize_version(spec), name = spec.name }
       table.insert(ctx.vim_packs, pack_spec)
       state.src_to_pack_spec[src] = pack_spec
     end

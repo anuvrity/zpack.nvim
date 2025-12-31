@@ -184,6 +184,70 @@ return function()
 
       helpers.cleanup_test_env()
     end)
+
+    helpers.test("standalone branch is not overridden by nil dependency branch", function()
+      helpers.setup_test_env()
+
+      require('zpack').setup({
+        spec = {
+          {
+            'test/parent',
+            dependencies = {
+              'test/dep',
+            },
+          },
+          {
+            'test/dep',
+            branch = 'main',
+          },
+        },
+        defaults = { confirm = false },
+      })
+
+      helpers.flush_pending()
+      local state = require('zpack.state')
+      local src = 'https://github.com/test/dep'
+
+      local merged_spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(merged_spec.branch, 'main', "standalone branch should be preserved")
+
+      local pack_spec = state.src_to_pack_spec[src]
+      helpers.assert_equal(pack_spec.version, 'main', "pack_spec.version should use merged branch")
+
+      helpers.cleanup_test_env()
+    end)
+
+    helpers.test("dependency branch is used when standalone has no branch", function()
+      helpers.setup_test_env()
+
+      require('zpack').setup({
+        spec = {
+          {
+            'test/parent',
+            dependencies = {
+              { 'test/dep', branch = 'develop' },
+            },
+          },
+          {
+            'test/dep',
+            config = function() end,
+          },
+        },
+        defaults = { confirm = false },
+      })
+
+      helpers.flush_pending()
+      local state = require('zpack.state')
+      local src = 'https://github.com/test/dep'
+
+      local merged_spec = state.spec_registry[src].merged_spec
+      helpers.assert_equal(merged_spec.branch, 'develop', "dependency branch should be used when standalone has none")
+
+      local pack_spec = state.src_to_pack_spec[src]
+      helpers.assert_equal(pack_spec.version, 'develop', "pack_spec.version should use dependency branch")
+
+      helpers.cleanup_test_env()
+    end)
   end)
 
   helpers.describe("Merge Module Unit Tests", function()
